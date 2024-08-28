@@ -1,0 +1,18 @@
+sequenceDiagram
+    participant User
+    participant SolanaProgram as Solana Program
+    participant PoolAccount as Pool Account
+    participant UserPosition as User Position Account
+    participant TokenAccount0 as Token Account 0
+    participant TokenAccount1 as Token Account 1
+
+    %% Add Liquidity Flow
+    User->>SolanaProgram: Add Liquidity (amount0, amount1, tickLower, tickUpper)
+    SolanaProgram->>PoolAccount: Read current state
+    SolanaProgram->>SolanaProgram: Validate ticks
+    SolanaProgram->>SolanaProgram: Calculate liquidity
+    SolanaProgram->>PoolAccount: Update liquidity
+    SolanaProgram->>TokenAccount0: Transfer tokens from user
+    SolanaProgram->>TokenAccount1: Transfer tokens from user
+    SolanaProgram->>UserPosition: Create/Update position
+    SolanaProgram->>User: Return result

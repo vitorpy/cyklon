@@ -1,0 +1,25 @@
+%% Confidential Swap Flow
+sequenceDiagram
+    participant User
+    participant ZKProver as ZK Prover (Off-chain)
+    participant SolanaProgram as Solana Program
+    participant PoolAccount as Pool Account
+    participant TokenAccount0 as Token Account 0
+    participant TokenAccount1 as Token Account 1
+
+    User->>ZKProver: Generate proof (privateAmountIn, privateZeroForOne)
+    ZKProver-->>User: Proof and public inputs
+    User->>SolanaProgram: Confidential Swap (proof, publicInputs, amountInMax, minAmountOut)
+    SolanaProgram->>SolanaProgram: Verify ZK proof
+    SolanaProgram->>PoolAccount: Read current state
+    SolanaProgram->>SolanaProgram: Extract swap result from public inputs
+    SolanaProgram->>SolanaProgram: Check slippage
+    SolanaProgram->>PoolAccount: Update sqrt_price
+    alt Determined from token accounts
+        SolanaProgram->>TokenAccount0: Transfer up to amountInMax from user to pool
+        SolanaProgram->>TokenAccount1: Transfer amount_out from pool to user
+    else
+        SolanaProgram->>TokenAccount1: Transfer up to amountInMax from user to pool
+        SolanaProgram->>TokenAccount0: Transfer amount_out from pool to user
+    end
+    SolanaProgram->>User: Return result
