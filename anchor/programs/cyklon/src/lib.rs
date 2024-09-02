@@ -5,7 +5,7 @@ use sha3::Keccak256;
 declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 
 #[program]
-pub mod clmm_dex {
+pub mod cyklon {
     use super::*;
 
     pub fn initialize_pool(
