@@ -1,96 +1,55 @@
-# cyklon
+# Cyklon
 
-This project is generated with the [create-solana-dapp](https://github.com/solana-developers/create-solana-dapp) generator.
+Cyklon is a decentralized exchange (DEX) protocol built on the Solana blockchain, inspired by Uniswap v3. It aims to provide efficient and flexible liquidity provision with concentrated liquidity and confidential swaps.
+
+Further information can be found in the [website](https://vitorpy.notion.site/Cyklon-02a81afcc9af4326a42384e89853b879).
+
+## Features
+
+- Concentrated liquidity for capital efficiency
+- Confidential swaps using zero-knowledge proofs
+- Built on Solana for high speed and low transaction costs
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node v18.18.0 or higher
-
+- Node.js v18.18.0 or higher
 - Rust v1.77.2 or higher
 - Anchor CLI 0.30.0 or higher
 - Solana CLI 1.18.9 or higher
 
-### Installation
+## Project Structure
 
-#### Clone the repo
+### Anchor Program
 
-```shell
-git clone <repo-url>
-cd <repo-name>
-```
+The `anchor` directory contains the Solana program written in Rust using the Anchor framework.
 
-#### Install Dependencies
+#### Key Commands
 
-```shell
-npm install
-```
+- Sync program ID: `npm run anchor keys sync`
+- Build the program: `npm run anchor-build`
+- Start local test validator: `npm run anchor-localnet`
+- Run tests: `npm run anchor-test`
+- Deploy to Devnet: `npm run anchor deploy --provider.cluster devnet`
 
-#### Start the web app
+### Web Application
 
-```
-npm run dev
-```
+The `web` directory contains a React app that interacts with the Solana program using the Anchor-generated client.
 
-## Apps
+#### Key Commands
 
-### anchor
+- Start the web app: `npm run dev`
+- Build the web app: `npm run build`
 
-This is a Solana program written in Rust using the Anchor framework.
+## Contributing
 
-#### Commands
+We welcome contributions to Cyklon! Please read our contributing guidelines before submitting pull requests.
 
-You can use any normal anchor commands. Either move to the `anchor` directory and run the `anchor` command or prefix the command with `npm run`, eg: `npm run anchor`.
+## License
 
-#### Sync the program id:
+This project is licensed under the [MIT License](LICENSE).
 
-Running this command will create a new keypair in the `anchor/target/deploy` directory and save the address to the Anchor config file and update the `declare_id!` macro in the `./src/lib.rs` file of the program.
+## Contact
 
-You will manually need to update the constant in `anchor/lib/counter-exports.ts` to match the new program id.
-
-```shell
-npm run anchor keys sync
-```
-
-#### Build the program:
-
-```shell
-npm run anchor-build
-```
-
-#### Start the test validator with the program deployed:
-
-```shell
-npm run anchor-localnet
-```
-
-#### Run the tests
-
-```shell
-npm run anchor-test
-```
-
-#### Deploy to Devnet
-
-```shell
-npm run anchor deploy --provider.cluster devnet
-```
-
-### web
-
-This is a React app that uses the Anchor generated client to interact with the Solana program.
-
-#### Commands
-
-Start the web app
-
-```shell
-npm run dev
-```
-
-Build the web app
-
-```shell
-npm run build
-```
+For questions or support, please open an issue on the GitHub repository or contact the maintainers directly.

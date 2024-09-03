@@ -134,7 +134,7 @@ pub mod cyklon {
                         to: ctx.accounts.user_token_account_out.to_account_info(),
                         authority: ctx.accounts.pool.to_account_info(),
                     },
-                    &[&[b"pool", &[*ConfidentialSwapBumps::get("pool").unwrap()]]],
+                    &[&[b"pool", &[ctx.bumps.pool]]],
                 ),
                 amount_out,
             )?;
@@ -161,7 +161,7 @@ pub mod cyklon {
                         to: ctx.accounts.user_token_account_out.to_account_info(),
                         authority: ctx.accounts.pool.to_account_info(),
                     },
-                    &[&[b"pool", &[*ConfidentialSwapBumps::get("pool").unwrap()]]],
+                    &[&[b"pool", &[ctx.bumps.pool]]],
                 ),
                 amount_out,
             )?;
@@ -216,7 +216,10 @@ pub struct AddLiquidity<'info> {
 
 #[derive(Accounts)]
 pub struct ConfidentialSwap<'info> {
-    #[account(mut)]
+    #[account(mut,
+        seeds = [b"pool"],
+        bump
+    )]
     pub pool: Account<'info, Pool>,
     #[account(mut)]
     pub user_token_account_in: Account<'info, TokenAccount>,
