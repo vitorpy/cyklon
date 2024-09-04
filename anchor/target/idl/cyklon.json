@@ -1,0 +1,444 @@
+{
+  "address": "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS",
+  "metadata": {
+    "name": "cyklon",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Cyklon"
+  },
+  "instructions": [
+    {
+      "name": "add_liquidity",
+      "discriminator": [
+        181,
+        157,
+        89,
+        67,
+        143,
+        182,
+        52,
+        72
+      ],
+      "accounts": [
+        {
+          "name": "pool",
+          "writable": true
+        },
+        {
+          "name": "user_token_account_0",
+          "writable": true
+        },
+        {
+          "name": "user_token_account_1",
+          "writable": true
+        },
+        {
+          "name": "pool_token_account_0",
+          "writable": true
+        },
+        {
+          "name": "pool_token_account_1",
+          "writable": true
+        },
+        {
+          "name": "token_mint_0",
+          "writable": true
+        },
+        {
+          "name": "token_mint_1",
+          "writable": true
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "user_position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount_0",
+          "type": "u64"
+        },
+        {
+          "name": "amount_1",
+          "type": "u64"
+        },
+        {
+          "name": "tick_lower",
+          "type": "i32"
+        },
+        {
+          "name": "tick_upper",
+          "type": "i32"
+        }
+      ]
+    },
+    {
+      "name": "confidential_swap",
+      "discriminator": [
+        94,
+        224,
+        95,
+        178,
+        166,
+        124,
+        121,
+        91
+      ],
+      "accounts": [
+        {
+          "name": "pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_token_account_in",
+          "writable": true
+        },
+        {
+          "name": "user_token_account_out",
+          "writable": true
+        },
+        {
+          "name": "pool_token_account_0",
+          "writable": true
+        },
+        {
+          "name": "pool_token_account_1",
+          "writable": true
+        },
+        {
+          "name": "token_mint_0",
+          "writable": true
+        },
+        {
+          "name": "token_mint_1",
+          "writable": true
+        },
+        {
+          "name": "user",
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount_in_max",
+          "type": "u64"
+        },
+        {
+          "name": "minimum_amount_out",
+          "type": "u64"
+        },
+        {
+          "name": "proof",
+          "type": "bytes"
+        },
+        {
+          "name": "public_inputs",
+          "type": {
+            "vec": "u128"
+          }
+        }
+      ]
+    },
+    {
+      "name": "initialize_pool",
+      "discriminator": [
+        95,
+        180,
+        10,
+        172,
+        84,
+        174,
+        232,
+        40
+      ],
+      "accounts": [
+        {
+          "name": "pool",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_mint_0"
+        },
+        {
+          "name": "token_mint_1"
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "tick_spacing",
+          "type": "u16"
+        },
+        {
+          "name": "initial_sqrt_price",
+          "type": "u128"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Pool",
+      "discriminator": [
+        241,
+        154,
+        109,
+        4,
+        17,
+        177,
+        109,
+        188
+      ]
+    },
+    {
+      "name": "Position",
+      "discriminator": [
+        170,
+        188,
+        143,
+        228,
+        122,
+        64,
+        247,
+        208
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "ConfidentialSwapEvent",
+      "discriminator": [
+        71,
+        57,
+        223,
+        200,
+        23,
+        15,
+        103,
+        112
+      ]
+    },
+    {
+      "name": "LiquidityAdded",
+      "discriminator": [
+        154,
+        26,
+        221,
+        108,
+        238,
+        64,
+        217,
+        161
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidTickRange",
+      "msg": "Lower tick must be less than upper tick"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidLowerTick",
+      "msg": "Lower tick must be a multiple of tick spacing"
+    },
+    {
+      "code": 6002,
+      "name": "InvalidUpperTick",
+      "msg": "Upper tick must be a multiple of tick spacing"
+    },
+    {
+      "code": 6003,
+      "name": "InvalidProof",
+      "msg": "Invalid zero-knowledge proof"
+    },
+    {
+      "code": 6004,
+      "name": "SlippageExceeded",
+      "msg": "Slippage tolerance exceeded"
+    }
+  ],
+  "types": [
+    {
+      "name": "ConfidentialSwapEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount_out",
+            "type": "u64"
+          },
+          {
+            "name": "new_sqrt_price",
+            "type": "u128"
+          }
+        ]
+      }
+    },
+    {
+      "name": "LiquidityAdded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount_0",
+            "type": "u64"
+          },
+          {
+            "name": "amount_1",
+            "type": "u64"
+          },
+          {
+            "name": "tick_lower",
+            "type": "i32"
+          },
+          {
+            "name": "tick_upper",
+            "type": "i32"
+          },
+          {
+            "name": "liquidity",
+            "type": "u128"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Pool",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "token_mint_0",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_mint_1",
+            "type": "pubkey"
+          },
+          {
+            "name": "tick_spacing",
+            "type": "u16"
+          },
+          {
+            "name": "sqrt_price",
+            "type": "u128"
+          },
+          {
+            "name": "liquidity",
+            "type": "u128"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Position",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "tick_lower",
+            "type": "i32"
+          },
+          {
+            "name": "tick_upper",
+            "type": "i32"
+          },
+          {
+            "name": "liquidity",
+            "type": "u128"
+          }
+        ]
+      }
+    }
+  ]
+}

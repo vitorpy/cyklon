@@ -21,9 +21,9 @@ pub struct ConfidentialSwap<'info> {
     #[account(mut)]
     pub pool_token_account_1: InterfaceAccount<'info, TokenAccount>,
     #[account(mut)]
-    pub token_mint_0: Account<'info, Mint>,
+    pub token_mint_0: InterfaceAccount<'info, Mint>,
     #[account(mut)]
-    pub token_mint_1: Account<'info, Mint>,
+    pub token_mint_1: InterfaceAccount<'info, Mint>,
     pub user: Signer<'info>,
     pub token_program: Program<'info, AssociatedToken>,
     pub associated_token_program: Program<'info, AssociatedToken>,
