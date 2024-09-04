@@ -1,85 +1,27 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Token, TokenAccount, transfer, Transfer};
+use anchor_spl::token_interface::{Mint, TokenAccount, transfer_checked, TransferChecked};
+use anchor_spl::associated_token::AssociatedToken;
 use crate::state::{Pool, Position};
 use crate::errors::ErrorCode;
 use crate::events::LiquidityAdded;
 
-pub fn add_liquidity(
-    ctx: Context<AddLiquidity>,
-    amount_0: u64,
-    amount_1: u64,
-    tick_lower: i32,
-    tick_upper: i32,
-) -> Result<()> {
-    let pool = &mut ctx.accounts.pool;
-    
-    // Ensure ticks are valid
-    require!(tick_lower < tick_upper, ErrorCode::InvalidTickRange);
-    require!(tick_lower % pool.tick_spacing as i32 == 0, ErrorCode::InvalidLowerTick);
-    require!(tick_upper % pool.tick_spacing as i32 == 0, ErrorCode::InvalidUpperTick);
-
-    // Calculate liquidity based on amounts and price range
-    let liquidity = calculate_liquidity(amount_0, amount_1, tick_lower, tick_upper, pool.sqrt_price);
-
-    // Update pool liquidity
-    pool.liquidity = pool.liquidity.checked_add(liquidity).unwrap();
-
-    // Transfer tokens from user to pool
-    transfer(
-        CpiContext::new(
-            ctx.accounts.token_program.to_account_info(),
-            Transfer {
-                from: ctx.accounts.user_token_account_0.to_account_info(),
-                to: ctx.accounts.pool_token_account_0.to_account_info(),
-                authority: ctx.accounts.user.to_account_info(),
-            },
-        ),
-        amount_0,
-    )?;
-
-    transfer(
-        CpiContext::new(
-            ctx.accounts.token_program.to_account_info(),
-            Transfer {
-                from: ctx.accounts.user_token_account_1.to_account_info(),
-                to: ctx.accounts.pool_token_account_1.to_account_info(),
-                authority: ctx.accounts.user.to_account_info(),
-            },
-        ),
-        amount_1,
-    )?;
-
-    // Create or update user position
-    let position = &mut ctx.accounts.user_position;
-    position.owner = ctx.accounts.user.key();
-    position.tick_lower = tick_lower;
-    position.tick_upper = tick_upper;
-    position.liquidity = position.liquidity.checked_add(liquidity).unwrap();
-
-    emit!(LiquidityAdded {
-        user: ctx.accounts.user.key(),
-        amount_0,
-        amount_1,
-        tick_lower,
-        tick_upper,
-        liquidity,
-    });
-
-    Ok(())
-}
 
 #[derive(Accounts)]
 pub struct AddLiquidity<'info> {
     #[account(mut)]
     pub pool: Account<'info, Pool>,
     #[account(mut)]
-    pub user_token_account_0: Account<'info, TokenAccount>,
+    pub user_token_account_0: InterfaceAccount<'info, TokenAccount>,
     #[account(mut)]
-    pub user_token_account_1: Account<'info, TokenAccount>,
+    pub user_token_account_1: InterfaceAccount<'info, TokenAccount>,
     #[account(mut)]
-    pub pool_token_account_0: Account<'info, TokenAccount>,
+    pub pool_token_account_0: InterfaceAccount<'info, TokenAccount>,
     #[account(mut)]
-    pub pool_token_account_1: Account<'info, TokenAccount>,
+    pub pool_token_account_1: InterfaceAccount<'info, TokenAccount>,
+    #[account(mut)]
+    pub token_mint_0: Box<InterfaceAccount<'info, Mint>>,
+    #[account(mut)]
+    pub token_mint_1: Box<InterfaceAccount<'info, Mint>>,
     #[account(mut)]
     pub user: Signer<'info>,
     #[account(
@@ -91,8 +33,80 @@ pub struct AddLiquidity<'info> {
     )]
     pub user_position: Account<'info, Position>,
     pub system_program: Program<'info, System>,
-    pub token_program: Program<'info, Token>,
+    pub token_program: Program<'info, AssociatedToken>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
 }
+
+impl<'info> AddLiquidity<'info> {
+    pub fn add_liquidity(
+        &mut self,
+        amount_0: u64,
+        amount_1: u64,
+        tick_lower: i32,
+        tick_upper: i32,
+    ) -> Result<()> {
+        let pool = &mut self.pool;
+        
+        // Ensure ticks are valid
+        require!(tick_lower < tick_upper, ErrorCode::InvalidTickRange);
+        require!(tick_lower % pool.tick_spacing as i32 == 0, ErrorCode::InvalidLowerTick);
+        require!(tick_upper % pool.tick_spacing as i32 == 0, ErrorCode::InvalidUpperTick);
+
+        // Calculate liquidity based on amounts and price range
+        let liquidity = calculate_liquidity(amount_0, amount_1, tick_lower, tick_upper, pool.sqrt_price);
+
+        // Update pool liquidity
+        pool.liquidity = pool.liquidity.checked_add(liquidity).unwrap();
+
+        // Transfer tokens from user to pool
+        transfer_checked(
+            CpiContext::new(
+                self.token_program.to_account_info(),
+                TransferChecked {
+                    from: self.user_token_account_0.to_account_info(),
+                    to: self.pool_token_account_0.to_account_info(),
+                    authority: self.user.to_account_info(),
+                    mint: self.token_mint_0.to_account_info(),
+                },
+            ),
+            amount_0,
+            9,
+        )?;
+
+        transfer_checked(
+            CpiContext::new(
+                self.token_program.to_account_info(),
+                TransferChecked {
+                    from: self.user_token_account_1.to_account_info(),
+                    to: self.pool_token_account_1.to_account_info(),
+                    authority: self.user.to_account_info(),
+                    mint: self.token_mint_1.to_account_info(),
+                },
+            ),
+            amount_1,
+            9,
+        )?;
+
+        // Create or update user position
+        let position = &mut self.user_position;
+        position.owner = self.user.key();
+        position.tick_lower = tick_lower;
+        position.tick_upper = tick_upper;
+        position.liquidity = position.liquidity.checked_add(liquidity).unwrap();
+
+        emit!(LiquidityAdded {
+            user: self.user.key(),
+            amount_0,
+            amount_1,
+            tick_lower,
+            tick_upper,
+            liquidity,
+        });
+
+        Ok(())
+    }
+}
+
 
 // Helper function to calculate liquidity (simplified)
 fn calculate_liquidity(amount_0: u64, amount_1: u64, tick_lower: i32, tick_upper: i32, current_sqrt_price: u128) -> u128 {
