@@ -1,7 +1,7 @@
 import * as anchor from '@coral-xyz/anchor';
 import { Program } from '@coral-xyz/anchor';
-import { Keypair } from '@solana/web3.js';
 import { Cyklon } from '../target/types/cyklon';
+import { before } from 'node:test';
 
 describe('cyklon', () => {
   // Configure the client to use the local cluster.
@@ -29,11 +29,12 @@ describe('cyklon', () => {
 
   it('Initialize Pool', async () => {
     await program.methods
-      .initializePool(tokenMint0, tokenMint1)
-      .accounts({
+      .initializePool(1, 1)
+      .accountsPartial({
         pool: poolPubkey,
         payer: payer.publicKey,
-        systemProgram: anchor.web3.SystemProgram.programId,
+        tokenMint0: tokenMint0,
+        tokenMint1: tokenMint1,
       })
       .rpc();
 

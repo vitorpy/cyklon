@@ -1,5 +1,30 @@
 use anchor_lang::prelude::*;
 
+/// The main module for the Cyklon program.
+///
+/// This module contains the entry points for the Cyklon program, which implements
+/// a decentralized exchange with confidential transactions.
+///
+/// # Parameters
+///
+/// * `initialize_pool` - Initializes a new liquidity pool.
+///   - `tick_spacing`: The minimum tick separation for position and tick-indexed data. It determines
+///     the granularity of price increments in the pool. A smaller tick spacing allows for finer price
+///     movements but may increase gas costs for operations that iterate over tick ranges.
+///   - `initial_sqrt_price`: The initial square root price of the pool.
+///
+/// * `add_liquidity` - Adds liquidity to an existing pool.
+///   - `amount_0`: The amount of token 0 to add.
+///   - `amount_1`: The amount of token 1 to add.
+///   - `tick_lower`: The lower tick of the price range.
+///   - `tick_upper`: The upper tick of the price range.
+///
+/// * `confidential_swap` - Performs a confidential swap in the pool.
+///   - `amount_in_max`: The maximum amount of tokens to swap in.
+///   - `minimum_amount_out`: The minimum amount of tokens to receive.
+///   - `proof`: The zero-knowledge proof for the confidential swap.
+///   - `public_inputs`: The public inputs for the zero-knowledge proof.
+
 mod instructions;
 mod state;
 mod errors;
