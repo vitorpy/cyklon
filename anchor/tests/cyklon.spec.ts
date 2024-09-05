@@ -8,6 +8,7 @@ describe('cyklon', () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
   const payer = provider.wallet as anchor.Wallet;
+  console.log("Payer:", payer.publicKey.toBase58());
 
   const program = anchor.workspace.Cyklon as Program<Cyklon>;
 
@@ -25,11 +26,15 @@ describe('cyklon', () => {
       [Buffer.from("pool")],
       program.programId
     );
+    
+    console.log("Pool PDA:", poolPubkey.toBase58());
+    console.log("Token Mint 0:", tokenMint0.toBase58());
+    console.log("Token Mint 1:", tokenMint1.toBase58());
   });
 
   it('Initialize Pool', async () => {
     await program.methods
-      .initializePool(1, 1)
+      .initializePool(1, new anchor.BN(1))
       .accountsPartial({
         pool: poolPubkey,
         payer: payer.publicKey,
