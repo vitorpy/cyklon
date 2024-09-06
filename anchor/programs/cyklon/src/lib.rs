@@ -32,7 +32,7 @@ mod events;
 
 use instructions::*;
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("5WrVRh6pUTvyrjrTn4GKGebsZn2GnqBK2h7agfn2QvBX");
 
 #[program]
 pub mod cyklon {
