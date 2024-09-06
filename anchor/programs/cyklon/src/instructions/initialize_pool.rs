@@ -4,7 +4,7 @@ use crate::state::Pool;
 
 #[derive(Accounts)]
 pub struct InitializePool<'info> {
-    #[account(init, payer = payer, space = 8 + 32 + 32 + 2 + 16)]
+    #[account(init, payer = payer, space = 8 + 32 + 32 + 2 + 16, seeds = [b"pool"], bump)]
     pub pool: Account<'info, Pool>,
     pub token_mint_0: Box<InterfaceAccount<'info, Mint>>,
     pub token_mint_1: Box<InterfaceAccount<'info, Mint>>,
