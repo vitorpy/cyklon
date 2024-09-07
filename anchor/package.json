@@ -7,5 +7,8 @@
   },
   "main": "./index.cjs",
   "module": "./index.js",
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
 }

@@ -5,7 +5,7 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-counter = "GNha6ebc7SRZ1AT1pKsbr6pRJ3fEUnV7gkCcxc6jdo8P"
+cyklon = "GNha6ebc7SRZ1AT1pKsbr6pRJ3fEUnV7gkCcxc6jdo8P"
 
 [registry]
 url = "https://api.apr.dev"
@@ -26,3 +26,6 @@ upgradeable = false
 bind_address = "127.0.0.1"
 ledger = ".anchor/test-ledger"
 rpc_port = 8899
+[[test.genesis]]
+address = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+program = "./binaries/token.so"

@@ -1,0 +1,17 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "type": "typescript",
+        "tsconfig": "anchor/tsconfig.spec.json",
+        "problemMatcher": [
+          "$tsc"
+        ],
+        "group": "build",
+        "label": "tsc: build - tsconfig.spec.json",
+        "options": {
+          "cwd": "${workspaceFolder}/anchor"
+        }
+      }
+    ]
+  }

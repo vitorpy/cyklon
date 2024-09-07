@@ -6,8 +6,8 @@ use crate::state::Pool;
 pub struct InitializePool<'info> {
     #[account(init, payer = payer, space = 8 + 32 + 32 + 2 + 16, seeds = [b"pool"], bump)]
     pub pool: Account<'info, Pool>,
-    pub token_mint_0: Box<InterfaceAccount<'info, Mint>>,
-    pub token_mint_1: Box<InterfaceAccount<'info, Mint>>,
+    pub token_mint_0: InterfaceAccount<'info, Mint>,
+    pub token_mint_1: InterfaceAccount<'info, Mint>,
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
