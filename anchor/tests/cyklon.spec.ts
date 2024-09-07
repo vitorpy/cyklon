@@ -17,9 +17,13 @@ describe('cyklon', () => {
   let tokenMint1: anchor.web3.PublicKey;
 
   before(async () => {
+    console.log('BEFORE before');
+
     // Create token mints for testing
     tokenMint0 = await createMint(provider);
     tokenMint1 = await createMint(provider);
+
+    console.log('AFTER before, mint0: ', tokenMint0?.toBase58(), 'mint1: ', tokenMint1?.toBase58());
 
     // Find the pool PDA
     [poolPubkey] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -40,8 +44,8 @@ Token Mint 1: ${tokenMint1.toBase58()}`
       await program.methods
         .initializePool(1, new anchor.BN(1))
       .accountsPartial({
-        tokenMint0: tokenMint0,
-        tokenMint1: tokenMint1,
+        tokenMint0: tokenMint0.toBase58(),
+        tokenMint1: tokenMint1.toBase58(),
         payer: payer.publicKey,
         })
         .rpc();
@@ -69,10 +73,24 @@ Token Mint 1: ${tokenMint1.toBase58()}`
   });
 });
 
-// Helper function to create a mint (you might need to implement this)
+// Helper function to create a mint
 async function createMint(provider: anchor.AnchorProvider): Promise<anchor.web3.PublicKey> {
+  console.log('BEFORE createMint');
+  
   const mint = anchor.web3.Keypair.generate();
-  const lamports = await provider.connection.getMinimumBalanceForRentExemption(spl.MintLayout.span);
+  
+  console.log('AFTER createMint, mint: ', mint.publicKey.toBase58());
+
+  let lamports: number;
+  try { 
+    lamports = await spl.getMinimumBalanceForRentExemptMint(provider.connection);
+
+  } catch (error) {
+    console.error("Error creating mint:", error);
+    throw error;
+  }
+
+  console.log('BEFORE createMint, lamports: ', lamports);
 
   const transaction = new anchor.web3.Transaction().add(
     anchor.web3.SystemProgram.createAccount({
@@ -91,5 +109,7 @@ async function createMint(provider: anchor.AnchorProvider): Promise<anchor.web3.
   );
 
   await provider.sendAndConfirm(transaction, [mint]);
+  console.log('AFTER, ', mint.publicKey.toBase58());
+
   return mint.publicKey;
 }
