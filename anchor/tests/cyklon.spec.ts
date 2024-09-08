@@ -1,6 +1,7 @@
 import * as anchor from '@coral-xyz/anchor';
 import { Program } from '@coral-xyz/anchor';
 import * as spl from '@solana/spl-token';
+import { createMint } from '@solana/spl-token';
 import { Cyklon } from '../target/types/cyklon';
 import { before } from 'node:test';
 
@@ -17,13 +18,20 @@ describe('cyklon', () => {
   let tokenMint1: anchor.web3.PublicKey;
 
   before(async () => {
-    console.log('BEFORE before');
+    // Airdrop 10 SOL to the payer wallet
+    const airdropSignature = await provider.connection.requestAirdrop(
+      payer.publicKey,
+      10 * anchor.web3.LAMPORTS_PER_SOL
+    );
+    await provider.connection.confirmTransaction(airdropSignature);
 
     // Create token mints for testing
-    tokenMint0 = await createMint(provider);
-    tokenMint1 = await createMint(provider);
-
-    console.log('AFTER before, mint0: ', tokenMint0?.toBase58(), 'mint1: ', tokenMint1?.toBase58());
+    const signer = {
+      publicKey: payer.publicKey,
+      secretKey: (payer as anchor.Wallet).payer.secretKey,
+    };
+    tokenMint0 = await createMint(provider.connection, signer, signer.publicKey, null, 6);
+    tokenMint1 = await createMint(provider.connection, signer, signer.publicKey, null, 6);
 
     // Find the pool PDA
     [poolPubkey] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -72,44 +80,3 @@ Token Mint 1: ${tokenMint1.toBase58()}`
     expect(typeof program.methods.confidentialSwap).toBe('function');
   });
 });
-
-// Helper function to create a mint
-async function createMint(provider: anchor.AnchorProvider): Promise<anchor.web3.PublicKey> {
-  console.log('BEFORE createMint');
-  
-  const mint = anchor.web3.Keypair.generate();
-  
-  console.log('AFTER createMint, mint: ', mint.publicKey.toBase58());
-
-  let lamports: number;
-  try { 
-    lamports = await spl.getMinimumBalanceForRentExemptMint(provider.connection);
-
-  } catch (error) {
-    console.error("Error creating mint:", error);
-    throw error;
-  }
-
-  console.log('BEFORE createMint, lamports: ', lamports);
-
-  const transaction = new anchor.web3.Transaction().add(
-    anchor.web3.SystemProgram.createAccount({
-      fromPubkey: provider.wallet.publicKey,
-      newAccountPubkey: mint.publicKey,
-      space: spl.MintLayout.span,
-      lamports,
-      programId: spl.TOKEN_PROGRAM_ID,
-    }),
-    spl.createInitializeMintInstruction(
-      mint.publicKey,
-      6,
-      provider.wallet.publicKey,
-      provider.wallet.publicKey
-    )
-  );
-
-  await provider.sendAndConfirm(transaction, [mint]);
-  console.log('AFTER, ', mint.publicKey.toBase58());
-
-  return mint.publicKey;
-}

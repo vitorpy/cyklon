@@ -5,7 +5,7 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-cyklon = "GNha6ebc7SRZ1AT1pKsbr6pRJ3fEUnV7gkCcxc6jdo8P"
+cyklon = "5WrVRh6pUTvyrjrTn4GKGebsZn2GnqBK2h7agfn2QvBX"
 
 [registry]
 url = "https://api.apr.dev"
@@ -23,9 +23,9 @@ shutdown_wait = 2000
 upgradeable = false
 
 [test.validator]
-bind_address = "127.0.0.1"
+url = "https://api.mainnet-beta.solana.com"
+bind_address = "0.0.0.0"
 ledger = ".anchor/test-ledger"
 rpc_port = 8899
-[[test.genesis]]
+[[test.validator.clone]]
 address = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-program = "./binaries/token.so"
