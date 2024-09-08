@@ -1,9 +1,8 @@
 import * as anchor from '@coral-xyz/anchor';
 import { Program } from '@coral-xyz/anchor';
-import * as spl from '@solana/spl-token';
 import { createMint } from '@solana/spl-token';
 import { Cyklon } from '../target/types/cyklon';
-import { before } from 'node:test';
+import { createAccount, mintTo, getAccount } from '@solana/spl-token';
 
 describe('cyklon', () => {
   // Configure the client to use the local cluster.
@@ -17,8 +16,7 @@ describe('cyklon', () => {
   let tokenMint0: anchor.web3.PublicKey;
   let tokenMint1: anchor.web3.PublicKey;
 
-  /*
-  before(async () => {
+  const setupMint = async () => {
     // Airdrop 10 SOL to the payer wallet
     const airdropSignature = await provider.connection.requestAirdrop(
       payer.publicKey,
@@ -46,39 +44,9 @@ Pool PDA: ${poolPubkey.toBase58()}
 Token Mint 0: ${tokenMint0.toBase58()}
 Token Mint 1: ${tokenMint1.toBase58()}`
     );
-  });
-  */
-
-  it('Initialize Pool', async () => {
-    // Airdrop 10 SOL to the payer wallet
-    const airdropSignature = await provider.connection.requestAirdrop(
-      payer.publicKey,
-      10 * anchor.web3.LAMPORTS_PER_SOL
-    );
-    await provider.connection.confirmTransaction(airdropSignature);
-
-    // Create token mints for testing
-    const signer = {
-      publicKey: payer.publicKey,
-      secretKey: (payer as anchor.Wallet).payer.secretKey,
-    };
-    tokenMint0 = await createMint(provider.connection, signer, signer.publicKey, null, 6);
-    tokenMint1 = await createMint(provider.connection, signer, signer.publicKey, null, 6);
-
-    // Find the pool PDA
-    [poolPubkey] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("pool")],
-      program.programId
-    );
-    
-    console.log(
-      `Payer: ${payer.publicKey.toBase58()}
-Pool PDA: ${poolPubkey.toBase58()}
-Token Mint 0: ${tokenMint0.toBase58()}
-Token Mint 1: ${tokenMint1.toBase58()}`
-    );
-
-    // original
+  };
+  
+  const setupPool = async () => {
     try {
       await program.methods
         .initializePool(1, new anchor.BN(1))
@@ -92,13 +60,75 @@ Token Mint 1: ${tokenMint1.toBase58()}`
       console.error("Error initializing pool:", error);
       throw error;
     }
+  };
+
+  it('Initialize Pool', async () => {
+    await setupMint();
+    await setupPool();
 
     const poolAccount = await program.account.pool.fetch(poolPubkey);
     expect(poolAccount.tokenMint0.equals(tokenMint0)).toBe(true);
     expect(poolAccount.tokenMint1.equals(tokenMint1)).toBe(true);
   });
+  
+  it('Add Liquidity', async () => {
+    await setupMint();
+    await setupPool();
+    
+    // Create user token accounts
+    const userAccount0 = await createAccount(provider.connection, payer, tokenMint0, payer.publicKey);
+    const userAccount1 = await createAccount(provider.connection, payer, tokenMint1, payer.publicKey);
+
+    // Mint tokens to the user
+    const amount0 = 1000000; // 1 token with 6 decimals
+    const amount1 = 2000000; // 2 tokens with 6 decimals
+    await mintTo(provider.connection, payer, tokenMint0, userAccount0, payer, amount0);
+    await mintTo(provider.connection, payer, tokenMint1, userAccount1, payer, amount1);
+
+    // Add liquidity
+    const tickLower = -10;
+    const tickUpper = 10;
+    try {
+      await program.methods
+        .addLiquidity(
+          new anchor.BN(amount0),
+          new anchor.BN(amount1),
+          tickLower,
+          tickUpper
+        )
+        .accounts({
+          pool: poolPubkey,
+          userAccount0,
+          userAccount1,
+          tokenMint0,
+          tokenMint1,
+          user: payer.publicKey,
+        })
+        .rpc();
+
+      // Fetch the pool account after adding liquidity
+      const updatedPoolAccount = await program.account.pool.fetch(poolPubkey);
+
+      // Check if liquidity has been added
+      expect(updatedPoolAccount.liquidity.toNumber()).toBeGreaterThan(0);
+
+      // Fetch user token accounts to verify balance changes
+      const userAccount0Info = await getAccount(provider.connection, userAccount0);
+      const userAccount1Info = await getAccount(provider.connection, userAccount1);
+
+      // Check if tokens have been transferred from user accounts
+      expect(Number(userAccount0Info.amount)).toBeLessThan(amount0);
+      expect(Number(userAccount1Info.amount)).toBeLessThan(amount1);
+
+    } catch (error) {
+      console.error("Error adding liquidity:", error);
+      throw error;
+    }
+  });
 
   it('Confidential Swap', async () => {
+    await setupMint();
+    await setupPool();
     // This is a placeholder test. In a real scenario, you'd need to:
     // 1. Create user token accounts
     // 2. Mint some tokens to the user
