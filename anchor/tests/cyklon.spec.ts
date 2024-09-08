@@ -17,6 +17,7 @@ describe('cyklon', () => {
   let tokenMint0: anchor.web3.PublicKey;
   let tokenMint1: anchor.web3.PublicKey;
 
+  /*
   before(async () => {
     // Airdrop 10 SOL to the payer wallet
     const airdropSignature = await provider.connection.requestAirdrop(
@@ -46,8 +47,38 @@ Token Mint 0: ${tokenMint0.toBase58()}
 Token Mint 1: ${tokenMint1.toBase58()}`
     );
   });
+  */
 
   it('Initialize Pool', async () => {
+    // Airdrop 10 SOL to the payer wallet
+    const airdropSignature = await provider.connection.requestAirdrop(
+      payer.publicKey,
+      10 * anchor.web3.LAMPORTS_PER_SOL
+    );
+    await provider.connection.confirmTransaction(airdropSignature);
+
+    // Create token mints for testing
+    const signer = {
+      publicKey: payer.publicKey,
+      secretKey: (payer as anchor.Wallet).payer.secretKey,
+    };
+    tokenMint0 = await createMint(provider.connection, signer, signer.publicKey, null, 6);
+    tokenMint1 = await createMint(provider.connection, signer, signer.publicKey, null, 6);
+
+    // Find the pool PDA
+    [poolPubkey] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("pool")],
+      program.programId
+    );
+    
+    console.log(
+      `Payer: ${payer.publicKey.toBase58()}
+Pool PDA: ${poolPubkey.toBase58()}
+Token Mint 0: ${tokenMint0.toBase58()}
+Token Mint 1: ${tokenMint1.toBase58()}`
+    );
+
+    // original
     try {
       await program.methods
         .initializePool(1, new anchor.BN(1))
