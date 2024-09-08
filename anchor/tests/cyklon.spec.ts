@@ -1,8 +1,12 @@
 import * as anchor from '@coral-xyz/anchor';
 import { Program } from '@coral-xyz/anchor';
-import { createMint } from '@solana/spl-token';
 import { Cyklon } from '../target/types/cyklon';
-import { createAccount, mintTo, getAccount } from '@solana/spl-token';
+import { createAccount, createMint, mintTo, getAccount } from '@solana/spl-token';
+
+const convertToSigner = (wallet: anchor.Wallet): anchor.web3.Signer => ({
+  publicKey: wallet.publicKey,
+  secretKey: wallet.payer.secretKey,
+});
 
 describe('cyklon', () => {
   // Configure the client to use the local cluster.
@@ -15,6 +19,10 @@ describe('cyklon', () => {
   let poolPubkey: anchor.web3.PublicKey;
   let tokenMint0: anchor.web3.PublicKey;
   let tokenMint1: anchor.web3.PublicKey;
+  let userTokenAccount0: anchor.web3.PublicKey;
+  let userTokenAccount1: anchor.web3.PublicKey;
+  let poolTokenAccount0: anchor.web3.PublicKey;
+  let poolTokenAccount1: anchor.web3.PublicKey;
 
   const setupMint = async () => {
     // Airdrop 10 SOL to the payer wallet
@@ -25,10 +33,7 @@ describe('cyklon', () => {
     await provider.connection.confirmTransaction(airdropSignature);
 
     // Create token mints for testing
-    const signer = {
-      publicKey: payer.publicKey,
-      secretKey: (payer as anchor.Wallet).payer.secretKey,
-    };
+    const signer = convertToSigner(payer);
     tokenMint0 = await createMint(provider.connection, signer, signer.publicKey, null, 6);
     tokenMint1 = await createMint(provider.connection, signer, signer.publicKey, null, 6);
 
@@ -61,7 +66,7 @@ Token Mint 1: ${tokenMint1.toBase58()}`
       throw error;
     }
   };
-
+  
   it('Initialize Pool', async () => {
     await setupMint();
     await setupPool();
@@ -72,18 +77,17 @@ Token Mint 1: ${tokenMint1.toBase58()}`
   });
   
   it('Add Liquidity', async () => {
-    await setupMint();
-    await setupPool();
-    
     // Create user token accounts
-    const userAccount0 = await createAccount(provider.connection, payer, tokenMint0, payer.publicKey);
-    const userAccount1 = await createAccount(provider.connection, payer, tokenMint1, payer.publicKey);
+    userTokenAccount0 = await createAccount(provider.connection, convertToSigner(payer), tokenMint0, payer.publicKey);
+    userTokenAccount1 = await createAccount(provider.connection, convertToSigner(payer), tokenMint1, payer.publicKey);
+    poolTokenAccount0 = await createAccount(provider.connection, convertToSigner(payer), tokenMint0, payer.publicKey);
+    poolTokenAccount1 = await createAccount(provider.connection, convertToSigner(payer), tokenMint1, payer.publicKey);
 
     // Mint tokens to the user
     const amount0 = 1000000; // 1 token with 6 decimals
     const amount1 = 2000000; // 2 tokens with 6 decimals
-    await mintTo(provider.connection, payer, tokenMint0, userAccount0, payer, amount0);
-    await mintTo(provider.connection, payer, tokenMint1, userAccount1, payer, amount1);
+    await mintTo(provider.connection, convertToSigner(payer), tokenMint0, userTokenAccount0, convertToSigner(payer), amount0);
+    await mintTo(provider.connection, convertToSigner(payer), tokenMint1, userTokenAccount1, convertToSigner(payer), amount1);
 
     // Add liquidity
     const tickLower = -10;
@@ -98,11 +102,13 @@ Token Mint 1: ${tokenMint1.toBase58()}`
         )
         .accounts({
           pool: poolPubkey,
-          userAccount0,
-          userAccount1,
+          userTokenAccount0,
+          userTokenAccount1,
           tokenMint0,
           tokenMint1,
           user: payer.publicKey,
+          poolTokenAccount0,
+          poolTokenAccount1,
         })
         .rpc();
 
@@ -113,8 +119,8 @@ Token Mint 1: ${tokenMint1.toBase58()}`
       expect(updatedPoolAccount.liquidity.toNumber()).toBeGreaterThan(0);
 
       // Fetch user token accounts to verify balance changes
-      const userAccount0Info = await getAccount(provider.connection, userAccount0);
-      const userAccount1Info = await getAccount(provider.connection, userAccount1);
+      const userAccount0Info = await getAccount(provider.connection, userTokenAccount0);
+      const userAccount1Info = await getAccount(provider.connection, userTokenAccount1);
 
       // Check if tokens have been transferred from user accounts
       expect(Number(userAccount0Info.amount)).toBeLessThan(amount0);
