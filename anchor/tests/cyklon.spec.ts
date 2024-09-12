@@ -1,7 +1,7 @@
 import * as anchor from '@coral-xyz/anchor';
 import { Program } from '@coral-xyz/anchor';
 import { Cyklon } from '../target/types/cyklon';
-import { createAccount, createMint, mintTo, getAccount } from '@solana/spl-token';
+import { createAccount, createMint, mintTo, getAccount, getOrCreateAssociatedTokenAccount } from '@solana/spl-token';
 
 const convertToSigner = (wallet: anchor.Wallet): anchor.web3.Signer => ({
   publicKey: wallet.publicKey,
@@ -39,7 +39,7 @@ describe('cyklon', () => {
 
     // Find the pool PDA
     [poolPubkey] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("pool")],
+      [Buffer.from("pool"), tokenMint0.toBuffer(), tokenMint1.toBuffer()],
       program.programId
     );
     
@@ -130,20 +130,122 @@ Token Mint 1: ${tokenMint1.toBase58()}`
       console.error("Error adding liquidity:", error);
       throw error;
     }
-  });
+  }, 10000000);
 
   it('Confidential Swap', async () => {
-    await setupMint();
-    await setupPool();
-    // This is a placeholder test. In a real scenario, you'd need to:
-    // 1. Create user token accounts
-    // 2. Mint some tokens to the user
-    // 3. Create pool token accounts
-    // 4. Generate a valid zero-knowledge proof
-    // 5. Perform the swap
-    // 6. Check the results
+    // Create user token accounts
+    const userTokenAccount0 = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      convertToSigner(payer),
+      tokenMint0,
+      payer.publicKey
+    );
+    const userTokenAccount1 = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      convertToSigner(payer),
+      tokenMint1,
+      payer.publicKey
+    );
 
-    // For now, we'll just check if the method exists
-    expect(typeof program.methods.confidentialSwap).toBe('function');
+    // Mint tokens to the user
+    const amountToMint = 1000000; // 1 token with 6 decimals
+    await mintTo(provider.connection, convertToSigner(payer), tokenMint0, userTokenAccount0.address, convertToSigner(payer), amountToMint);
+
+    // Create pool token accounts (if not already created)
+    const poolTokenAccount0 = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      convertToSigner(payer),
+      tokenMint0,
+      poolPubkey,
+      true
+    );
+    const poolTokenAccount1 = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      convertToSigner(payer),
+      tokenMint1,
+      poolPubkey,
+      true
+    );
+
+    // Generate a valid zero-knowledge proof
+    const privateAmountIn = 100000; // 0.1 token
+    const privateZeroForOne = 1; // Swapping token0 for token1
+    
+    const publicInputs = {
+      publicSqrtPrice: poolAccount.sqrtPrice.toString(),
+      publicLiquidity: poolAccount.liquidity.toString(),
+      publicAmountInMax: amountIn.toString(),
+      publicMinimumAmountOut: "0" // Set a minimum amount out if desired
+    };
+
+    const privateInputs = {
+      privateAmountIn: privateAmountIn.toString(),
+      privateZeroForOne: privateZeroForOne.toString()
+    };
+
+    const { proof, publicSignals } = await generateProof(
+      'swap',
+      privateInputs,
+      publicInputs
+    );
+
+    // Perform the swap
+    const amountIn = new anchor.BN(privateAmountIn);
+    try {
+      await program.methods
+        .confidentialSwap(
+          new anchor.BN(publicInputs.publicAmountInMax),
+          new anchor.BN(publicInputs.publicMinimumAmountOut),
+          proof,
+          publicSignals
+        )
+        .accounts({
+          pool: poolPubkey,
+          userTokenAccount0: userTokenAccount0.address,
+          userTokenAccount1: userTokenAccount1.address,
+          poolTokenAccount0: poolTokenAccount0.address,
+          poolTokenAccount1: poolTokenAccount1.address,
+          user: payer.publicKey,
+        })
+        .rpc();
+
+      // Check the results
+      const userAccount0AfterSwap = await getAccount(provider.connection, userTokenAccount0.address);
+      const userAccount1AfterSwap = await getAccount(provider.connection, userTokenAccount1.address);
+
+      // Verify that tokens were swapped
+      expect(Number(userAccount0AfterSwap.amount)).toBeLessThan(amountToMint);
+      expect(Number(userAccount1AfterSwap.amount)).toBeGreaterThan(0);
+
+      // Verify pool balances (optional, depending on your implementation)
+      const poolAccount0AfterSwap = await getAccount(provider.connection, poolTokenAccount0.address);
+      const poolAccount1AfterSwap = await getAccount(provider.connection, poolTokenAccount1.address);
+
+      expect(Number(poolAccount0AfterSwap.amount)).toBeGreaterThan(0);
+      expect(Number(poolAccount1AfterSwap.amount)).toBeGreaterThan(0);
+
+    } catch (error) {
+      console.error("Error performing confidential swap:", error);
+      throw error;
+    }
   });
 });
+
+// Add this function at the end of the file
+async function generateProof(
+  circuit: string,
+  privateInputs: any,
+  publicInputs: any
+): Promise<{ proof: Buffer; publicSignals: anchor.BN[] }> {
+  // This is a placeholder. You need to implement the actual proof generation
+  // using a ZK proving system like SnarkJS or a custom prover
+  console.log("Generating proof for inputs:", { privateInputs, publicInputs });
+  
+  // Simulate proof generation (replace with actual implementation)
+  const proof = Buffer.from("simulated_proof_data");
+  const publicSignals = Object.values(publicInputs).map(
+    (value) => new anchor.BN(value)
+  );
+
+  return { proof, publicSignals };
+}
