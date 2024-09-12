@@ -238,6 +238,14 @@ export type Cyklon = {
                   111,
                   108
                 ]
+              },
+              {
+                "kind": "account",
+                "path": "tokenMint0"
+              },
+              {
+                "kind": "account",
+                "path": "tokenMint1"
               }
             ]
           }

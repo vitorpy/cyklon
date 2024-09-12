@@ -232,6 +232,14 @@
                   111,
                   108
                 ]
+              },
+              {
+                "kind": "account",
+                "path": "token_mint_0"
+              },
+              {
+                "kind": "account",
+                "path": "token_mint_1"
               }
             ]
           }

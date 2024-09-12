@@ -8,7 +8,10 @@ use crate::events::LiquidityAdded;
 
 #[derive(Accounts)]
 pub struct AddLiquidity<'info> {
-    #[account(mut)]
+    #[account(mut,
+        seeds = [b"pool", pool.token_mint_0.key().as_ref(), pool.token_mint_1.key().as_ref()],
+        bump
+    )]
     pub pool: Account<'info, Pool>,
     #[account(mut)]
     pub user_token_account_0: InterfaceAccount<'info, TokenAccount>,
