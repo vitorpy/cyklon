@@ -12,4 +12,6 @@ pub enum ErrorCode {
     InvalidProof,
     #[msg("Slippage tolerance exceeded")]
     SlippageExceeded,
+    #[msg("Math overflow")]
+    MathOverflow,
 }

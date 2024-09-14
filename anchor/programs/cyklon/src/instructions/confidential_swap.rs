@@ -1,9 +1,8 @@
 use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
-use anchor_spl::token_interface::{transfer_checked, Mint, TokenAccount, TransferChecked};
+use anchor_spl::token_interface::{Mint, TokenAccount, TokenInterface};
 use crate::state::Pool;
 use crate::errors::ErrorCode;
-use crate::events::ConfidentialSwapEvent;
 
 #[derive(Accounts)]
 pub struct ConfidentialSwap<'info> {
@@ -25,7 +24,7 @@ pub struct ConfidentialSwap<'info> {
     #[account(mut)]
     pub token_mint_1: InterfaceAccount<'info, Mint>,
     pub user: Signer<'info>,
-    pub token_program: Program<'info, AssociatedToken>,
+    pub token_program: Interface<'info, TokenInterface>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
 }
@@ -45,14 +44,23 @@ fn verify_proof(proof: &[u8], public_inputs: &[u128]) -> bool {
 
 impl<'info> ConfidentialSwap<'info> {
     pub fn confidential_swap(
-        ctx: Context<ConfidentialSwap>,
-        amount_in_max: u64,
-        minimum_amount_out: u64,
+        &mut self,
+        _amount_in_max: u64,
+        _minimum_amount_out: u64,
         proof: Vec<u8>,
         public_inputs: Vec<u128>,
     ) -> Result<()> {
-        // Verify the ZK proof here
+        // Verify the ZK proof
+        let is_proof_valid = verify_proof(&proof, &public_inputs);
+
         // If the proof is valid, proceed with the swap
-        // ...
+        if is_proof_valid {
+            // Proceed with the swap logic here
+            // ...
+            Ok(())
+        } else {
+            // Return an error if the proof is invalid
+            Err(ErrorCode::InvalidProof.into())
+        }
     }
 }

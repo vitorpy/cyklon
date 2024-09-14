@@ -13,7 +13,7 @@
             ],
             "cwd": "${workspaceFolder}/anchor",
             "runtimeExecutable": "anchor",
-            "runtimeArgs": ["test"],
+            "runtimeArgs": ["test", "--skip-build", "--skip-local-validator"],
             "preLaunchTask": "tsc: build - tsconfig.spec.json",
             "sourceMaps": true,
             "resolveSourceMapLocations": [
@@ -21,5 +21,36 @@
             ],
             "console": "integratedTerminal",
         },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Solana Test Validator",
+            "program": "solana-test-validator",
+            "args": [
+                "--ledger", "${workspaceFolder}/anchor/.anchor/test-ledger",
+                "--mint", "4doTkL1geeiw3EHeoKgXx9EQ84DAV2fsx3GSdGiHJX8u",
+                "--bind-address", "0.0.0.0",
+                "--clone", "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+                "--rpc-port", "8899",
+                "--url", "https://api.mainnet-beta.solana.com"
+            ],
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PATH": "${env:PATH}:${env:HOME}/.local/share/solana/install/active_release/bin"
+            },
+            "console": "integratedTerminal",
+            "preLaunchTask": "prepare-validator",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Validator + Test",
+            "configurations": ["Solana Test Validator", "anchor test"],
+            "stopAll": true
+        }
     ]
 }
