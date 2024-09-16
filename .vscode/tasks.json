@@ -12,6 +12,13 @@
         "options": {
           "cwd": "${workspaceFolder}/anchor"
         }
+      },
+      {
+        "label": "prepare-validator",
+        "type": "shell",
+        "command": "rm -rf ${workspaceFolder}/anchor/.anchor/test-ledger && cd ${workspaceFolder}/anchor && RUSTFLAGS=\"-g\" anchor build",
+        "problemMatcher": [],
+        "group": "build"
       }
     ]
   }

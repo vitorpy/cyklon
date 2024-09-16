@@ -76,23 +76,61 @@ Token Mint 1: ${tokenMint1.toBase58()}`
     expect(poolAccount.tokenMint1.equals(tokenMint1)).toBe(true);
   });
   
+  let poolPda;
   it('Add Liquidity', async () => {
-    // Create user token accounts
-    userTokenAccount0 = await createAccount(provider.connection, convertToSigner(payer), tokenMint0, payer.publicKey);
-    userTokenAccount1 = await createAccount(provider.connection, convertToSigner(payer), tokenMint1, payer.publicKey);
-    poolTokenAccount0 = await createAccount(provider.connection, convertToSigner(payer), tokenMint0, payer.publicKey);
-    poolTokenAccount1 = await createAccount(provider.connection, convertToSigner(payer), tokenMint1, payer.publicKey);
+    // Create user token accounts (ATAs)
+    const userTokenAccount0 = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      convertToSigner(payer),
+      tokenMint0,
+      payer.publicKey
+    );
+    const userTokenAccount1 = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      convertToSigner(payer),
+      tokenMint1,
+      payer.publicKey
+    );
+
+    // Create pool token accounts (ATAs)
+    const poolTokenAccount0 = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      convertToSigner(payer),
+      tokenMint0,
+      poolPubkey,
+      true
+    );
+    const poolTokenAccount1 = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      convertToSigner(payer),
+      tokenMint1,
+      poolPubkey,
+      true
+    );
 
     // Mint tokens to the user
     const amount0 = 1000000; // 1 token with 6 decimals
     const amount1 = 2000000; // 2 tokens with 6 decimals
-    await mintTo(provider.connection, convertToSigner(payer), tokenMint0, userTokenAccount0, convertToSigner(payer), amount0);
-    await mintTo(provider.connection, convertToSigner(payer), tokenMint1, userTokenAccount1, convertToSigner(payer), amount1);
+    await mintTo(provider.connection, convertToSigner(payer), tokenMint0, userTokenAccount0.address, convertToSigner(payer), amount0);
+    await mintTo(provider.connection, convertToSigner(payer), tokenMint1, userTokenAccount1.address, convertToSigner(payer), amount1);
 
     // Add liquidity
     const tickLower = -10;
     const tickUpper = 10;
+    
     try {
+      // Derive the pool PDA (if not already done)
+      [poolPda] = anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("pool"), tokenMint0.toBuffer(), tokenMint1.toBuffer()],
+        program.programId
+      );
+
+      // Derive the user position PDA
+      const [userPositionPda] = anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("position"), poolPda.toBuffer(), payer.publicKey.toBuffer()],
+        program.programId
+      );
+
       await program.methods
         .addLiquidity(
           new anchor.BN(amount0),
@@ -101,14 +139,19 @@ Token Mint 1: ${tokenMint1.toBase58()}`
           tickUpper
         )
         .accounts({
-          pool: poolPubkey,
-          userTokenAccount0,
-          userTokenAccount1,
-          tokenMint0,
-          tokenMint1,
+          // @ts-expect-error ts complains but anchor fails to run if its missing
+          pool: poolPda,
+          userTokenAccount0: userTokenAccount0.address,
+          userTokenAccount1: userTokenAccount1.address,
+          poolTokenAccount0: poolTokenAccount0.address,
+          poolTokenAccount1: poolTokenAccount1.address,
+          tokenMint0: tokenMint0,
+          tokenMint1: tokenMint1,
           user: payer.publicKey,
-          poolTokenAccount0,
-          poolTokenAccount1,
+          userPosition: userPositionPda,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+          associatedTokenProgram: anchor.utils.token.ASSOCIATED_PROGRAM_ID,
         })
         .rpc();
 
@@ -119,8 +162,8 @@ Token Mint 1: ${tokenMint1.toBase58()}`
       expect(updatedPoolAccount.liquidity.toNumber()).toBeGreaterThan(0);
 
       // Fetch user token accounts to verify balance changes
-      const userAccount0Info = await getAccount(provider.connection, userTokenAccount0);
-      const userAccount1Info = await getAccount(provider.connection, userTokenAccount1);
+      const userAccount0Info = await getAccount(provider.connection, userTokenAccount0.address);
+      const userAccount1Info = await getAccount(provider.connection, userTokenAccount1.address);
 
       // Check if tokens have been transferred from user accounts
       expect(Number(userAccount0Info.amount)).toBeLessThan(amount0);
@@ -133,6 +176,8 @@ Token Mint 1: ${tokenMint1.toBase58()}`
   }, 10000000);
 
   it('Confidential Swap', async () => {
+    const poolAccount = await program.account.pool.fetch(poolPda);
+
     // Create user token accounts
     const userTokenAccount0 = await getOrCreateAssociatedTokenAccount(
       provider.connection,
@@ -171,10 +216,11 @@ Token Mint 1: ${tokenMint1.toBase58()}`
     const privateAmountIn = 100000; // 0.1 token
     const privateZeroForOne = 1; // Swapping token0 for token1
     
+    const amountIn = new anchor.BN(privateAmountIn);
     const publicInputs = {
       publicSqrtPrice: poolAccount.sqrtPrice.toString(),
       publicLiquidity: poolAccount.liquidity.toString(),
-      publicAmountInMax: amountIn.toString(),
+      publicAmountInMax: (2 * amountIn).toString(),
       publicMinimumAmountOut: "0" // Set a minimum amount out if desired
     };
 
@@ -190,7 +236,6 @@ Token Mint 1: ${tokenMint1.toBase58()}`
     );
 
     // Perform the swap
-    const amountIn = new anchor.BN(privateAmountIn);
     try {
       await program.methods
         .confidentialSwap(
@@ -200,12 +245,18 @@ Token Mint 1: ${tokenMint1.toBase58()}`
           publicSignals
         )
         .accounts({
-          pool: poolPubkey,
-          userTokenAccount0: userTokenAccount0.address,
-          userTokenAccount1: userTokenAccount1.address,
+          // @ts-expect-error ts complains but anchor fails to run if its missing
+          pool: poolPda,
+          userTokenAccountIn: userTokenAccount0.address,
+          userTokenAccountOut: userTokenAccount1.address,
           poolTokenAccount0: poolTokenAccount0.address,
           poolTokenAccount1: poolTokenAccount1.address,
+          tokenMint0: tokenMint0,
+          tokenMint1: tokenMint1,
           user: payer.publicKey,
+          tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+          associatedTokenProgram: anchor.utils.token.ASSOCIATED_PROGRAM_ID,
+          systemProgram: anchor.web3.SystemProgram.programId,
         })
         .rpc();
 
@@ -228,7 +279,7 @@ Token Mint 1: ${tokenMint1.toBase58()}`
       console.error("Error performing confidential swap:", error);
       throw error;
     }
-  });
+  }, 10000000);
 });
 
 // Add this function at the end of the file

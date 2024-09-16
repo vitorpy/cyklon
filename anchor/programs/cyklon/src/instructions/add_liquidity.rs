@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token_interface::{Mint, TokenAccount, transfer_checked, TransferChecked};
+use anchor_spl::token_interface::{transfer_checked, Mint, TokenAccount, TokenInterface, TransferChecked};
 use anchor_spl::associated_token::AssociatedToken;
 use crate::state::{Pool, Position};
 use crate::errors::ErrorCode;
@@ -13,17 +13,27 @@ pub struct AddLiquidity<'info> {
         bump
     )]
     pub pool: Account<'info, Pool>,
-    #[account(mut)]
+    #[account(mut,
+        associated_token::mint = token_mint_0,
+        associated_token::authority = user
+    )]
     pub user_token_account_0: InterfaceAccount<'info, TokenAccount>,
-    #[account(mut)]
+    #[account(mut,
+        associated_token::mint = token_mint_1,
+        associated_token::authority = user
+    )]
     pub user_token_account_1: InterfaceAccount<'info, TokenAccount>,
-    #[account(mut)]
+    #[account(mut,
+        associated_token::mint = token_mint_0,
+        associated_token::authority = pool
+    )]
     pub pool_token_account_0: InterfaceAccount<'info, TokenAccount>,
-    #[account(mut)]
+    #[account(mut,
+        associated_token::mint = token_mint_1,
+        associated_token::authority = pool
+    )]
     pub pool_token_account_1: InterfaceAccount<'info, TokenAccount>,
-    #[account(mut)]
     pub token_mint_0: Box<InterfaceAccount<'info, Mint>>,
-    #[account(mut)]
     pub token_mint_1: Box<InterfaceAccount<'info, Mint>>,
     #[account(mut)]
     pub user: Signer<'info>,
@@ -36,7 +46,7 @@ pub struct AddLiquidity<'info> {
     )]
     pub user_position: Account<'info, Position>,
     pub system_program: Program<'info, System>,
-    pub token_program: Program<'info, AssociatedToken>,
+    pub token_program: Interface<'info, TokenInterface>,
     pub associated_token_program: Program<'info, AssociatedToken>,
 }
 
@@ -56,7 +66,7 @@ impl<'info> AddLiquidity<'info> {
         require!(tick_upper % pool.tick_spacing as i32 == 0, ErrorCode::InvalidUpperTick);
 
         // Calculate liquidity based on amounts and price range
-        let liquidity = calculate_liquidity(amount_0, amount_1, tick_lower, tick_upper, pool.sqrt_price);
+        let liquidity = calculate_liquidity(amount_0, amount_1, tick_lower, tick_upper, pool.sqrt_price)?;
 
         // Update pool liquidity
         pool.liquidity = pool.liquidity.checked_add(liquidity).unwrap();
@@ -73,7 +83,7 @@ impl<'info> AddLiquidity<'info> {
                 },
             ),
             amount_0,
-            9,
+            self.token_mint_0.decimals,
         )?;
 
         transfer_checked(
@@ -87,7 +97,7 @@ impl<'info> AddLiquidity<'info> {
                 },
             ),
             amount_1,
-            9,
+            self.token_mint_1.decimals,
         )?;
 
         // Create or update user position
@@ -112,18 +122,21 @@ impl<'info> AddLiquidity<'info> {
 
 
 // Helper function to calculate liquidity (simplified)
-fn calculate_liquidity(amount_0: u64, amount_1: u64, tick_lower: i32, tick_upper: i32, current_sqrt_price: u128) -> u128 {
+fn calculate_liquidity(amount_0: u64, amount_1: u64, tick_lower: i32, tick_upper: i32, current_sqrt_price: u128) -> Result<u128> {
     // This is a simplified calculation and should be replaced with a proper implementation
-    let amount_0 = amount_0 as u128;
-    let amount_1 = amount_1 as u128;
-    let price_lower = 1u128 << (tick_lower as u32);
-    let price_upper = 1u128 << (tick_upper as u32);
+    let amount_0 = u128::from(amount_0);
+    let amount_1 = u128::from(amount_1);
+    let price_lower = 1u128.checked_shl(u32::try_from(tick_lower).unwrap_or(0)).ok_or(ErrorCode::MathOverflow)?;
+    let price_upper = 1u128.checked_shl(u32::try_from(tick_upper).unwrap_or(0)).ok_or(ErrorCode::MathOverflow)?;
     
     if current_sqrt_price <= price_lower {
-        amount_0
+        Ok(amount_0)
     } else if current_sqrt_price >= price_upper {
-        amount_1
+        Ok(amount_1)
     } else {
-        (amount_0 * amount_1 / (price_upper - price_lower)).min(amount_0).min(amount_1)
+        let price_diff = price_upper.checked_sub(price_lower).ok_or(ErrorCode::MathOverflow)?;
+        let product = amount_0.checked_mul(amount_1).ok_or(ErrorCode::MathOverflow)?;
+        let division_result = product.checked_div(price_diff).ok_or(ErrorCode::MathOverflow)?;
+        Ok(division_result.min(amount_0).min(amount_1))
     }
 }
