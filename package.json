@@ -9,7 +9,8 @@
     "anchor-test": "nx run anchor:anchor test",
     "feature": "nx generate @solana-developers/preset-react:feature",
     "build": "nx build web",
-    "dev": "nx serve web"
+    "dev": "nx serve web",
+    "snarkjs": "node snarkjs/cli.js"
   },
   "private": true,
   "dependencies": {
