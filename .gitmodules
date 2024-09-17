@@ -1,0 +1,3 @@
+[submodule "groth16-solana"]
+	path = groth16-solana
+	url = https://github.com/Lightprotocol/groth16-solana
