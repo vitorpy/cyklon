@@ -2,23 +2,30 @@
     "version": "2.0.0",
     "tasks": [
       {
-        "type": "typescript",
-        "tsconfig": "anchor/tsconfig.spec.json",
-        "problemMatcher": [
-          "$tsc"
-        ],
-        "group": "build",
-        "label": "tsc: build - tsconfig.spec.json",
-        "options": {
-          "cwd": "${workspaceFolder}/anchor"
+        "label": "build",
+        "type": "shell",
+        "command": "cd ${workspaceFolder}/anchor && cargo build-sbf --debug",
+        "problemMatcher": [],
+        "group": {
+          "kind": "build",
+          "isDefault": true
         }
       },
       {
-        "label": "prepare-validator",
+        "label": "solana-debugger",
         "type": "shell",
-        "command": "rm -rf ${workspaceFolder}/anchor/.anchor/test-ledger && cd ${workspaceFolder}/anchor && RUSTFLAGS=\"-g\" anchor build",
+        "command": "solana-ledger-tool program run -l anchor/.anchor/test-ledger -e debugger ${workspaceFolder}/anchor/target/deploy/cyklon.so",
         "problemMatcher": [],
-        "group": "build"
+        "presentation": {
+          "reveal": "always",
+          "panel": "dedicated"
+        },
+        "isBackground": true
+      },
+      {
+        "label": "start-debugger",
+        "dependsOn": ["build", "solana-debugger"],
+        "dependsOrder": "sequence"
       }
     ]
   }
