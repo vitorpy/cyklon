@@ -1,3 +1,6 @@
 [submodule "groth16-solana"]
 	path = groth16-solana
 	url = https://github.com/Lightprotocol/groth16-solana
+[submodule "snarkjs"]
+	path = snarkjs
+	url = https://github.com/iden3/snarkjs
