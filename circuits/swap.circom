@@ -20,6 +20,8 @@ template CLMMSwap() {
     // Intermediate signals
     signal sqrtPriceDelta;
     signal amountInActual;
+    signal intermediateValue;
+    signal intermediateMul;
     
     // Ensure privateAmountIn <= publicAmountInMax
     component lte = LessEqThan(64);
@@ -28,18 +30,19 @@ template CLMMSwap() {
     lte.out === 1;
     
     // Calculate swap
-    sqrtPriceDelta = privateAmountIn * 1000000 / publicLiquidity;
+    intermediateValue <== privateAmountIn * 1000000;
+    sqrtPriceDelta <== intermediateValue / publicLiquidity;
     
     // Conditional calculation based on swap direction
     component isZeroForOne = IsEqual();
     isZeroForOne.in[0] <== privateZeroForOne;
     isZeroForOne.in[1] <== 1;
     
-    newSqrtPrice = isZeroForOne.out * (publicSqrtPrice - sqrtPriceDelta) + 
+    newSqrtPrice <== isZeroForOne.out * (publicSqrtPrice - sqrtPriceDelta) + 
                    (1 - isZeroForOne.out) * (publicSqrtPrice + sqrtPriceDelta);
     
     // Calculate amountOut (simplified)
-    amountOut = isZeroForOne.out * (privateAmountIn * publicLiquidity / publicSqrtPrice) +
+    amountOut <== isZeroForOne.out * (privateAmountIn * publicLiquidity / publicSqrtPrice) +
                 (1 - isZeroForOne.out) * (privateAmountIn * publicSqrtPrice / publicLiquidity);
     
     // Ensure amountOut >= publicMinimumAmountOut
