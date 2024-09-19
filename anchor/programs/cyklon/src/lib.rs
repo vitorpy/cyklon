@@ -25,28 +25,28 @@ use anchor_lang::prelude::*;
 ///   - `proof`: The zero-knowledge proof for the confidential swap.
 ///   - `public_inputs`: The public inputs for the zero-knowledge proof.
 
-mod instructions;
-mod state;
-mod errors;
-mod events;
+pub mod instructions;
+pub mod state;
+pub mod errors;
+pub mod events;
 
 use instructions::*;
 
-declare_id!("5WrVRh6pUTvyrjrTn4GKGebsZn2GnqBK2h7agfn2QvBX");
+declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 
 #[program]
 pub mod cyklon {
     use super::*;
 
-    pub fn initialize_pool(ctx: Context<InitializePool>, tick_spacing: u16, initial_sqrt_price: u128) -> Result<()> {
-        ctx.accounts.initialize_pool(tick_spacing, initial_sqrt_price)
+    pub fn initialize_pool(ctx: Context<InitializePool>) -> Result<()> {
+        ctx.accounts.initialize_pool()
     }
 
-    pub fn add_liquidity(ctx: Context<AddLiquidity>, amount_0: u64, amount_1: u64, tick_lower: i32, tick_upper: i32) -> Result<()> {
-        ctx.accounts.add_liquidity(amount_0, amount_1, tick_lower, tick_upper)
+    pub fn add_liquidity(ctx: Context<AddLiquidity>, amount_0: u64, amount_1: u64) -> Result<()> {
+        ctx.accounts.add_liquidity(amount_0, amount_1)
     }
 
-    pub fn confidential_swap(ctx: Context<ConfidentialSwap>, amount_in_max: u64, minimum_amount_out: u64, proof: Vec<u8>, public_inputs: Vec<u128>) -> Result<()> {
-        ctx.accounts.confidential_swap(amount_in_max, minimum_amount_out, proof, public_inputs)
+    pub fn confidential_swap(ctx: Context<ConfidentialSwap>, proof: Vec<u8>, public_inputs: Vec<u128>) -> Result<()> {
+        ctx.accounts.confidential_swap(proof, public_inputs)
     }
 }
