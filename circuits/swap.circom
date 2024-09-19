@@ -2,26 +2,23 @@ pragma circom 2.0.0;
 
 include "node_modules/circomlib/circuits/comparators.circom";
 
-template CLMMSwap() {
+template CPMMSwap() {
     // Public inputs
-    signal input publicSqrtPrice;
-    signal input publicLiquidity;
+    signal input publicReserve0;
+    signal input publicReserve1;
     signal input publicAmountInMax;
     signal input publicMinimumAmountOut;
     
     // Private inputs
     signal input privateAmountIn;
+    signal input privateSlippage; // Represented as a percentage (e.g., 1% = 100)
     signal input privateZeroForOne;
     
     // Outputs
+    signal output newReserve0;
+    signal output newReserve1;
+    signal output amountIn;
     signal output amountOut;
-    signal output newSqrtPrice;
-    
-    // Intermediate signals
-    signal sqrtPriceDelta;
-    signal amountInActual;
-    signal intermediateValue;
-    signal intermediateMul;
     
     // Ensure privateAmountIn <= publicAmountInMax
     component lte = LessEqThan(64);
@@ -30,26 +27,39 @@ template CLMMSwap() {
     lte.out === 1;
     
     // Calculate swap
-    intermediateValue <== privateAmountIn * 1000000;
-    sqrtPriceDelta <== intermediateValue / publicLiquidity;
+    signal k;
+    k <== publicReserve0 * publicReserve1;
     
-    // Conditional calculation based on swap direction
-    component isZeroForOne = IsEqual();
-    isZeroForOne.in[0] <== privateZeroForOne;
-    isZeroForOne.in[1] <== 1;
+    signal reserveIn;
+    signal reserveOut;
+    reserveIn <== privateZeroForOne * publicReserve0 + (1 - privateZeroForOne) * publicReserve1;
+    reserveOut <== privateZeroForOne * publicReserve1 + (1 - privateZeroForOne) * publicReserve0;
     
-    newSqrtPrice <== isZeroForOne.out * (publicSqrtPrice - sqrtPriceDelta) + 
-                   (1 - isZeroForOne.out) * (publicSqrtPrice + sqrtPriceDelta);
+    signal newReserveIn;
+    newReserveIn <== reserveIn + privateAmountIn;
     
-    // Calculate amountOut (simplified)
-    amountOut <== isZeroForOne.out * (privateAmountIn * publicLiquidity / publicSqrtPrice) +
-                (1 - isZeroForOne.out) * (privateAmountIn * publicSqrtPrice / publicLiquidity);
+    signal newReserveOut;
+    newReserveOut <== k / newReserveIn;
+    
+    signal rawAmountOut;
+    rawAmountOut <== reserveOut - newReserveOut;
+    
+    // Apply slippage
+    signal slippageFactor;
+    slippageFactor <== 10000 - privateSlippage;
+    
+    amountOut <== (rawAmountOut * slippageFactor) / 10000;
     
     // Ensure amountOut >= publicMinimumAmountOut
     component gte = GreaterEqThan(64);
     gte.in[0] <== amountOut;
     gte.in[1] <== publicMinimumAmountOut;
     gte.out === 1;
+    
+    // Set outputs
+    newReserve0 <== privateZeroForOne * newReserveIn + (1 - privateZeroForOne) * newReserveOut;
+    newReserve1 <== privateZeroForOne * newReserveOut + (1 - privateZeroForOne) * newReserveIn;
+    amountIn <== privateAmountIn;
 }
 
-component main = CLMMSwap();
+component main = CPMMSwap();

@@ -1,5 +1,5 @@
 {
-  "address": "5WrVRh6pUTvyrjrTn4GKGebsZn2GnqBK2h7agfn2QvBX",
+  "address": "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS",
   "metadata": {
     "name": "cyklon",
     "version": "0.1.0",
@@ -22,390 +22,23 @@
       "accounts": [
         {
           "name": "pool",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  112,
-                  111,
-                  111,
-                  108
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "pool.token_mint_0",
-                "account": "Pool"
-              },
-              {
-                "kind": "account",
-                "path": "pool.token_mint_1",
-                "account": "Pool"
-              }
-            ]
-          }
+          "writable": true
         },
         {
           "name": "user_token_account_0",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "user"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "token_mint_0"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
+          "writable": true
         },
         {
           "name": "user_token_account_1",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "user"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "token_mint_1"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
+          "writable": true
         },
         {
           "name": "pool_token_account_0",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "pool"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "token_mint_0"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
+          "writable": true
         },
         {
           "name": "pool_token_account_1",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "pool"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "token_mint_1"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
+          "writable": true
         },
         {
           "name": "token_mint_0"
@@ -415,48 +48,14 @@
         },
         {
           "name": "user",
-          "writable": true,
           "signer": true
-        },
-        {
-          "name": "user_position",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  112,
-                  111,
-                  115,
-                  105,
-                  116,
-                  105,
-                  111,
-                  110
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "pool"
-              },
-              {
-                "kind": "account",
-                "path": "user"
-              }
-            ]
-          }
-        },
-        {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
         },
         {
           "name": "token_program"
         },
         {
-          "name": "associated_token_program",
-          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
@@ -467,14 +66,6 @@
         {
           "name": "amount_1",
           "type": "u64"
-        },
-        {
-          "name": "tick_lower",
-          "type": "i32"
-        },
-        {
-          "name": "tick_upper",
-          "type": "i32"
         }
       ]
     },
@@ -560,14 +151,6 @@
       ],
       "args": [
         {
-          "name": "amount_in_max",
-          "type": "u64"
-        },
-        {
-          "name": "minimum_amount_out",
-          "type": "u64"
-        },
-        {
           "name": "proof",
           "type": "bytes"
         },
@@ -633,16 +216,7 @@
           "address": "11111111111111111111111111111111"
         }
       ],
-      "args": [
-        {
-          "name": "tick_spacing",
-          "type": "u16"
-        },
-        {
-          "name": "initial_sqrt_price",
-          "type": "u128"
-        }
-      ]
+      "args": []
     }
   ],
   "accounts": [
@@ -657,19 +231,6 @@
         177,
         109,
         188
-      ]
-    },
-    {
-      "name": "Position",
-      "discriminator": [
-        170,
-        188,
-        143,
-        228,
-        122,
-        64,
-        247,
-        208
       ]
     }
   ],
@@ -704,31 +265,36 @@
   "errors": [
     {
       "code": 6000,
+      "name": "InvalidInput",
+      "msg": "Invalid input"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidProof",
+      "msg": "Invalid proof"
+    },
+    {
+      "code": 6002,
       "name": "InvalidTickRange",
       "msg": "Lower tick must be less than upper tick"
     },
     {
-      "code": 6001,
+      "code": 6003,
       "name": "InvalidLowerTick",
       "msg": "Lower tick must be a multiple of tick spacing"
     },
     {
-      "code": 6002,
+      "code": 6004,
       "name": "InvalidUpperTick",
       "msg": "Upper tick must be a multiple of tick spacing"
     },
     {
-      "code": 6003,
-      "name": "InvalidProof",
-      "msg": "Invalid zero-knowledge proof"
-    },
-    {
-      "code": 6004,
+      "code": 6005,
       "name": "SlippageExceeded",
       "msg": "Slippage tolerance exceeded"
     },
     {
-      "code": 6005,
+      "code": 6006,
       "name": "MathOverflow",
       "msg": "Math overflow"
     }
@@ -772,16 +338,8 @@
             "type": "u64"
           },
           {
-            "name": "tick_lower",
-            "type": "i32"
-          },
-          {
-            "name": "tick_upper",
-            "type": "i32"
-          },
-          {
             "name": "liquidity",
-            "type": "u128"
+            "type": "u64"
           }
         ]
       }
@@ -800,36 +358,12 @@
             "type": "pubkey"
           },
           {
-            "name": "tick_spacing",
-            "type": "u16"
+            "name": "reserve_0",
+            "type": "u64"
           },
           {
-            "name": "sqrt_price",
-            "type": "u128"
-          },
-          {
-            "name": "liquidity",
-            "type": "u128"
-          }
-        ]
-      }
-    },
-    {
-      "name": "Position",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "owner",
-            "type": "pubkey"
-          },
-          {
-            "name": "tick_lower",
-            "type": "i32"
-          },
-          {
-            "name": "tick_upper",
-            "type": "i32"
+            "name": "reserve_1",
+            "type": "u64"
           },
           {
             "name": "liquidity",

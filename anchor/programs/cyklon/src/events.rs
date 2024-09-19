@@ -5,9 +5,7 @@ pub struct LiquidityAdded {
     pub user: Pubkey,
     pub amount_0: u64,
     pub amount_1: u64,
-    pub tick_lower: i32,
-    pub tick_upper: i32,
-    pub liquidity: u128,
+    pub liquidity: u64,
 }
 
 #[event]
