@@ -2,9 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Helvetica Neue';
+  src: url('/fonts/HelveticaNeueMedium.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Helvetica Neue Light';
+  src: url('/fonts/HelveticaNeueLight.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+}
+
+:root {
+  --font-base: "Helvetica Neue", Arial, sans-serif;
+  --font-light: "Helvetica Neue Light", Arial, sans-serif;
+}
+
 html,
 body {
   height: 100%;
+  font-family: var(--font-base);
 }
 
 .wallet-adapter-button-trigger {
@@ -16,4 +36,12 @@ body {
 .wallet-adapter-dropdown-list,
 .wallet-adapter-button {
   font-family: inherit !important;
+}
+
+.font-base {
+  font-family: var(--font-base);
+}
+
+.font-light {
+  font-family: var(--font-light);
 }

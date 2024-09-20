@@ -11,7 +11,11 @@ module.exports = {
     ...createGlobPatternsForDependencies(__dirname),
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ['Helvetica Neue', 'Arial', 'sans-serif'],
+      },
+    },
   },
   plugins: [require('daisyui')],
 };

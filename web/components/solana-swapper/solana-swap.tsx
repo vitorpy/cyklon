@@ -47,9 +47,9 @@ export function SolanaSwapComponent() {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-900 text-white font-sans">
-      <div className="w-96 p-6 rounded-lg bg-gray-800">
-        <h2 className="text-2xl font-bold mb-6">Swap Tokens</h2>
+    <div className="flex justify-center items-center text-white">
+      <div className="w-96 p-6 rounded-lg bg-base-200 shadow-xl overflow-auto">
+        <h2 className="text-2xl font-base mb-6">Swap Tokens</h2>
         <div className="space-y-4">
           <div className="flex items-center space-x-2">
             <TokenSelect
@@ -62,7 +62,7 @@ export function SolanaSwapComponent() {
               value={sourceAmount}
               onChange={(e) => handleSourceAmountChange(e.target.value)}
               placeholder="0.00"
-              className="flex-grow bg-gray-700 border-gray-600"
+              className="flex-grow bg-base-300 border-base-300"
             />
           </div>
           <div className="flex justify-center">
@@ -70,7 +70,7 @@ export function SolanaSwapComponent() {
               variant="ghost"
               size="icon"
               onClick={handleSwap}
-              className="rounded-full bg-gray-700 hover:bg-gray-600"
+              className="rounded-full bg-base-300 hover:bg-base-100"
             >
               <ArrowUpDown className="h-4 w-4" />
             </Button>
@@ -86,14 +86,14 @@ export function SolanaSwapComponent() {
               value={destAmount}
               readOnly
               placeholder="0.00"
-              className="flex-grow bg-gray-700 border-gray-600"
+              className="flex-grow bg-base-300 border-base-300"
             />
           </div>
           <Popover open={showSlippage} onOpenChange={setShowSlippage}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className="w-full justify-between bg-gray-700 border-gray-600 hover:bg-gray-600"
+                className="w-full justify-between bg-base-300 border-base-300 hover:bg-base-100"
               >
                 Slippage: {slippage[0].toFixed(1)}%
                 {showSlippage ? (
@@ -103,7 +103,7 @@ export function SolanaSwapComponent() {
                 )}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80 bg-gray-700 border-gray-600">
+            <PopoverContent className="w-80 bg-base-200 border-base-300">
               <div className="space-y-2">
                 <h3 className="font-medium">Adjust Slippage</h3>
                 <Slider
@@ -111,15 +111,15 @@ export function SolanaSwapComponent() {
                   onValueChange={(value) => setSlippage(value)}
                   max={5}
                   step={0.1}
-                  className="bg-gray-600"
+                  className="bg-base-300"
                 />
-                <div className="text-sm text-gray-300">
+                <div className="text-sm text-base-content">
                   Current slippage: {slippage[0].toFixed(1)}%
                 </div>
               </div>
             </PopoverContent>
           </Popover>
-          <Button className="w-full bg-white text-gray-900 hover:bg-gray-200">
+          <Button className="w-full bg-primary text-primary-content hover:bg-primary-focus">
             Swap
           </Button>
         </div>
@@ -144,15 +144,15 @@ function TokenSelect({ tokens, selectedToken, onSelect }: TokenSelectProps) {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[120px] justify-between bg-gray-700 border-gray-600 hover:bg-gray-600"
+          className="w-[120px] justify-between bg-base-300 border-base-300 hover:bg-base-100"
         >
           {selectedToken.symbol}
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0 bg-gray-700 border-gray-600">
+      <PopoverContent className="w-[200px] p-0 bg-base-200 border-base-300">
         <Command>
-          <CommandInput placeholder="Search token..." className="h-9 bg-gray-700" />
+          <CommandInput placeholder="Search token..." className="h-9 bg-base-200" />
           <CommandEmpty>No token found.</CommandEmpty>
           <CommandGroup>
             {tokens.map((token) => (
@@ -162,7 +162,7 @@ function TokenSelect({ tokens, selectedToken, onSelect }: TokenSelectProps) {
                   onSelect(token)
                   setOpen(false)
                 }}
-                className="hover:bg-gray-600"
+                className="hover:bg-base-300"
               >
                 {token.symbol} - {token.name}
               </CommandItem>

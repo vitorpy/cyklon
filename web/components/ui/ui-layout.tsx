@@ -29,7 +29,7 @@ export function UiLayout({
       <div className="navbar bg-base-300 text-neutral-content flex-col md:flex-row space-y-2 md:space-y-0">
         <div className="flex-1">
           <Link className="btn btn-ghost normal-case text-xl" href="/">
-            <p>Blackpool</p>
+            <p className="font-normal">Blackpool</p>
           </Link>
           <ul className="menu menu-horizontal px-1 space-x-2">
             {links.map(({ label, path }) => (
@@ -106,7 +106,7 @@ export function AppModal({
   return (
     <dialog className="modal" ref={dialogRef}>
       <div className="modal-box space-y-5">
-        <h3 className="font-bold text-lg">{title}</h3>
+        <h3 className="font-base text-lg">{title}</h3>
         {children}
         <div className="modal-action">
           <div className="join space-x-2">
@@ -143,12 +143,12 @@ export function AppHero({
       <div className="hero-content text-center">
         <div className="max-w-2xl">
           {typeof title === 'string' ? (
-            <h1 className="text-5xl font-bold">{title}</h1>
+            <h1 className="text-5xl font-base">{title}</h1>
           ) : (
             title
           )}
           {typeof subtitle === 'string' ? (
-            <p className="py-6">{subtitle}</p>
+            <p className="py-6 font-light">{subtitle}</p>
           ) : (
             subtitle
           )}
