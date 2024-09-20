@@ -22,7 +22,7 @@ export function AccountBalance({ address }: { address: PublicKey }) {
   return (
     <div>
       <h1
-        className="text-5xl font-bold cursor-pointer"
+        className="text-5xl font-base cursor-pointer"
         onClick={() => query.refetch()}
       >
         {query.data ? <BalanceSol balance={query.data} /> : '...'} SOL
@@ -129,7 +129,7 @@ export function AccountTokens({ address }: { address: PublicKey }) {
     <div className="space-y-2">
       <div className="justify-between">
         <div className="flex justify-between">
-          <h2 className="text-2xl font-bold">Token Accounts</h2>
+          <h2 className="text-2xl font-base">Token Accounts</h2>
           <div className="space-x-2">
             {query.isLoading ? (
               <span className="loading loading-spinner"></span>
@@ -231,7 +231,7 @@ export function AccountTransactions({ address }: { address: PublicKey }) {
   return (
     <div className="space-y-2">
       <div className="flex justify-between">
-        <h2 className="text-2xl font-bold">Transaction History</h2>
+        <h2 className="text-2xl font-base">Transaction History</h2>
         <div className="space-x-2">
           {query.isLoading ? (
             <span className="loading loading-spinner"></span>
