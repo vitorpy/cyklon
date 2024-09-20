@@ -10,10 +10,23 @@
 }
 
 @font-face {
+  font-family: 'Helvetica Neue';
+  src: url('/fonts/HelveticaNeueMediumItalic.otf') format('opentype');
+  font-weight: normal;
+  font-style: italic;
+}
+@font-face {
   font-family: 'Helvetica Neue Light';
   src: url('/fonts/HelveticaNeueLight.otf') format('opentype');
   font-weight: 300;
   font-style: normal;
+}
+
+@font-face {
+  font-family: 'Helvetica Neue Light';
+  src: url('/fonts/HelveticaNeueLightItalic.otf') format('opentype');
+  font-weight: 300;
+  font-style: italic;
 }
 
 :root {
