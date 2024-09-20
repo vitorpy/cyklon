@@ -3,6 +3,7 @@
 import { WalletButton } from '../solana/solana-provider';
 import * as React from 'react';
 import { ReactNode, Suspense, useEffect, useRef } from 'react';
+import Image from 'next/image';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -52,17 +53,27 @@ export function UiLayout({
       <ClusterChecker>
         <AccountChecker />
       </ClusterChecker>
-      <div className="flex-grow mx-4 lg:mx-auto">
-        <Suspense
-          fallback={
-            <div className="text-center my-32">
-              <span className="loading loading-spinner loading-lg"></span>
-            </div>
-          }
-        >
-          {children}
-        </Suspense>
-        <Toaster position="bottom-right" />
+      <div className="flex-grow flex bg-white">
+        <div className="w-1/3 overflow-y-auto px-4">
+          <Suspense
+            fallback={
+              <div className="text-center my-32">
+                <span className="loading loading-spinner loading-lg"></span>
+              </div>
+            }
+          >
+            {children}
+          </Suspense>
+          <Toaster position="bottom-right" />
+        </div>
+        <div className="w-2/3 relative">
+          <Image
+            src="/images/background.jpg"
+            alt="Background"
+            layout="fill"
+            objectFit="cover"
+          />
+        </div>
       </div>
       <footer className="footer footer-center p-4 bg-base-300 text-base-content">
         <aside>
@@ -143,12 +154,12 @@ export function AppHero({
       <div className="hero-content text-center">
         <div className="max-w-2xl">
           {typeof title === 'string' ? (
-            <h1 className="text-5xl font-base">{title}</h1>
+            <h1 className="text-5xl font-base text-black tracking-[0.125em]">{title}</h1>
           ) : (
             title
           )}
           {typeof subtitle === 'string' ? (
-            <p className="py-6 font-light">{subtitle}</p>
+            <p className="py-6 font-light text-black">{subtitle}</p>
           ) : (
             subtitle
           )}
