@@ -1,0 +1,7 @@
+:root {
+  --site-title-font-font-size-value: 1.5;
+}
+
+.header-title-text {
+  font-size: calc((var(--site-title-font-font-size-value) - 1) * 1.2vw + 1rem);
+}
