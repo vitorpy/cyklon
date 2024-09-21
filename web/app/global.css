@@ -41,11 +41,26 @@ body {
 }
 
 .wallet-adapter-button-trigger {
-  background: rgb(100, 26, 230) !important;
-  border-radius: 8px !important;
+  background-color: #a1a1aa !important;
+  border-radius: 0.5rem !important;
   padding-left: 16px !important;
   padding-right: 16px !important;
 }
+
+/* New styles from solana-provider.tsx */
+.wallet-adapter-button:hover {
+  background-color: #71717a !important;
+}
+
+.wallet-adapter-button-trigger:hover {
+  background-color: #71717a !important;
+}
+
+.wallet-adapter-button-start-icon {
+  border-radius: 0.5rem !important;
+  filter: grayscale(100%) !important;
+}
+
 .wallet-adapter-dropdown-list,
 .wallet-adapter-button {
   font-family: inherit !important;
