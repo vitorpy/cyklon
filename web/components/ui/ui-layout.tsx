@@ -32,7 +32,7 @@ export function UiLayout({
       <div className="navbar bg-base-300 text-neutral-content flex-col md:flex-row space-y-2 md:space-y-0">
         <div className="flex-1">
           <Link className="btn btn-ghost normal-case text-xl" href="/">
-            <p className="font-normal header-title-text">Blackpool</p>
+            <p className="font-normal header-title-text text-white">Blackpool</p>
           </Link>
           <ul className="menu menu-horizontal px-1 space-x-2">
             {links.map(({ label, path }) => (
@@ -77,7 +77,7 @@ export function UiLayout({
           />
         </div>
       </div>
-      <footer className="footer footer-center p-4 bg-base-300 text-base-content">
+      <footer className="footer footer-center p-4 bg-base-300 text-white">
         <aside>
           <p>
             <a href="https://blackpool.capital">Blackpool Capital</a>
