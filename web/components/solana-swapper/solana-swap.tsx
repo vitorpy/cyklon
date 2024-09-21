@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ChevronDown, ChevronUp, ArrowUpDown } from 'lucide-react'
 import { Input } from "@/components/solana-swapper/ui/input"
 import { Button } from "@/components/solana-swapper/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/solana-swapper/ui/popover"
 import { Slider } from "@/components/solana-swapper/ui/slider"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/solana-swapper/ui/command"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/solana-swapper/ui/command"
 
 interface Token {
   symbol: string;
@@ -45,6 +45,11 @@ export function SolanaSwapComponent() {
       setDestAmount('')
     }
   }
+
+  // Add this useEffect hook to update destAmount when sourceAmount or tokens change
+  useEffect(() => {
+    handleSourceAmountChange(sourceAmount)
+  }, [sourceAmount, sourceToken, destToken])
 
   return (
     <div className="flex justify-center items-center text-white">
@@ -146,29 +151,36 @@ function TokenSelect({ tokens, selectedToken, onSelect }: TokenSelectProps) {
           aria-expanded={open}
           className="w-[120px] justify-between bg-base-300 border-base-300 hover:bg-base-100"
         >
-          {selectedToken.symbol}
+          {selectedToken?.symbol || 'Select Token'}
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0 bg-base-200 border-base-300">
-        <Command>
-          <CommandInput placeholder="Search token..." className="h-9 bg-base-200" />
-          <CommandEmpty>No token found.</CommandEmpty>
-          <CommandGroup>
-            {tokens.map((token) => (
-              <CommandItem
-                key={token.symbol}
-                onSelect={() => {
-                  onSelect(token)
-                  setOpen(false)
-                }}
-                className="hover:bg-base-300"
-              >
-                {token.symbol} - {token.name}
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        </Command>
+        {tokens && tokens.length > 0 ? (
+          <Command>
+            <CommandInput placeholder="Search token..." className="h-9 bg-base-200" />
+            <CommandEmpty>No token found.</CommandEmpty>
+            <CommandGroup>
+              <CommandList>
+              {tokens.map((token) => (
+                <CommandItem
+                  key={token.symbol}
+                  value={token.symbol}
+                  onSelect={() => {
+                    onSelect(token)
+                    setOpen(false)
+                  }}
+                  className="hover:bg-base-300"
+                >
+                  {token.symbol} - {token.name}
+                </CommandItem>
+              ))}
+              </CommandList>
+            </CommandGroup>
+          </Command>
+        ) : (
+          <div className="p-2 text-sm text-gray-500">No tokens available</div>
+        )}
       </PopoverContent>
     </Popover>
   )

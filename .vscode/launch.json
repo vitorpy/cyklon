@@ -2,6 +2,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "chrome",
+            "request": "launch",
+            "name": "chrome",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}/web",
+        },
+        {
             "type": "node",
             "request": "launch",
             "name": "anchor test",
