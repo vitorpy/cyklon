@@ -21,7 +21,7 @@ export function getCyklonProgramId(cluster: Cluster) {
     case 'devnet':
     case 'testnet':
       // This is the program ID for the Counter program on devnet and testnet.
-      return new PublicKey('CyklonNZdmsQmWh7uVngV9FXW2dZ6zAgbJyYsvBpqbykg');
+      return new PublicKey('5WrVRh6pUTvyrjrTn4GKGebsZn2GnqBK2h7agfn2QvBX');
     case 'mainnet-beta':
     default:
       return CYKLON_PROGRAM_ID;

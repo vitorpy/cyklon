@@ -1,6 +1,6 @@
 {
-  "name": "@cyklon/source",
-  "version": "0.0.0",
+  "name": "@blackpool/source",
+  "version": "0.0.1",
   "license": "MIT",
   "scripts": {
     "anchor": "nx run anchor:anchor",
