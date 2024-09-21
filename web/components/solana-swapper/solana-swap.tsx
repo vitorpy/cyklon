@@ -80,7 +80,7 @@ export function SolanaSwapComponent() {
   }
 
   return (
-    <div className="flex justify-center items-center text-white">
+    <div className="flex justify-center items-center text-white cursor-default">
       <div className="w-96 p-6 rounded-lg bg-base-200 shadow-xl overflow-auto">
         <h2 className="text-2xl font-base mb-6">Swap Tokens</h2>
         <div className="space-y-4">
@@ -155,7 +155,7 @@ export function SolanaSwapComponent() {
             </PopoverContent>
           </Popover>
           <Button 
-            className={`w-full ${isValidPool ? 'bg-[#a1a1aa] hover:bg-[#a1a1aa]/90' : 'bg-gray-500 cursor-not-allowed'} text-primary-content`}
+            className={`w-full ${isValidPool ? 'bg-[#a1a1aa] hover:bg-[#71717a]' : 'bg-gray-500 cursor-not-allowed'} text-primary-content`}
             disabled={!isValidPool || isSwapping}
             onClick={handleConfidentialSwap}
           >
