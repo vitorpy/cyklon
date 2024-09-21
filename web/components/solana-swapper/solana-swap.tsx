@@ -7,26 +7,34 @@ import { Button } from "@/components/solana-swapper/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/solana-swapper/ui/popover"
 import { Slider } from "@/components/solana-swapper/ui/slider"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/solana-swapper/ui/command"
+import Image from 'next/image'
+import { useConfidentialSwap } from '@/lib/cyklon-swap'
 
 interface Token {
   symbol: string;
   name: string;
+  image: string;
 }
 
 const tokens: Token[] = [
-  { symbol: 'SOL', name: 'Solana' },
-  { symbol: 'USDC', name: 'USD Coin' },
-  { symbol: 'RAY', name: 'Raydium' },
-  { symbol: 'SRM', name: 'Serum' },
+  { symbol: 'SOL', name: 'Solana', image: '/images/token-icons/solana.webp' },
+  { symbol: 'USDC', name: 'USD Coin', image: '/images/token-icons/usdc.webp' },
+  { symbol: 'RAY', name: 'Raydium', image: '/images/token-icons/PSigc4ie_400x400.webp' },
+  { symbol: 'SRM', name: 'Serum', image: '/images/token-icons/serum-logo.webp' },
+  { symbol: 'PYUSD', name: 'PayPal USD', image: '/images/token-icons/PYUSD_Logo_(2).webp' },
 ]
 
 export function SolanaSwapComponent() {
-  const [sourceToken, setSourceToken] = useState<Token>(tokens[0])
-  const [destToken, setDestToken] = useState<Token>(tokens[1])
+  const [sourceToken, setSourceToken] = useState<Token>(tokens.find(t => t.symbol === 'PYUSD') || tokens[0])
+  const [destToken, setDestToken] = useState<Token>(tokens.find(t => t.symbol === 'SOL') || tokens[1])
   const [sourceAmount, setSourceAmount] = useState<string>('')
   const [destAmount, setDestAmount] = useState<string>('')
   const [slippage, setSlippage] = useState<number[]>([0.5])
   const [showSlippage, setShowSlippage] = useState<boolean>(false)
+  const [isSwapping, setIsSwapping] = useState<boolean>(false)
+  const [swapError, setSwapError] = useState<string | null>(null)
+
+  const confidentialSwap = useConfidentialSwap()
 
   const handleSwap = () => {
     setSourceToken(destToken)
@@ -46,10 +54,30 @@ export function SolanaSwapComponent() {
     }
   }
 
-  // Add this useEffect hook to update destAmount when sourceAmount or tokens change
   useEffect(() => {
     handleSourceAmountChange(sourceAmount)
   }, [sourceAmount, sourceToken, destToken])
+
+  const isValidPool = (sourceToken.symbol === 'PYUSD' && destToken.symbol === 'SOL') ||
+                      (sourceToken.symbol === 'SOL' && destToken.symbol === 'PYUSD');
+
+  const handleConfidentialSwap = async () => {
+    setIsSwapping(true)
+    setSwapError(null)
+    try {
+      const result = await confidentialSwap(sourceToken.symbol, destToken.symbol, parseFloat(sourceAmount))
+      if (result.success) {
+        setDestAmount(result.amount?.toString() || '')
+        // Handle successful swap (e.g., show success message, update balances, etc.)
+      } else {
+        setSwapError(result.error || 'Swap failed')
+      }
+    } catch (error) {
+      setSwapError('An unexpected error occurred')
+    } finally {
+      setIsSwapping(false)
+    }
+  }
 
   return (
     <div className="flex justify-center items-center text-white">
@@ -61,13 +89,14 @@ export function SolanaSwapComponent() {
               tokens={tokens}
               selectedToken={sourceToken}
               onSelect={setSourceToken}
+              disabledToken={destToken}
             />
             <Input
               type="number"
               value={sourceAmount}
               onChange={(e) => handleSourceAmountChange(e.target.value)}
               placeholder="0.00"
-              className="flex-grow bg-base-300 border-base-300"
+              className="flex-grow bg-base-300 border-base-300 text-right"
             />
           </div>
           <div className="flex justify-center">
@@ -85,13 +114,14 @@ export function SolanaSwapComponent() {
               tokens={tokens}
               selectedToken={destToken}
               onSelect={setDestToken}
+              disabledToken={sourceToken}
             />
             <Input
               type="number"
               value={destAmount}
               readOnly
               placeholder="0.00"
-              className="flex-grow bg-base-300 border-base-300"
+              className="flex-grow bg-base-300 border-base-300 text-right cursor-not-allowed"
             />
           </div>
           <Popover open={showSlippage} onOpenChange={setShowSlippage}>
@@ -124,9 +154,14 @@ export function SolanaSwapComponent() {
               </div>
             </PopoverContent>
           </Popover>
-          <Button className="w-full bg-[#a1a1aa] text-primary-content hover:bg-[#a1a1aa]/90">
-            Swap
+          <Button 
+            className={`w-full ${isValidPool ? 'bg-[#a1a1aa] hover:bg-[#a1a1aa]/90' : 'bg-gray-500 cursor-not-allowed'} text-primary-content`}
+            disabled={!isValidPool || isSwapping}
+            onClick={handleConfidentialSwap}
+          >
+            {isSwapping ? 'Swapping...' : isValidPool ? 'Swap' : 'This pool isn\'t available yet.'}
           </Button>
+          {swapError && <div className="text-red-500 text-sm">{swapError}</div>}
         </div>
       </div>
     </div>
@@ -137,9 +172,10 @@ interface TokenSelectProps {
   tokens: Token[];
   selectedToken: Token;
   onSelect: (token: Token) => void;
+  disabledToken: Token;
 }
 
-function TokenSelect({ tokens, selectedToken, onSelect }: TokenSelectProps) {
+function TokenSelect({ tokens, selectedToken, onSelect, disabledToken }: TokenSelectProps) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -151,7 +187,16 @@ function TokenSelect({ tokens, selectedToken, onSelect }: TokenSelectProps) {
           aria-expanded={open}
           className="w-[120px] justify-between bg-base-300 border-base-300 hover:bg-base-100"
         >
-          {selectedToken?.symbol || 'Select Token'}
+          <div className="flex items-center">
+            <Image
+              src={selectedToken.image}
+              alt={selectedToken.name}
+              width={20}
+              height={20}
+              className="mr-2 rounded-full"
+            />
+            {selectedToken?.symbol || 'Select Token'}
+          </div>
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -170,9 +215,19 @@ function TokenSelect({ tokens, selectedToken, onSelect }: TokenSelectProps) {
                     onSelect(token)
                     setOpen(false)
                   }}
-                  className="hover:bg-base-300"
+                  className={`hover:bg-base-300 ${token.symbol === disabledToken.symbol ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={token.symbol === disabledToken.symbol}
                 >
-                  {token.symbol} - {token.name}
+                  <div className="flex items-center">
+                    <Image
+                      src={token.image}
+                      alt={token.name}
+                      width={20}
+                      height={20}
+                      className="mr-2 rounded-full"
+                    />
+                    {token.symbol} - {token.name}
+                  </div>
                 </CommandItem>
               ))}
               </CommandList>

@@ -16,7 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./web/*"],
-      "@cyklon/anchor": ["anchor/src/index.ts"]
+      "@blackpool/anchor": ["anchor/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

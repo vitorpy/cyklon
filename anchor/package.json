@@ -1,5 +1,5 @@
 {
-  "name": "@cyklon/anchor",
+  "name": "@blackpool/anchor",
   "version": "0.0.1",
   "dependencies": {
     "@coral-xyz/anchor": "^0.30.0",
