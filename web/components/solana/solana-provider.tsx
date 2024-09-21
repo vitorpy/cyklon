@@ -32,7 +32,28 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
   return (
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={[]} onError={onError} autoConnect={true}>
-        <WalletModalProvider>{children}</WalletModalProvider>
+        <WalletModalProvider>
+          <style jsx global>{`
+            .wallet-adapter-button {
+              background-color: #a1a1aa !important;
+              border-radius: 0.5rem !important; /* Adjust this value to match SolanaSwapperComponent */
+            }
+            .wallet-adapter-button:hover {
+              background-color: #71717a !important;
+            }
+            .wallet-adapter-button-trigger {
+              background-color: #a1a1aa !important;
+            }
+            .wallet-adapter-button-trigger:hover {
+              background-color: #71717a !important;
+            }
+            .wallet-adapter-button-start-icon {
+              border-radius: 0.5rem !important; /* Match the button's border radius */
+              filter: grayscale(100%) !important;
+            }
+          `}</style>
+          {children}
+        </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
   );

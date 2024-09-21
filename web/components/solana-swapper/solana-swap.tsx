@@ -119,7 +119,7 @@ export function SolanaSwapComponent() {
               </div>
             </PopoverContent>
           </Popover>
-          <Button className="w-full bg-primary text-primary-content hover:bg-primary-focus">
+          <Button className="w-full bg-[#a1a1aa] text-primary-content hover:bg-[#a1a1aa]/90">
             Swap
           </Button>
         </div>
