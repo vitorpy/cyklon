@@ -45,6 +45,8 @@ body {
   border-radius: 0.5rem !important;
   padding-left: 16px !important;
   padding-right: 16px !important;
+  color: black !important;
+  font-size: 14px !important;
 }
 
 /* New styles from solana-provider.tsx */
@@ -56,9 +58,13 @@ body {
   background-color: #71717a !important;
 }
 
-.wallet-adapter-button-start-icon {
-  border-radius: 0.5rem !important;
+.wallet-adapter-button-start-icon img {
+  border-radius: 50% !important;
   filter: grayscale(100%) !important;
+}
+
+.wallet-adapter-button-trigger:hover .wallet-adapter-button-start-icon img {
+  filter: grayscale(100%) invert(1) !important;
 }
 
 .wallet-adapter-dropdown-list,

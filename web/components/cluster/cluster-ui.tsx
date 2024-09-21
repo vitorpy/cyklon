@@ -66,7 +66,7 @@ export function ClusterUiSelect() {
     <div className="dropdown dropdown-end">
       <label
         tabIndex={0}
-        className="btn rounded-btn bg-[#a1a1aa] hover:bg-[#71717a] text-white border-none"
+        className="btn rounded-btn bg-[#a1a1aa] hover:bg-[#71717a] text-black border-none"
       >
         {cluster.name}
       </label>
