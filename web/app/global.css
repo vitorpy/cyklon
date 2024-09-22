@@ -4,17 +4,25 @@
 
 @font-face {
   font-family: 'Helvetica Neue';
-  src: url('/fonts/HelveticaNeueMedium.otf') format('opentype');
+  src: url('/fonts/HelveticaNeueRoman.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Helvetica Neue';
-  src: url('/fonts/HelveticaNeueMediumItalic.otf') format('opentype');
+  src: url('/fonts/HelveticaNeueItalic.otf') format('opentype');
   font-weight: normal;
   font-style: italic;
 }
+
+@font-face {
+  font-family: 'Helvetica Neue';
+  src: url('/fonts/HelveticaNeueBold.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+}
+
 @font-face {
   font-family: 'Helvetica Neue Light';
   src: url('/fonts/HelveticaNeueLight.otf') format('opentype');
@@ -47,6 +55,7 @@ body {
   padding-right: 16px !important;
   color: black !important;
   font-size: 14px !important;
+  font-weight: 500 !important;
 }
 
 /* New styles from solana-provider.tsx */
@@ -78,4 +87,13 @@ body {
 
 .font-light {
   font-family: var(--font-light);
+}
+
+/* New rule to add margin-top to the text inside the wallet adapter button */
+.wallet-adapter-button-trigger {
+  padding-top: 0.25rem !important; /* equivalent to Tailwind's mt-1 */
+}
+
+.wallet-adapter-button-trigger img {
+  margin-top: -0.25rem !important; /* equivalent to Tailwind's mt-1 */
 }

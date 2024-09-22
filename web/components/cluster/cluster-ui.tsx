@@ -68,7 +68,7 @@ export function ClusterUiSelect() {
         tabIndex={0}
         className="btn rounded-btn bg-[#a1a1aa] hover:bg-[#71717a] text-black border-none"
       >
-        {cluster.name}
+        <span className="mt-1 font-medium">{cluster.name}</span>
       </label>
       <ul
         tabIndex={0}
