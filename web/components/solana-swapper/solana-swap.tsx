@@ -84,20 +84,24 @@ export function SolanaSwapComponent() {
       <div className="w-96 p-6 rounded-lg bg-base-200 shadow-xl overflow-auto">
         <h2 className="text-2xl font-base mb-6">Swap Tokens</h2>
         <div className="space-y-4">
-          <div className="flex items-center space-x-2">
-            <TokenSelect
-              tokens={tokens}
-              selectedToken={sourceToken}
-              onSelect={setSourceToken}
-              disabledToken={destToken}
-            />
-            <Input
-              type="number"
-              value={sourceAmount}
-              onChange={(e) => handleSourceAmountChange(e.target.value)}
-              placeholder="0.00"
-              className="flex-grow bg-base-300 border-base-300 text-right"
-            />
+          <div className="flex items-center">
+            <div className="w-2/5 pr-2">
+              <TokenSelect
+                tokens={tokens}
+                selectedToken={sourceToken}
+                onSelect={setSourceToken}
+                disabledToken={destToken}
+              />
+            </div>
+            <div className="w-3/5">
+              <Input
+                type="number"
+                value={sourceAmount}
+                onChange={(e) => handleSourceAmountChange(e.target.value)}
+                placeholder="0.00"
+                className="w-full bg-base-300 border-base-300 text-right"
+              />
+            </div>
           </div>
           <div className="flex justify-center">
             <Button
@@ -109,20 +113,24 @@ export function SolanaSwapComponent() {
               <ArrowUpDown className="h-4 w-4" />
             </Button>
           </div>
-          <div className="flex items-center space-x-2">
-            <TokenSelect
-              tokens={tokens}
-              selectedToken={destToken}
-              onSelect={setDestToken}
-              disabledToken={sourceToken}
-            />
-            <Input
-              type="number"
-              value={destAmount}
-              readOnly
-              placeholder="0.00"
-              className="flex-grow bg-base-300 border-base-300 text-right cursor-not-allowed"
-            />
+          <div className="flex items-center">
+            <div className="w-2/5 pr-2">
+              <TokenSelect
+                tokens={tokens}
+                selectedToken={destToken}
+                onSelect={setDestToken}
+                disabledToken={sourceToken}
+              />
+            </div>
+            <div className="w-3/5">
+              <Input
+                type="number"
+                value={destAmount}
+                readOnly
+                placeholder="0.00"
+                className="w-full bg-base-300 border-base-300 text-right cursor-not-allowed"
+              />
+            </div>
           </div>
           <Popover open={showSlippage} onOpenChange={setShowSlippage}>
             <PopoverTrigger asChild>
@@ -185,7 +193,7 @@ function TokenSelect({ tokens, selectedToken, onSelect, disabledToken }: TokenSe
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[120px] justify-between bg-base-300 border-base-300 hover:bg-base-100"
+          className="w-full justify-between bg-base-300 border-base-300 hover:bg-[#71717a]"
         >
           <div className="flex items-center">
             <Image
@@ -195,7 +203,7 @@ function TokenSelect({ tokens, selectedToken, onSelect, disabledToken }: TokenSe
               height={20}
               className="mr-2 rounded-full"
             />
-            {selectedToken?.symbol || 'Select Token'}
+            <span className="truncate">{selectedToken?.symbol || 'Select Token'}</span>
           </div>
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -215,7 +223,7 @@ function TokenSelect({ tokens, selectedToken, onSelect, disabledToken }: TokenSe
                     onSelect(token)
                     setOpen(false)
                   }}
-                  className={`hover:bg-base-300 ${token.symbol === disabledToken.symbol ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`hover:bg-[#a1a1aa] ${token.symbol === disabledToken.symbol ? 'opacity-50 cursor-not-allowed' : ''}`}
                   disabled={token.symbol === disabledToken.symbol}
                 >
                   <div className="flex items-center">
