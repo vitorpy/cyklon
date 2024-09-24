@@ -18,8 +18,6 @@ describe('cyklon', () => {
   let poolPubkey: anchor.web3.PublicKey;
   let tokenMint0: anchor.web3.PublicKey;
   let tokenMint1: anchor.web3.PublicKey;
-  let userTokenAccount0: anchor.web3.PublicKey;
-  let userTokenAccount1: anchor.web3.PublicKey;
   let poolTokenAccount0: anchor.web3.PublicKey;
   let poolTokenAccount1: anchor.web3.PublicKey;
 
@@ -52,11 +50,9 @@ Token Mint 1: ${tokenMint1.toBase58()}`
       await program.methods
         .initializePool()
         .accounts({
-          pool: poolPubkey,
           tokenMint0: tokenMint0,
           tokenMint1: tokenMint1,
           payer: payer.publicKey,
-          systemProgram: anchor.web3.SystemProgram.programId,
         })
         .rpc();
     } catch (error) {
@@ -124,7 +120,6 @@ Token Mint 1: ${tokenMint1.toBase58()}`
           tokenMint1: tokenMint1,
           user: payer.publicKey,
           tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
-          systemProgram: anchor.web3.SystemProgram.programId,
         })
         .rpc();
 
@@ -194,16 +189,14 @@ Token Mint 1: ${tokenMint1.toBase58()}`
           publicSignals
         )
         .accounts({
-          pool: poolPubkey,
           userTokenAccountIn: userTokenAccount0.address,
           userTokenAccountOut: userTokenAccount1.address,
-          poolTokenAccount0: poolTokenAccount0.address,
-          poolTokenAccount1: poolTokenAccount1.address,
+          poolTokenAccount0: poolTokenAccount0,
+          poolTokenAccount1: poolTokenAccount1,
           tokenMint0: tokenMint0,
           tokenMint1: tokenMint1,
           user: payer.publicKey,
           tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
-          systemProgram: anchor.web3.SystemProgram.programId,
         })
         .rpc();
 
@@ -213,8 +206,8 @@ Token Mint 1: ${tokenMint1.toBase58()}`
       expect(Number(userAccount0AfterSwap.amount)).toBeLessThan(amountToMint);
       expect(Number(userAccount1AfterSwap.amount)).toBeGreaterThan(0);
 
-      const poolAccount0AfterSwap = await getAccount(provider.connection, poolTokenAccount0.address);
-      const poolAccount1AfterSwap = await getAccount(provider.connection, poolTokenAccount1.address);
+      const poolAccount0AfterSwap = await getAccount(provider.connection, poolTokenAccount0);
+      const poolAccount1AfterSwap = await getAccount(provider.connection, poolTokenAccount1);
 
       expect(Number(poolAccount0AfterSwap.amount)).toBeGreaterThan(0);
       expect(Number(poolAccount1AfterSwap.amount)).toBeGreaterThan(0);
@@ -223,7 +216,7 @@ Token Mint 1: ${tokenMint1.toBase58()}`
       console.error("Error performing confidential swap:", error);
       throw error;
     }
-  });
+  }, 10000000);
 });
 
 async function generateProof(
