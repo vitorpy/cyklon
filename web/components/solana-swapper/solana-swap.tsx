@@ -210,7 +210,7 @@ function TokenSelect({ tokens, selectedToken, onSelect, disabledToken }: TokenSe
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0 bg-base-200 border-base-300">
         {tokens && tokens.length > 0 ? (
-          <Command>
+          <Command value={selectedToken.symbol}>
             <CommandInput placeholder="Search token..." className="h-9 bg-base-200" />
             <CommandEmpty>No token found.</CommandEmpty>
             <CommandGroup>
