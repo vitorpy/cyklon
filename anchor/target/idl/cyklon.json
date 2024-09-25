@@ -151,13 +151,44 @@
       ],
       "args": [
         {
-          "name": "proof",
-          "type": "bytes"
+          "name": "proof_a",
+          "type": {
+            "array": [
+              "u8",
+              64
+            ]
+          }
+        },
+        {
+          "name": "proof_b",
+          "type": {
+            "array": [
+              "u8",
+              128
+            ]
+          }
+        },
+        {
+          "name": "proof_c",
+          "type": {
+            "array": [
+              "u8",
+              64
+            ]
+          }
         },
         {
           "name": "public_inputs",
           "type": {
-            "vec": "u128"
+            "array": [
+              {
+                "array": [
+                  "u8",
+                  32
+                ]
+              },
+              2
+            ]
           }
         }
       ]
