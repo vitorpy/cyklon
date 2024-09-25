@@ -50,8 +50,8 @@ template ZKConstantSumAMM() {
     newBalanceX <== muxNewX.out;
 
     component muxNewY = Mux1();
-    muxNewY.c[0] <== newInputBalance;
-    muxNewY.c[1] <== publicBalanceY;
+    muxNewY.c[0] <== totalLiquidity - newInputBalance;
+    muxNewY.c[1] <== totalLiquidity - newBalanceX;
     muxNewY.s <== isSwapXtoY;
     newBalanceY <== muxNewY.out;
 

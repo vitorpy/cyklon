@@ -22,11 +22,15 @@ describe("ZK Constant Sum AMM Swap", () => {
 
     const witness = await circuit.calculateWitness(input);
     await circuit.checkConstraints(witness);
-
-    const output = await circuit.getDecoratedOutput(witness);
     
-    expect(output[0]).toBe(1100n); // newBalanceX
-    expect(output[1]).toBe(900n);  // newBalanceY
-    expect(output[2]).toBe(100n);  // amountReceived
+    await circuit.loadSymbols();
+
+    const newBalanceX = circuit.symbols["main.newBalanceX"];
+    const newBalanceY = circuit.symbols["main.newBalanceY"];
+    const amountReceived = circuit.symbols["main.amountReceived"];
+
+    expect(witness[newBalanceX.varIdx]).toBe(1100n); // newBalanceX
+    expect(witness[newBalanceY.varIdx]).toBe(900n);  // newBalanceY
+    expect(witness[amountReceived.varIdx]).toBe(100n);  // amountReceived
   });
 });

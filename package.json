@@ -68,7 +68,7 @@
     "@typescript-eslint/parser": "^7.3.0",
     "autoprefixer": "10.4.13",
     "circom": "^0.5.46",
-    "circom_tester": "^0.0.20",
+    "circom_tester": "github:blackpooldao/circom_tester",
     "circomlib": "^2.0.5",
     "eslint": "~8.57.0",
     "eslint-config-next": "14.0.4",
