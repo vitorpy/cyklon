@@ -1,7 +1,7 @@
 import * as anchor from '@coral-xyz/anchor';
 import { Program } from '@coral-xyz/anchor';
 import { Cyklon } from '../target/types/cyklon';
-import { createMint, mintTo, getAccount, getOrCreateAssociatedTokenAccount } from '@solana/spl-token';
+import { createMint, mintTo, getAccount, getOrCreateAssociatedTokenAccount, Account } from '@solana/spl-token';
 
 const convertToSigner = (wallet: anchor.Wallet): anchor.web3.Signer => ({
   publicKey: wallet.publicKey,
@@ -18,8 +18,6 @@ describe('cyklon', () => {
   let poolPubkey: anchor.web3.PublicKey;
   let tokenMint0: anchor.web3.PublicKey;
   let tokenMint1: anchor.web3.PublicKey;
-  let poolTokenAccount0: anchor.web3.PublicKey;
-  let poolTokenAccount1: anchor.web3.PublicKey;
 
   const setupMint = async () => {
     const airdropSignature = await provider.connection.requestAirdrop(
@@ -156,6 +154,21 @@ Token Mint 1: ${tokenMint1.toBase58()}`
       payer.publicKey
     );
 
+    const poolTokenAccount0 = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      convertToSigner(payer),
+      tokenMint0,
+      poolPubkey,
+      true
+    );
+    const poolTokenAccount1 = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      convertToSigner(payer),
+      tokenMint1,
+      poolPubkey,
+      true
+    );
+    
     const amountToMint = 1000000; // 1 token with 6 decimals
     await mintTo(provider.connection, convertToSigner(payer), tokenMint0, userTokenAccount0.address, convertToSigner(payer), amountToMint);
 
@@ -189,14 +202,18 @@ Token Mint 1: ${tokenMint1.toBase58()}`
           publicSignals
         )
         .accounts({
+          // @ts-expect-error Anchor fails without it
+          pool: poolPubkey,
           userTokenAccountIn: userTokenAccount0.address,
           userTokenAccountOut: userTokenAccount1.address,
-          poolTokenAccount0: poolTokenAccount0,
-          poolTokenAccount1: poolTokenAccount1,
+          poolTokenAccount0: poolTokenAccount0.address,
+          poolTokenAccount1: poolTokenAccount1.address,
           tokenMint0: tokenMint0,
           tokenMint1: tokenMint1,
           user: payer.publicKey,
           tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+          associatedTokenProgram: anchor.utils.token.ASSOCIATED_PROGRAM_ID,
+          systemProgram: anchor.web3.SystemProgram.programId,
         })
         .rpc();
 
@@ -206,8 +223,8 @@ Token Mint 1: ${tokenMint1.toBase58()}`
       expect(Number(userAccount0AfterSwap.amount)).toBeLessThan(amountToMint);
       expect(Number(userAccount1AfterSwap.amount)).toBeGreaterThan(0);
 
-      const poolAccount0AfterSwap = await getAccount(provider.connection, poolTokenAccount0);
-      const poolAccount1AfterSwap = await getAccount(provider.connection, poolTokenAccount1);
+      const poolAccount0AfterSwap = await getAccount(provider.connection, poolTokenAccount0.address);
+      const poolAccount1AfterSwap = await getAccount(provider.connection, poolTokenAccount1.address);
 
       expect(Number(poolAccount0AfterSwap.amount)).toBeGreaterThan(0);
       expect(Number(poolAccount1AfterSwap.amount)).toBeGreaterThan(0);
