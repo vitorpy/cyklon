@@ -157,13 +157,44 @@ export type Cyklon = {
       ],
       "args": [
         {
-          "name": "proof",
-          "type": "bytes"
+          "name": "proofA",
+          "type": {
+            "array": [
+              "u8",
+              64
+            ]
+          }
+        },
+        {
+          "name": "proofB",
+          "type": {
+            "array": [
+              "u8",
+              128
+            ]
+          }
+        },
+        {
+          "name": "proofC",
+          "type": {
+            "array": [
+              "u8",
+              64
+            ]
+          }
         },
         {
           "name": "publicInputs",
           "type": {
-            "vec": "u128"
+            "array": [
+              {
+                "array": [
+                  "u8",
+                  32
+                ]
+              },
+              2
+            ]
           }
         }
       ]

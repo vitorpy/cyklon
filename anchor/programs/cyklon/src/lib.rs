@@ -20,15 +20,16 @@ use anchor_lang::prelude::*;
 ///   - `tick_upper`: The upper tick of the price range.
 ///
 /// * `confidential_swap` - Performs a confidential swap in the pool.
-///   - `amount_in_max`: The maximum amount of tokens to swap in.
-///   - `minimum_amount_out`: The minimum amount of tokens to receive.
-///   - `proof`: The zero-knowledge proof for the confidential swap.
-///   - `public_inputs`: The public inputs for the zero-knowledge proof.
+///   - `proof_a`: The first part of the zero-knowledge proof (64 bytes).
+///   - `proof_b`: The second part of the zero-knowledge proof (128 bytes).
+///   - `proof_c`: The third part of the zero-knowledge proof (64 bytes).
+///   - `public_inputs`: The public inputs for the zero-knowledge proof (2 32-byte arrays).
 
 pub mod instructions;
 pub mod state;
 pub mod errors;
 pub mod events;
+pub mod constants;
 
 use instructions::*;
 
@@ -46,7 +47,13 @@ pub mod cyklon {
         ctx.accounts.add_liquidity(amount_0, amount_1)
     }
 
-    pub fn confidential_swap(ctx: Context<ConfidentialSwap>, proof: Vec<u8>, public_inputs: Vec<u128>) -> Result<()> {
-        ctx.accounts.confidential_swap(proof, public_inputs)
+    pub fn confidential_swap(
+        ctx: Context<ConfidentialSwap>,
+        proof_a: [u8; 64],
+        proof_b: [u8; 128],
+        proof_c: [u8; 64],
+        public_inputs: [[u8; 32]; 2]
+    ) -> Result<()> {
+        ctx.accounts.confidential_swap(proof_a, proof_b, proof_c, public_inputs)
     }
 }

@@ -1,9 +1,11 @@
 use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token_interface::{Mint, TokenAccount, TokenInterface, transfer_checked, TransferChecked};
+use groth16_solana::{self, groth16::Groth16Verifier};
 
 use crate::state::Pool;
 use crate::errors::ErrorCode;
+use crate::constants::VERIFYINGKEY;
 
 #[derive(Accounts)]
 pub struct ConfidentialSwap<'info> {
@@ -30,58 +32,43 @@ pub struct ConfidentialSwap<'info> {
     pub system_program: Program<'info, System>,
 }
 
-// Helper function to verify the zero-knowledge proof (placeholder)
-fn verify_proof(proof: &[u8], public_inputs: &[u128]) -> bool {
-    use sha3::{Digest, Keccak256};
-    
-    let mut hasher = Keccak256::new();
-    hasher.update(proof);
-    for &input in public_inputs {
-        hasher.update(&input.to_le_bytes());
-    }
-    let result = hasher.finalize();
-    result[0] == 0 && result[1] == 0 // Arbitrary check for example purposes
-}
-
 impl<'info> ConfidentialSwap<'info> {
     pub fn confidential_swap(
         &mut self,
-        proof: Vec<u8>,
-        public_inputs: Vec<u128>,
+        proof_a: [u8; 64],
+        proof_b: [u8; 128],
+        proof_c: [u8; 64],
+        public_inputs: [[u8; 32]; 2], // Changed to fixed-size array
     ) -> Result<()> {
-        // Verify the ZK proof
-        let is_proof_valid = verify_proof(&proof, &public_inputs);
+        // Create a new Groth16Verifier instance
+        let mut verifier = Groth16Verifier::new(
+            &proof_a,
+            &proof_b,
+            &proof_c,
+            &public_inputs,
+            &VERIFYINGKEY,
+        ).map_err(|_| ErrorCode::InvalidProof)?;
 
-        if is_proof_valid {
+        // Verify the proof
+        let verified = verifier.verify().map_err(|_| ErrorCode::InvalidProof)?;
+
+        if verified {
             let pool = &mut self.pool;
-            let [public_reserve_0, public_reserve_1, public_amount_in_max, public_minimum_amount_out] = public_inputs[..4] else {
-                return Err(ErrorCode::InvalidInput.into());
-            };
-
-            // Ensure public inputs match the current pool state
-            require!(
-                public_reserve_0 == pool.reserve_0 as u128 && public_reserve_1 == pool.reserve_1 as u128,
-                ErrorCode::InvalidInput
-            );
-
-            // The actual amount_in and direction (zero_for_one) are kept private in the circuit
-            // Here we only update the pool state based on the public outputs from the circuit
-            let new_reserve_0 = public_inputs[4];
-            let new_reserve_1 = public_inputs[5];
-            let amount_in = public_inputs[6];
-            let amount_out = public_inputs[7];
-
-            // Update pool reserves
-            pool.reserve_0 = new_reserve_0 as u64;
-            pool.reserve_1 = new_reserve_1 as u64;
-
-            // Perform token transfers
-            let (from_account, to_account, from_mint, to_mint) = if new_reserve_0 > public_reserve_0 {
+            
+            // Extract values from public inputs
+            // We'll use only the last 8 bytes of each 32-byte input for u64 conversion
+            let new_balance_x = u64::from_be_bytes(public_inputs[0][24..].try_into().unwrap());
+            let new_balance_y = u64::from_be_bytes(public_inputs[1][24..].try_into().unwrap());
+            
+            // Determine swap direction and calculate amount_in and amount_out
+            let (from_account, to_account, from_mint, to_mint, amount_in, amount_out) = if new_balance_x > pool.reserve_0 {
                 (
                     &self.user_token_account_in,
                     &self.pool_token_account_0,
                     &self.token_mint_0,
                     &self.token_mint_1,
+                    new_balance_x - pool.reserve_0,
+                    pool.reserve_1 - new_balance_y,
                 )
             } else {
                 (
@@ -89,9 +76,16 @@ impl<'info> ConfidentialSwap<'info> {
                     &self.pool_token_account_1,
                     &self.token_mint_1,
                     &self.token_mint_0,
+                    new_balance_y - pool.reserve_1,
+                    pool.reserve_0 - new_balance_x,
                 )
             };
 
+            // Update pool reserves
+            pool.reserve_0 = new_balance_x;
+            pool.reserve_1 = new_balance_y;
+
+            // Perform token transfers
             transfer_checked(
                 CpiContext::new(
                     self.token_program.to_account_info(),
@@ -102,7 +96,7 @@ impl<'info> ConfidentialSwap<'info> {
                         mint: from_mint.to_account_info(),
                     },
                 ),
-                amount_in as u64,
+                amount_in,
                 from_mint.decimals,
             )?;
 
@@ -116,7 +110,7 @@ impl<'info> ConfidentialSwap<'info> {
                         mint: to_mint.to_account_info(),
                     },
                 ),
-                amount_out as u64,
+                amount_out,
                 to_mint.decimals,
             )?;
 

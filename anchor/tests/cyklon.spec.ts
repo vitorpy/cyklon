@@ -1,7 +1,11 @@
 import * as anchor from '@coral-xyz/anchor';
 import { Program } from '@coral-xyz/anchor';
 import { Cyklon } from '../target/types/cyklon';
-import { createMint, mintTo, getAccount, getOrCreateAssociatedTokenAccount, Account } from '@solana/spl-token';
+import { createMint, mintTo, getAccount, getOrCreateAssociatedTokenAccount } from '@solana/spl-token';
+import * as snarkjs from "snarkjs";
+import * as path from "path";
+import { buildBn128, utils } from "ffjavascript";
+const { unstringifyBigInts } = utils;
 
 const convertToSigner = (wallet: anchor.Wallet): anchor.web3.Signer => ({
   publicKey: wallet.publicKey,
@@ -172,25 +176,23 @@ Token Mint 1: ${tokenMint1.toBase58()}`
     const amountToMint = 1000000; // 1 token with 6 decimals
     await mintTo(provider.connection, convertToSigner(payer), tokenMint0, userTokenAccount0.address, convertToSigner(payer), amountToMint);
 
-    const privateAmountIn = 100000; // 0.1 token
-    const privateZeroForOne = 1; // Swapping token0 for token1
+    const privateAmount = 100000; // 0.1 token
+    const privateMinReceived = 99000; // 0.099 token (1% slippage)
+    const isSwapXtoY = 1; // Swapping token0 for token1
     
-    const amountIn = new anchor.BN(privateAmountIn);
     const publicInputs = {
-      publicReserve0: poolAccount.reserve0.toString(),
-      publicReserve1: poolAccount.reserve1.toString(),
-      publicAmountInMax: (2 * amountIn).toString(),
-      publicMinimumAmountOut: "0" // Set a minimum amount out if desired
+      publicBalanceX: poolAccount.reserve0.toNumber(),
+      publicBalanceY: poolAccount.reserve1.toNumber(),
+      isSwapXtoY: isSwapXtoY,
+      totalLiquidity: poolAccount.reserve0.toNumber() + poolAccount.reserve1.toNumber()
     };
 
     const privateInputs = {
-      privateAmountIn: privateAmountIn.toString(),
-      privateSlippage: "100", // 1% slippage
-      privateZeroForOne: privateZeroForOne.toString()
+      privateAmount: privateAmount,
+      privateMinReceived: privateMinReceived
     };
 
-    const { proof, publicSignals } = await generateProof(
-      'swap',
+    const { proofA, proofB, proofC, publicSignals } = await generateProof(
       privateInputs,
       publicInputs
     );
@@ -198,11 +200,13 @@ Token Mint 1: ${tokenMint1.toBase58()}`
     try {
       await program.methods
         .confidentialSwap(
-          proof,
-          publicSignals
+          Array.from(proofA),
+          Array.from(proofB),
+          Array.from(proofC),
+          publicSignals.map(signal => Array.from(signal))
         )
         .accounts({
-          // @ts-expect-error Anchor fails without it
+          // @ts-expect-error Anchor is annoying as fuck.
           pool: poolPubkey,
           userTokenAccountIn: userTokenAccount0.address,
           userTokenAccountOut: userTokenAccount1.address,
@@ -237,16 +241,50 @@ Token Mint 1: ${tokenMint1.toBase58()}`
 });
 
 async function generateProof(
-  circuit: string,
   privateInputs: any,
   publicInputs: any
-): Promise<{ proof: Buffer; publicSignals: anchor.BN[] }> {
+): Promise<{ proofA: Uint8Array, proofB: Uint8Array, proofC: Uint8Array, publicSignals: Uint8Array[] }> {
   console.log("Generating proof for inputs:", { privateInputs, publicInputs });
-  
-  const proof = Buffer.from("simulated_proof_data");
-  const publicSignals = Object.values(publicInputs).map(
-    (value) => new anchor.BN(value)
-  );
 
-  return { proof, publicSignals };
+  const wasmPath = path.join(__dirname, "../../swap_js", "swap.wasm");
+  const zkeyPath = path.join(__dirname, "../../", "swap_final.zkey");
+
+  const input = {
+    privateAmount: privateInputs.privateAmount.toString(),
+    privateMinReceived: privateInputs.privateMinReceived.toString(),
+    publicBalanceX: publicInputs.publicBalanceX.toString(),
+    publicBalanceY: publicInputs.publicBalanceY.toString(),
+    isSwapXtoY: publicInputs.isSwapXtoY.toString(),
+    totalLiquidity: publicInputs.totalLiquidity.toString()
+  };
+
+  const { proof, publicSignals } = await snarkjs.groth16.fullProve(input, wasmPath, zkeyPath);
+
+  const curve = await buildBn128();
+  const proofProc = unstringifyBigInts(proof);
+  const publicSignalsProc = unstringifyBigInts(publicSignals);
+
+  const proofA = curve.G1.toUncompressed(curve.G1.fromObject(proofProc.pi_a));
+  const proofB = curve.G2.toUncompressed(curve.G2.fromObject(proofProc.pi_b));
+  const proofC = curve.G1.toUncompressed(curve.G1.fromObject(proofProc.pi_c));
+
+  // Create two 32-byte arrays for public signals
+  const formattedPublicSignals = [
+    new Uint8Array(32),
+    new Uint8Array(32)
+  ];
+
+  // Fill the last 8 bytes of each public signal with the actual values
+  const newBalanceX = new anchor.BN(publicSignalsProc[0]).toArray('be', 8);
+  const newBalanceY = new anchor.BN(publicSignalsProc[1]).toArray('be', 8);
+
+  formattedPublicSignals[0].set(newBalanceX, 24);
+  formattedPublicSignals[1].set(newBalanceY, 24);
+
+  return { 
+    proofA: new Uint8Array(proofA.slice(0, 64)), 
+    proofB: new Uint8Array(proofB), 
+    proofC: new Uint8Array(proofC.slice(0, 64)), 
+    publicSignals: formattedPublicSignals 
+  };
 }
