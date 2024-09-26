@@ -238,43 +238,6 @@ Token Mint 1: ${tokenMint1.toBase58()}`
       throw error;
     }
   }, 10000000);
-
-  it('should generate a valid proof', async () => {
-    const wasmPath = path.join(__dirname, "../../swap_js", "swap.wasm");
-    const zkeyPath = path.join(__dirname, "../../", "swap_final.zkey");
-
-    // Generate proof
-    const input = {
-      privateAmount: 100000,  // Example value
-      privateMinReceived: 99000,  // Example value
-      publicBalanceX: 1000000,  // Example value
-      publicBalanceY: 2000000,  // Example value
-      isSwapXtoY: 1,  // Swapping X to Y
-      totalLiquidity: 3000000  // Example value, should be publicBalanceX + publicBalanceY
-    };
-    const { proof, publicSignals } = await snarkjs.groth16.fullProve(input, wasmPath, zkeyPath);
-
-    console.log("Public Signals:", publicSignals);
-
-    const curve = await buildBn128();
-    const proofProc = unstringifyBigInts(proof);
-
-    // Format proof
-    const pi_a = formatG1(curve, proofProc.pi_a);
-    const pi_b = formatG2(curve, proofProc.pi_b);
-    const pi_c = formatG1(curve, proofProc.pi_c);
-
-    console.log("Proof A:", pi_a);
-    console.log("Proof B:", pi_b);
-    console.log("Proof C:", pi_c);
-
-    // Format public inputs
-    const publicInputs = publicSignals.map(signal => formatPublicInput(BigInt(signal)));
-    console.log("Formatted Public Inputs:", publicInputs);
-
-    // Here you would typically send these values to your Solana program
-    // For now, we'll just log them and use them in the Rust test
-  });
 });
 
 async function generateProof(
@@ -324,28 +287,4 @@ async function generateProof(
     proofC: new Uint8Array(proofC.slice(0, 64)), 
     publicSignals: formattedPublicSignals 
   };
-}
-
-function formatG1(curve, point) {
-  const p = curve.G1.fromObject(point);
-  const buff = new Uint8Array(64);
-  curve.G1.toRprLe(buff, 0, p); // Use little-endian representation
-  return Array.from(buff);
-}
-
-function formatG2(curve, point) {
-  const p = curve.G2.fromObject(point);
-  const buff = new Uint8Array(128);
-  curve.G2.toRprLe(buff, 0, p); // Use little-endian representation
-  return Array.from(buff);
-}
-
-function formatPublicInput(input: bigint): number[] {
-  const buffer = new ArrayBuffer(32);
-  const view = new DataView(buffer);
-  view.setBigUint64(0, input, true); // true for little-endian
-  view.setBigUint64(8, 0n, true);
-  view.setBigUint64(16, 0n, true);
-  view.setBigUint64(24, 0n, true);
-  return Array.from(new Uint8Array(buffer));
 }
