@@ -25,7 +25,7 @@ Further information can be found in the [website](https://vitorpy.notion.site/Cy
 
 The `anchor` directory contains the Solana program written in Rust using the Anchor framework.
 
-#### Key Commands
+#### Key Commands - Anchor
 
 - Sync program ID: `npm run anchor keys sync`
 - Build the program: `npm run anchor-build`
@@ -37,7 +37,7 @@ The `anchor` directory contains the Solana program written in Rust using the Anc
 
 The `web` directory contains a React app that interacts with the Solana program using the Anchor-generated client.
 
-#### Key Commands
+#### Key Commands - Web
 
 - Start the web app: `npm run dev`
 - Build the web app: `npm run build`

@@ -9,19 +9,21 @@ import { Slider } from "@/components/solana-swapper/ui/slider"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/solana-swapper/ui/command"
 import Image from 'next/image'
 import { useConfidentialSwap } from '@/lib/cyklon-swap'
+import { PublicKey } from '@solana/web3.js'
 
 interface Token {
   symbol: string;
   name: string;
   image: string;
+  address: string;
 }
 
 const tokens: Token[] = [
-  { symbol: 'SOL', name: 'Solana', image: '/images/token-icons/solana.webp' },
-  { symbol: 'USDC', name: 'USD Coin', image: '/images/token-icons/usdc.webp' },
-  { symbol: 'RAY', name: 'Raydium', image: '/images/token-icons/PSigc4ie_400x400.webp' },
-  { symbol: 'SRM', name: 'Serum', image: '/images/token-icons/serum-logo.webp' },
-  { symbol: 'PYUSD', name: 'PayPal USD', image: '/images/token-icons/PYUSD_Logo_(2).webp' },
+  { symbol: 'SOL', name: 'Solana', image: '/images/token-icons/solana.webp', address: '...' },
+  { symbol: 'USDC', name: 'USD Coin', image: '/images/token-icons/usdc.webp', address: '...' },
+  { symbol: 'RAY', name: 'Raydium', image: '/images/token-icons/PSigc4ie_400x400.webp', address: '...' },
+  { symbol: 'SRM', name: 'Serum', image: '/images/token-icons/serum-logo.webp', address: '...' },
+  { symbol: 'PYUSD', name: 'PayPal USD', image: '/images/token-icons/PYUSD_Logo_(2).webp', address: '...' },
 ]
 
 export function SolanaSwapComponent() {
@@ -33,6 +35,7 @@ export function SolanaSwapComponent() {
   const [showSlippage, setShowSlippage] = useState<boolean>(false)
   const [isSwapping, setIsSwapping] = useState<boolean>(false)
   const [swapError, setSwapError] = useState<string | null>(null)
+  const [minReceived, setMinReceived] = useState<number>(0)
 
   const confidentialSwap = useConfidentialSwap()
 
@@ -45,17 +48,20 @@ export function SolanaSwapComponent() {
 
   const handleSourceAmountChange = (value: string) => {
     setSourceAmount(value)
-    // Mock calculation, replace with actual swap calculation
     const numValue = parseFloat(value)
     if (!isNaN(numValue)) {
-      setDestAmount((numValue * 0.98).toFixed(2))
+      const estimatedDestAmount = numValue * 0.98 // Mock calculation
+      setDestAmount(estimatedDestAmount.toFixed(2))
+      setMinReceived(estimatedDestAmount * (1 - slippage[0] / 100))
     } else {
       setDestAmount('')
+      setMinReceived(0)
     }
   }
 
   useEffect(() => {
     handleSourceAmountChange(sourceAmount)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sourceAmount, sourceToken, destToken])
 
   const isValidPool = (sourceToken.symbol === 'PYUSD' && destToken.symbol === 'SOL') ||
@@ -65,7 +71,14 @@ export function SolanaSwapComponent() {
     setIsSwapping(true)
     setSwapError(null)
     try {
-      const result = await confidentialSwap(sourceToken.symbol, destToken.symbol, parseFloat(sourceAmount))
+      const sourceTokenPublicKey = new PublicKey(sourceToken.address)
+      const destTokenPublicKey = new PublicKey(destToken.address)
+      const result = await confidentialSwap(
+        sourceTokenPublicKey,
+        destTokenPublicKey,
+        parseFloat(sourceAmount),
+        minReceived
+      )
       if (result.success) {
         setDestAmount(result.amount?.toString() || '')
         // Handle successful swap (e.g., show success message, update balances, etc.)
@@ -74,6 +87,7 @@ export function SolanaSwapComponent() {
       }
     } catch (error) {
       setSwapError('An unexpected error occurred')
+      console.error(error)
     } finally {
       setIsSwapping(false)
     }

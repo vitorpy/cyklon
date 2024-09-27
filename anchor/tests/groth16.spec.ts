@@ -4,7 +4,7 @@ import { buildBn128, utils } from "ffjavascript";
 import * as fs from 'fs';
 import * as os from 'os';
 
-const { unstringifyBigInts } = utils;
+const { unstringifyBigInts, leInt2Buff } = utils;
 
 describe('ZKConstantSumAMM Verifier', () => {
   it('should generate a valid proof', async () => {
@@ -69,9 +69,5 @@ function formatG2(curve, point) {
 }
 
 function formatPublicInput(input: bigint): number[] {
-  return Array.from(to32ByteBuffer(input));
-}
-
-function to32ByteBuffer(bigInt: bigint): Uint8Array {
-  return new Uint8Array(Buffer.from(bigInt.toString(16).padStart(64, '0'), 'hex'));
+  return Array.from(leInt2Buff(input, 32));
 }
