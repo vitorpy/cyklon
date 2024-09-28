@@ -4,8 +4,7 @@ import './ui-layout.css'; // Add this line to import the new CSS file
 
 import { WalletButton } from '../solana/solana-provider';
 import * as React from 'react';
-import { ReactNode, Suspense, useEffect, useRef } from 'react';
-import Image from 'next/image';
+import { ReactNode, Suspense } from 'react';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -28,7 +27,7 @@ export function UiLayout({
   const pathname = usePathname();
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden">
       <div className="navbar bg-base-300 text-neutral-content flex-col md:flex-row space-y-2 md:space-y-0">
         <div className="flex-1">
           <Link className="btn btn-ghost normal-case text-xl" href="/">
@@ -55,118 +54,17 @@ export function UiLayout({
       <ClusterChecker>
         <AccountChecker />
       </ClusterChecker>
-      <div className="flex-grow flex bg-white">
-        <div className="w-1/3 overflow-y-auto px-4">
-          <Suspense
-            fallback={
-              <div className="text-center my-32">
-                <span className="loading loading-spinner loading-lg"></span>
-              </div>
-            }
-          >
-            {children}
-          </Suspense>
-          <Toaster position="bottom-right" />
-        </div>
-        <div className="w-2/3 relative">
-          <Image
-            src="/images/background.jpg"
-            alt="Background"
-            layout="fill"
-            objectFit="cover"
-          />
-        </div>
-      </div>
-      <footer className="footer footer-center p-4 bg-base-300 text-white">
-        <aside>
-          <p>
-            <a href="https://blackpool.capital">Blackpool Capital</a>
-          </p>
-        </aside>
-      </footer>
-    </div>
-  );
-}
-
-export function AppModal({
-  children,
-  title,
-  hide,
-  show,
-  submit,
-  submitDisabled,
-  submitLabel,
-}: {
-  children: ReactNode;
-  title: string;
-  hide: () => void;
-  show: boolean;
-  submit?: () => void;
-  submitDisabled?: boolean;
-  submitLabel?: string;
-}) {
-  const dialogRef = useRef<HTMLDialogElement | null>(null);
-
-  useEffect(() => {
-    if (!dialogRef.current) return;
-    if (show) {
-      dialogRef.current.showModal();
-    } else {
-      dialogRef.current.close();
-    }
-  }, [show, dialogRef]);
-
-  return (
-    <dialog className="modal" ref={dialogRef}>
-      <div className="modal-box space-y-5">
-        <h3 className="font-base text-lg">{title}</h3>
-        {children}
-        <div className="modal-action">
-          <div className="join space-x-2">
-            {submit ? (
-              <button
-                className="btn btn-xs lg:btn-md btn-primary"
-                onClick={submit}
-                disabled={submitDisabled}
-              >
-                {submitLabel || 'Save'}
-              </button>
-            ) : null}
-            <button onClick={hide} className="btn">
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </dialog>
-  );
-}
-
-export function AppHero({
-  children,
-  title,
-  subtitle,
-}: {
-  children?: ReactNode;
-  title: ReactNode;
-  subtitle: ReactNode;
-}) {
-  return (
-    <div className="hero py-[64px]">
-      <div className="hero-content text-center">
-        <div className="max-w-2xl">
-          {typeof title === 'string' ? (
-            <h1 className="text-5xl font-base text-black">{title}</h1>
-          ) : (
-            title
-          )}
-          {typeof subtitle === 'string' ? (
-            <p className="py-6 font-light text-black">{subtitle}</p>
-          ) : (
-            subtitle
-          )}
+      <div className="flex-grow flex bg-white overflow-auto">
+        <Suspense
+          fallback={
+            <div className="text-center my-32">
+              <span className="loading loading-spinner loading-lg"></span>
+            </div>
+          }
+        >
           {children}
-        </div>
+        </Suspense>
+        <Toaster position="bottom-right" />
       </div>
     </div>
   );

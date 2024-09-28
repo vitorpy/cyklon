@@ -47,3 +47,4 @@ anchor/target/.rustc_info.json
 test-ledger
 .yarn
 .nx-cache/
+.env.local

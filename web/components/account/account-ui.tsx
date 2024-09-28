@@ -5,7 +5,8 @@ import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 import { IconRefresh } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
-import { AppModal, ellipsify } from '../ui/ui-layout';
+import { Modal } from '../ui/modal';
+import { ellipsify } from '../ui/ui-layout';
 import { useCluster } from '../cluster/cluster-data-access';
 import { ExplorerLink } from '../cluster/cluster-ui';
 import {
@@ -333,10 +334,10 @@ function ModalReceive({
   address: PublicKey;
 }) {
   return (
-    <AppModal title="Receive" hide={hide} show={show}>
+    <Modal title="Receive" hide={hide} show={show}>
       <p>Receive assets by sending them to your public key:</p>
       <code>{address.toString()}</code>
-    </AppModal>
+    </Modal>
   );
 }
 
@@ -353,7 +354,7 @@ function ModalAirdrop({
   const [amount, setAmount] = useState('2');
 
   return (
-    <AppModal
+    <Modal
       hide={hide}
       show={show}
       title="Airdrop"
@@ -371,7 +372,7 @@ function ModalAirdrop({
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
       />
-    </AppModal>
+    </Modal>
   );
 }
 
@@ -394,7 +395,7 @@ function ModalSend({
   }
 
   return (
-    <AppModal
+    <Modal
       hide={hide}
       show={show}
       title="Send"
@@ -427,6 +428,6 @@ function ModalSend({
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
       />
-    </AppModal>
+    </Modal>
   );
 }

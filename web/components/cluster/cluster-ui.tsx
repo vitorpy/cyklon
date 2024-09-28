@@ -4,7 +4,7 @@ import { useConnection } from '@solana/wallet-adapter-react';
 import { IconTrash } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { ReactNode, useState } from 'react';
-import { AppModal } from '../ui/ui-layout';
+import { Modal } from '../ui/modal';
 import { ClusterNetwork, useCluster } from './cluster-data-access';
 import { Connection } from '@solana/web3.js';
 
@@ -104,7 +104,7 @@ export function ClusterUiModal({
   const [endpoint, setEndpoint] = useState('');
 
   return (
-    <AppModal
+    <Modal
       title={'Add Cluster'}
       hide={hideModal}
       show={show}
@@ -147,7 +147,7 @@ export function ClusterUiModal({
         <option value={ClusterNetwork.Testnet}>Testnet</option>
         <option value={ClusterNetwork.Mainnet}>Mainnet</option>
       </select>
-    </AppModal>
+    </Modal>
   );
 }
 
