@@ -42,7 +42,7 @@ const NewsletterInput: React.FC = () => {
                     type="submit"
                     className="px-4 py-2 text-white rounded-md swap-button-style focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                    <span className="text-black">Subscribe</span>
+                    <span className="text-black text-primary-content text-sm">Subscribe</span>
                 </button>
             </form>
             {message && <p className="mt-2 text-sm">{message}</p>}
