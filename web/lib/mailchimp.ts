@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-// Replace these with your actual Brevo API key and list ID
 const API_KEY = process.env.NEXT_PUBLIC_BREVO_API_KEY;
 const LIST_ID = '2';
 const API_SERVER = 'https://api.brevo.com/v3';
@@ -28,7 +27,7 @@ export async function subscribeToNewsletter(data: SubscribeData): Promise<boolea
         smsBlacklisted: false,
         includeListIds: [parseInt(LIST_ID)],
         templateId: 1,
-        redirectionUrl: 'https://blackpool.capital/',
+        redirectionUrl: 'https://blackpool.capital/newsletter',
       },
       {
         headers: {
