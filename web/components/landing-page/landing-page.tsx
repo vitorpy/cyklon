@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from '../ui/header';
 import { SolanaSwapComponent } from '../solana-swapper/solana-swap';
 import Image from 'next/image';
@@ -87,6 +87,33 @@ export default function LandingPage() {
       return (prev + 1) % panels.length;
     });
   };
+
+  useEffect(() => {
+    const handleWheelScroll = (e: WheelEvent) => {
+      if (e.deltaY > 0) {
+        handleScroll('down');
+      } else {
+        handleScroll('up');
+      }
+    };
+
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowUp') {
+        handleScroll('up');
+      } else if (e.key === 'ArrowDown') {
+        handleScroll('down');
+      }
+    };
+
+    window.addEventListener('wheel', handleWheelScroll);
+    window.addEventListener('keydown', handleKeyPress);
+
+    return () => {
+      window.removeEventListener('wheel', handleWheelScroll);
+      window.removeEventListener('keydown', handleKeyPress);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="relative w-full h-full overflow-hidden">
