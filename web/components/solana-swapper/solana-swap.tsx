@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { ChevronDown, ChevronUp, ArrowUpDown } from 'lucide-react'
-import { Input } from "@/components/solana-swapper/ui/input"
-import { Button } from "@/components/solana-swapper/ui/button"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/solana-swapper/ui/popover"
-import { Slider } from "@/components/solana-swapper/ui/slider"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/solana-swapper/ui/command"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Slider } from "@/components/ui/slider"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import Image from 'next/image'
 import { useConfidentialSwap } from '@/lib/cyklon-swap'
 import { PublicKey } from '@solana/web3.js'

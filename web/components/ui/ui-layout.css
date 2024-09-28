@@ -1,7 +1,35 @@
 :root {
   --site-title-font-font-size-value: 1.5;
+  --swap-button-bg-color: #a1a1aa;
+  --swap-button-hover-bg-color: #71717a;
+  --second-panel-bg-color: #fafafa;
+  --third-panel-bg-color: #dcdcdc;
 }
 
 .header-title-text {
   font-size: calc((var(--site-title-font-font-size-value) - 1) * 1.2vw + 1rem);
+}
+
+.swap-button-style {
+  background-color: var(--swap-button-bg-color);
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+.swap-button-style:hover:not(:disabled) {
+  background-color: var(--swap-button-hover-bg-color);
+}
+
+.swap-button-style:disabled {
+  background-color: #71717a;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.second-panel-style {
+  background-color: var(--second-panel-bg-color);
+}
+
+.third-panel-style {
+  background-color: var(--third-panel-bg-color);
 }
