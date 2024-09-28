@@ -1,20 +1,53 @@
 import React, { useState } from 'react';
+import { submitContactForm } from '../../lib/mailchimp';
 
 const ContactForm: React.FC = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
     const [subscribeNewsletter, setSubscribeNewsletter] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitStatus, setSubmitStatus] = useState<'success' | 'error' | null>(null);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const validateEmail = (email: string) => {
+        const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return re.test(email);
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // TODO: Implement form submission logic
-        console.log('Form submitted:', { name, email, message, subscribeNewsletter });
-        // Reset the form fields after submission
-        setName('');
-        setEmail('');
-        setMessage('');
-        setSubscribeNewsletter(false);
+        
+        if (!name || !email || !message) {
+            alert('Please fill in all fields');
+            return;
+        }
+
+        if (!validateEmail(email)) {
+            alert('Please enter a valid email address');
+            return;
+        }
+
+        setIsSubmitting(true);
+        setSubmitStatus(null);
+
+        try {
+            const success = await submitContactForm({ name, email, message, subscribeNewsletter });
+            if (success) {
+                setSubmitStatus('success');
+                // Reset the form fields after successful submission
+                setName('');
+                setEmail('');
+                setMessage('');
+                setSubscribeNewsletter(false);
+            } else {
+                setSubmitStatus('error');
+            }
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            setSubmitStatus('error');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -67,11 +100,21 @@ const ContactForm: React.FC = () => {
             <div>
                 <button
                     type="submit"
-                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-black swap-button-style focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    disabled={isSubmitting}
+                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-black swap-button-style focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                 >
-                    <span className="text-black">Send Message</span>
+                    <span className="text-black">
+                        {isSubmitting ? 'Sending...' : 'Send Message'}
+                    </span>
                 </button>
             </div>
+            
+            {submitStatus === 'success' && (
+                <p className="text-green-600">Message sent successfully!</p>
+            )}
+            {submitStatus === 'error' && (
+                <p className="text-red-600">Error sending message. Please try again.</p>
+            )}
         </form>
     );
 };

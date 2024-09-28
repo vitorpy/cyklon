@@ -21,11 +21,14 @@ interface ContactFormData {
 export async function subscribeToNewsletter(data: SubscribeData): Promise<boolean> {
   try {
     const response = await axios.post(
-      `${API_SERVER}/contacts`,
+      `${API_SERVER}/contacts/doubleOptinConfirmation`,
       {
         email: data.email,
-        listIds: [parseInt(LIST_ID)],
-        updateEnabled: true,
+        emailBlacklisted: false,
+        smsBlacklisted: false,
+        includeListIds: [parseInt(LIST_ID)],
+        templateId: 1,
+        redirectionUrl: 'https://blackpool.capital/',
       },
       {
         headers: {
