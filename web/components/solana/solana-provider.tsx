@@ -11,8 +11,9 @@ import {
   WalletProvider,
 } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
-import { ReactNode, useCallback, useMemo } from 'react';
+import { ReactNode, useCallback, useMemo, useEffect } from 'react';
 import { useCluster } from '../cluster/cluster-data-access';
+import posthog from 'posthog-js'; // Add this import
 
 require('@solana/wallet-adapter-react-ui/styles.css');
 
@@ -25,9 +26,22 @@ export const WalletButton = dynamic(
 export function SolanaProvider({ children }: { children: ReactNode }) {
   const { cluster } = useCluster();
   const endpoint = useMemo(() => cluster.endpoint, [cluster]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { wallet, publicKey } = useWallet(); // Add publicKey here
+
   const onError = useCallback((error: WalletError) => {
     console.error(error);
   }, []);
+
+  useEffect(() => {
+    if (publicKey) {
+      // Wallet connected event
+      posthog.capture('wallet_connected', { wallet_address: publicKey.toString() });
+      
+      // Identify user session with wallet address
+      posthog.identify(publicKey.toString());
+    }
+  }, [publicKey]);
 
   return (
     <ConnectionProvider endpoint={endpoint}>
