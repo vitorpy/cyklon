@@ -13,13 +13,13 @@ export default function LandingPage() {
   const panels = [
     // Panel 1: Current content
     <div key={0} className="flex w-full h-full">
-      <div className="w-1/3 overflow-y-auto px-4">
+      <div className="w-full sm:w-1/3 overflow-y-auto px-4">
         <Header title="Secure. Private. Efficient." subtitle="Blackpool: Advanced privacy-preserving trading platform powered by Solana technology." />
         <div className="max-w-xl mx-auto py-6 sm:px-6 lg:px-9 mt-[50px]">
           <SolanaSwapComponent />
         </div>
       </div>
-      <div className="w-2/3 relative">
+      <div className="hidden sm:block sm:w-2/3 relative">
         <Image
           src="/images/background.jpg"
           alt="Background"
@@ -30,7 +30,7 @@ export default function LandingPage() {
     </div>,
     // Panel 2: New content
     <div key={1} className="flex w-full h-full second-panel-style">
-      <div className='w-1/2 overflow-y-auto px-4 relative'>
+      <div className='hidden sm:block sm:w-1/2 overflow-y-auto px-4 relative'>
         <Image
           src="/images/newsletter.jpg"
           alt="Newsletter Background"
@@ -38,26 +38,26 @@ export default function LandingPage() {
           objectFit="contain"
         />
       </div>
-      <div className='w-1/2 relative p-4 flex flex-col items-center justify-center text-black'>
+      <div className='w-full sm:w-1/2 relative p-4 flex flex-col items-center justify-center text-black'>
         <Header title="Newsletter" subtitle="Sign up with your email address to receive news and updates" />
         <NewsletterInput />
       </div>
     </div>,
     // Panel 3: New content
-    <div key={2} className="w-full h-full third-panel-style flex text-black">
-      <div className='w-1/2 relative p-4 flex flex-col items-center justify-center'>
+    <div key={2} className="w-full h-full third-panel-style flex flex-col sm:flex-row text-black">
+      <div className='w-full sm:w-1/2 relative p-4 flex flex-col items-center justify-center'>
         <Header title="Contact Us" subtitle="Have questions or feedback? Contact us below" />
         <ContactForm />
       </div>
-      <div className='w-1/2 relative p-4 flex flex-col items-center justify-center'>
+      <div className='w-full sm:w-1/2 relative p-4 flex flex-col items-center justify-center'>
         <div className='flex flex-col items-center justify-center w-full'>
           <Header title="Jump in the pool" />
         </div>
       </div>
     </div>,
     // Panel 4: Updated content
-    <div key={3} className="w-full h-full bg-black flex text-white">
-      <div className='w-3/5 relative'>
+    <div key={3} className="w-full h-full bg-black flex flex-col-reverse sm:flex-row text-white">
+      <div className='hidden sm:block sm:w-3/5 relative'>
         <Image
           src="/images/about.jpeg"
           alt="Background"
@@ -65,7 +65,7 @@ export default function LandingPage() {
           objectFit="contain"
         />
       </div>
-      <div className='w-2/5 relative p-4 flex flex-col items-center justify-center'>
+      <div className='w-full sm:w-2/5 relative p-4 flex flex-col items-center justify-center'>
         <div className='flex flex-col items-center justify-center w-full'>
           <Header title="About Us" subtitle="Blackpool is a privacy-preserving AMM for Solana." isWhite={true} />
           <div className="flex space-x-6">
