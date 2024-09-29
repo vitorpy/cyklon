@@ -36,6 +36,18 @@
             ],
             "preLaunchTask": "start-debugger",
             "processCreateCommands": ["gdb-remote 127.0.0.1:9001"],
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "cargo test",
+            "cargo": {
+                "args": ["test", "--manifest-path", "${workspaceFolder}/anchor/programs/cyklon/Cargo.toml"],
+            },
+            "cwd": "${workspaceFolder}/anchor/programs/cyklon",
+            "env": {
+                "RUST_BACKTRACE": "1"
+            },
         }
     ]
 }

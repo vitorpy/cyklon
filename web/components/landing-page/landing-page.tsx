@@ -75,6 +75,9 @@ export default function LandingPage() {
             <a href="https://github.com/blackpooldao" target="_blank" rel="noopener noreferrer" className="text-3xl text-white hover:text-gray-600">
               <i className="fab fa-github"></i>
             </a>
+            <a href="https://t.me/blackpoolcapital" target="_blank" rel="noopener noreferrer" className="text-3xl text-white hover:text-blue-400">
+              <i className="fab fa-telegram"></i>
+            </a>
           </div>
         </div>
       </div>
