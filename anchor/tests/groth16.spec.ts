@@ -48,9 +48,6 @@ describe('ZKConstantSumAMM Verifier', () => {
     fs.writeFileSync(tempFilePath, JSON.stringify(outputData, null, 2));
 
     console.log(`Proof and public inputs written to: ${tempFilePath}`);
-
-    // Here you would typically send these values to your Solana program
-    // For now, we've written them to a temporary file
   });
 });
 
