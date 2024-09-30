@@ -38,8 +38,8 @@ describe("ZK Constant Sum AMM Swap", () => {
     const input = {
       privateAmount: 100000,
       privateMinReceived: 99000,
-      publicBalanceX: 1000000,
-      publicBalanceY: 2000000,
+      publicBalanceX: 1100000,  // Changed from 1000000
+      publicBalanceY: 1900000,  // Changed from 2000000
       isSwapXtoY: 1,
       totalLiquidity: 3000000
     };
@@ -53,8 +53,8 @@ describe("ZK Constant Sum AMM Swap", () => {
     const newBalanceY = circuit.symbols["main.newBalanceY"];
     const amountReceived = circuit.symbols["main.amountReceived"];
 
-    expect(witness[newBalanceX.varIdx]).toBe(1100000n); // newBalanceX
-    expect(witness[newBalanceY.varIdx]).toBe(1900000n); // newBalanceY
+    expect(witness[newBalanceX.varIdx]).toBe(1200000n); // newBalanceX
+    expect(witness[newBalanceY.varIdx]).toBe(1800000n); // newBalanceY
     expect(witness[amountReceived.varIdx]).toBe(100000n); // amountReceived
   });
 });

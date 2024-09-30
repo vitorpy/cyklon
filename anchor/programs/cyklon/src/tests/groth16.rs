@@ -7,7 +7,7 @@ mod tests {
     use std::io::Read;
     use std::convert::TryInto;
 
-    fn read_proof_from_json() -> (Vec<u8>, Vec<[u8; 32]>) {
+    fn read_proof_from_json() -> ([u8; 64], [u8; 128], [u8; 64], [[u8; 32]; 3]) {
         let file_path = "./src/tests/zk_proof_output.json";
         
         // Check if the file exists
@@ -21,52 +21,65 @@ mod tests {
         
         let json: Value = serde_json::from_str(&contents).expect("Failed to parse JSON");
         
-        // Extract and concatenate proof parts
-        let proof_a: Vec<u8> = json["pi_a"].as_array().unwrap()
-            .iter().flat_map(|v| v.as_u64().unwrap().to_le_bytes().to_vec()).collect();
-        let proof_b: Vec<u8> = json["pi_b"].as_array().unwrap()
-            .iter().flat_map(|v| v.as_u64().unwrap().to_le_bytes().to_vec()).collect();
-        let proof_c: Vec<u8> = json["pi_c"].as_array().unwrap()
-            .iter().flat_map(|v| v.as_u64().unwrap().to_le_bytes().to_vec()).collect();
+        // Print the keys of the JSON object
+        println!("JSON keys:");
+        if let Some(obj) = json.as_object() {
+            for key in obj.keys() {
+                println!("- {}", key);
+            }
+        } else {
+            println!("JSON is not an object");
+        }
         
-        let proof = [proof_a, proof_b, proof_c].concat();
+        // Extract proof parts
+        let proof_a: [u8; 64] = json["pi_a"].as_array().expect("pi_a is not an array")
+            .iter().map(|v| v.as_u64().expect("pi_a value is not a u64") as u8)
+            .collect::<Vec<u8>>().try_into().expect("Failed to convert pi_a to [u8; 64]");
         
+        let proof_b: [u8; 128] = json["pi_b"].as_array().expect("pi_b is not an array")
+            .iter().map(|v| v.as_u64().expect("pi_b value is not a u64") as u8)
+            .collect::<Vec<u8>>().try_into().expect("Failed to convert pi_b to [u8; 128]");
+        
+        let proof_c: [u8; 64] = json["pi_c"].as_array().expect("pi_c is not an array")
+            .iter().map(|v| v.as_u64().expect("pi_c value is not a u64") as u8)
+            .collect::<Vec<u8>>().try_into().expect("Failed to convert pi_c to [u8; 64]");
+
         // Extract public inputs
-        let public_inputs: Vec<[u8; 32]> = json["public_inputs"].as_array().unwrap()
+        let public_inputs: [[u8; 32]; 3] = json["publicInputs"].as_array()
+            .expect("publicInputs is not an array")
             .iter()
             .map(|v| {
-                let mut input = [0u8; 32];
-                let bytes = v.as_str().unwrap().parse::<u64>().unwrap().to_le_bytes();
-                input[..8].copy_from_slice(&bytes);
-                input
+                let input = v.as_array().expect("public input is not an array");
+                let mut result = [0u8; 32];
+                for i in 0..32 {
+                    result[i] = input[i].as_u64().expect("public input value is not a u64") as u8;
+                }
+                result
             })
-            .collect();
-        
-        (proof, public_inputs)
+            .collect::<Vec<[u8; 32]>>()
+            .try_into()
+            .expect("Failed to convert public inputs to [[u8; 32]; 3]");
+
+        (proof_a, proof_b, proof_c, public_inputs)
     }
 
     #[test]
     fn zk_constant_sum_amm_proof_verification_should_succeed() {
-        let (proof, public_inputs) = read_proof_from_json();
+        let (proof_a, proof_b, proof_c, public_inputs) = read_proof_from_json();
+        
+        println!("Public inputs length: {}", public_inputs.len());
 
-        let proof_a: [u8; 64] = proof[0..64].try_into().expect("Failed to convert proof_a");
-        let proof_b: [u8; 128] = proof[64..192].try_into().expect("Failed to convert proof_b");
-        let proof_c: [u8; 64] = proof[192..256].try_into().expect("Failed to convert proof_c");
+        let public_inputs_array: [[u8; 32]; 3] = public_inputs.try_into()
+            .expect("Failed to convert public inputs to array");
 
-        // Convert Vec<[u8; 32]> to [[u8; 32]; 3]
-        let public_inputs_array: [[u8; 32]; 3] = public_inputs.try_into().expect("Failed to convert public_inputs");
+        println!("Proof A: {:?}", proof_a);
+        println!("Proof B: {:?}", proof_b);
+        println!("Proof C: {:?}", proof_c);
+        println!("Public Inputs: {:?}", public_inputs_array);
+        println!("Verifying Key: {:?}", VERIFYINGKEY);
 
-        let mut verifier = match Groth16Verifier::new(&proof_a, &proof_b, &proof_c, &public_inputs_array, &VERIFYINGKEY) {
-            Ok(v) => v,
-            Err(e) => panic!("Failed to create verifier: {:?}", e),
-        };
+        let mut verifier = Groth16Verifier::new(&proof_a, &proof_b, &proof_c, &public_inputs_array, &VERIFYINGKEY).unwrap();
 
-        println!("Verifier created successfully");
-
-        match verifier.verify() {
-            Ok(true) => println!("Proof verified successfully"),
-            Ok(false) => panic!("Proof verification returned false"),
-            Err(e) => panic!("Proof verification failed with error: {:?}", e),
-        }
+        assert!(verifier.verify().unwrap(), "Proof verification failed");
     }
 }
