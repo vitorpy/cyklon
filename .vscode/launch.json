@@ -48,6 +48,24 @@
             "env": {
                 "RUST_BACKTRACE": "1"
             },
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "jest: generate valid proof",
+            "cwd": "${workspaceFolder}/anchor",
+            "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/jest",
+            "args": [
+                "--config",
+                "./jest.config.ts",
+                "./tests/groth16.spec.ts",
+                "-t",
+                "should generate a valid proof",
+                "--",
+                "--no-capture"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
         }
     ]
 }
