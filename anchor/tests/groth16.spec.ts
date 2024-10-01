@@ -44,10 +44,10 @@ describe('ZKConstantSumAMM Verifier', () => {
     const proofProc = unstringifyBigInts(proof);
 
     // Format proof
-    let pi_a = formatG1(curve, proofProc.pi_a);
-    let buf_pi_a = reverseEndianness(pi_a)
+    let buf_pi_a = g1Uncompressed(curve, proofProc.pi_a);
+    buf_pi_a = reverseEndianness(buf_pi_a)
     buf_pi_a = await negateAndSerializeG1(curve, buf_pi_a);
-    pi_a = Array.from(buf_pi_a)
+    const pi_a = Array.from(buf_pi_a)
     const pi_b = formatG2(curve, proofProc.pi_b);
     const pi_c = formatG1(curve, proofProc.pi_c);
 
@@ -202,4 +202,13 @@ async function negateAndSerializeG1(curve, reversedP1Uncompressed) {
   const proof_a = reverseEndianness(serializedNegatedP1);
 
   return proof_a;
+}
+
+function g1Uncompressed(curve, p1Raw) {
+  const p1 = curve.G1.fromObject(p1Raw);
+
+  const buff = new Uint8Array(64); // 64 bytes for G1 uncompressed
+  curve.G1.toRprUncompressed(buff, 0, p1);
+
+  return Buffer.from(buff);
 }

@@ -78,7 +78,7 @@ mod tests {
         println!("Public Inputs: {:?}", public_inputs_array);
         println!("Verifying Key: {:?}", VERIFYINGKEY);
 
-        let mut verifier = Groth16Verifier::new(&proof_a, &proof_b, &proof_c, &public_inputs_array, &VERIFYINGKEY).unwrap();
+        let mut verifier = Groth16Verifier::new(&proof_a, &proof_b, &proof_c, &public_inputs, &VERIFYINGKEY).unwrap();
 
         assert!(verifier.verify().unwrap(), "Proof verification failed");
     }
