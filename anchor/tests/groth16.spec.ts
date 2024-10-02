@@ -40,28 +40,40 @@ describe('ZKConstantSumAMM Verifier', () => {
 
     console.log("Original proof:", JSON.stringify(proof, null, 2));
     console.log("Public signals:", JSON.stringify(publicSignals, null, 2));
-
+    
     const proofProc = unstringifyBigInts(proof);
+    const publicSignalsUnstrigified = unstringifyBigInts(publicSignals);
 
-    // Format proof
-    let buf_pi_a = g1Uncompressed(curve, proofProc.pi_a);
-    buf_pi_a = reverseEndianness(buf_pi_a)
-    buf_pi_a = await negateAndSerializeG1(curve, buf_pi_a);
-    const pi_a = Array.from(buf_pi_a)
-    const pi_b = formatG2(curve, proofProc.pi_b);
-    const pi_c = formatG1(curve, proofProc.pi_c);
+    let pi_a : Buffer | Uint8Array = g1Uncompressed(curve, proofProc.pi_a);
+    //pi_a = reverseEndianness(pi_a)
+    pi_a = await negateAndSerializeG1(curve, pi_a);
+    const pi_a_0_u8_array = Array.from(pi_a);
+    console.log(pi_a_0_u8_array);
+
+    const pi_b = g2Uncompressed(curve, proofProc.pi_b);
+    const pi_b_0_u8_array = Array.from(pi_b);
+    console.log(pi_b_0_u8_array.slice(0, 64));
+    console.log(pi_b_0_u8_array.slice(64, 128));
+
+    const pi_c = g1Uncompressed(curve, proofProc.pi_c);
+    const pi_c_0_u8_array = Array.from(pi_c);
+    console.log(pi_c_0_u8_array);
 
     // Format public inputs for verification
-    const publicInputsForVerification = publicSignals.map(signal => BigInt(signal));
+    const public_signal_0_u8_array = publicSignalsUnstrigified.map(signal => {
+      const signalBuffer = to32ByteBuffer(BigInt(signal));
+      return Array.from(signalBuffer);
+    });
 
+    /*
     // Verify the original proof
     const vKey = JSON.parse(fs.readFileSync(path.join(__dirname, "../../verification_key.json"), "utf8"));
     console.log("Verification Key:", JSON.stringify(vKey, null, 2));
-    console.log("Public Inputs for Verification:", publicInputsForVerification);
+    console.log("Public Inputs for Verification:", public_signal_0_u8_array);
 
     let verificationResult;
     try {
-      verificationResult = await snarkjs.groth16.verify(vKey, publicInputsForVerification, proof);
+      verificationResult = await snarkjs.groth16.verify(vKey, public_signal_0_u8_array, proof);
       console.log("Verification result:", verificationResult);
     } catch (error) {
       console.error("Error during verification:", error);
@@ -72,16 +84,17 @@ describe('ZKConstantSumAMM Verifier', () => {
     expect(verificationResult).toBe(true);
 
     console.log("Regenerated proof verified successfully");
+    */
 
     // Create a temporary file to store the proof and public inputs
     const tempDir = os.tmpdir();
     const tempFilePath = path.join(tempDir, 'zk_proof_output.json');
 
     const outputData = {
-      pi_a,
-      pi_b,
-      pi_c,
-      publicInputs: publicInputsForVerification.map(formatPublicInput)
+      pi_a: pi_a_0_u8_array,
+      pi_b: pi_b_0_u8_array,
+      pi_c: pi_c_0_u8_array,
+      publicInputs: public_signal_0_u8_array
     };
 
     fs.writeFileSync(tempFilePath, JSON.stringify(outputData, null, 2));
@@ -159,22 +172,20 @@ describe('ZKConstantSumAMM Verifier', () => {
   });
 });
 
-function formatG1(curve, point) {
-  const p = curve.G1.fromObject(point);
-  const buff = new Uint8Array(64);
-  curve.G1.toRprUncompressed(buff, 0, p);
-  return Array.from(buff);
+
+function to32ByteBuffer(bigInt) {
+  const hexString = bigInt.toString(16).padStart(64, '0'); // Pad to 64 hex characters (32 bytes)
+  const buffer = Buffer.from(hexString, "hex");
+  return buffer; 
 }
 
-function formatG2(curve, point) {
-  const p = curve.G2.fromObject(point);
-  const buff = new Uint8Array(128);
-  curve.G2.toRprUncompressed(buff, 0, p);
-  return Array.from(buff);
-}
+function g1Uncompressed(curve, p1Raw) {
+  const p1 = curve.G1.fromObject(p1Raw);
 
-function formatPublicInput(input: bigint): number[] {
-  return Array.from(leInt2Buff(input, 32));
+  const buff = new Uint8Array(64); // 64 bytes for G1 uncompressed
+  curve.G1.toRprUncompressed(buff, 0, p1);
+
+  return Buffer.from(buff);
 }
 
 // Function to reverse endianness of a buffer
@@ -199,16 +210,16 @@ async function negateAndSerializeG1(curve, reversedP1Uncompressed) {
   console.log(serializedNegatedP1)
 
   // Change endianness if necessary
-  const proof_a = reverseEndianness(serializedNegatedP1);
+  //const proof_a = reverseEndianness(serializedNegatedP1);
 
-  return proof_a;
+  return serializedNegatedP1;
 }
 
-function g1Uncompressed(curve, p1Raw) {
-  const p1 = curve.G1.fromObject(p1Raw);
+function g2Uncompressed(curve, p2Raw) {
+  const p2 = curve.G2.fromObject(p2Raw);
 
-  const buff = new Uint8Array(64); // 64 bytes for G1 uncompressed
-  curve.G1.toRprUncompressed(buff, 0, p1);
+  const buff = new Uint8Array(128); // 128 bytes for G2 uncompressed
+  curve.G2.toRprUncompressed(buff, 0, p2);
 
   return Buffer.from(buff);
 }

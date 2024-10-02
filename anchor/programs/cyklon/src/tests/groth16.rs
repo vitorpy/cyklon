@@ -67,19 +67,17 @@ mod tests {
     fn zk_constant_sum_amm_proof_verification_should_succeed() {
         let (proof_a, proof_b, proof_c, public_inputs) = read_proof_from_json();
         
-        println!("Public inputs length: {}", public_inputs.len());
+        println!("Original proof_b: {:?}", proof_b);
+        
+        let result = Groth16Verifier::new(&proof_a, &proof_b, &proof_c, &public_inputs, &VERIFYINGKEY);
 
-        let public_inputs_array: [[u8; 32]; 3] = public_inputs.try_into()
-            .expect("Failed to convert public inputs to array");
-
-        println!("Proof A: {:?}", proof_a);
-        println!("Proof B: {:?}", proof_b);
-        println!("Proof C: {:?}", proof_c);
-        println!("Public Inputs: {:?}", public_inputs_array);
-        println!("Verifying Key: {:?}", VERIFYINGKEY);
-
-        let mut verifier = Groth16Verifier::new(&proof_a, &proof_b, &proof_c, &public_inputs, &VERIFYINGKEY).unwrap();
-
-        assert!(verifier.verify().unwrap(), "Proof verification failed");
+        match result {
+            Ok(mut verifier) => {
+                let verification_result = verifier.verify();
+                println!("Verification result: {:?}", verification_result);
+                assert!(verification_result.unwrap(), "Proof verification failed");
+            },
+            Err(e) => panic!("Failed to create verifier: {:?}", e),
+        }
     }
 }
