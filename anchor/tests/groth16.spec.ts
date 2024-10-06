@@ -4,8 +4,9 @@ import { buildBn128, utils, Curve } from "ffjavascript";
 import * as fs from 'fs';
 import * as os from 'os';
 import { execSync } from 'child_process';
+import { g1Uncompressed, negateAndSerializeG1, g2Uncompressed, to32ByteBuffer } from "../src/utils";
 
-const { unstringifyBigInts, leInt2Buff } = utils;
+const { unstringifyBigInts } = utils;
 
 describe('ZKConstantSumAMM Verifier', () => {
   let curve: Curve;
@@ -171,55 +172,3 @@ describe('ZKConstantSumAMM Verifier', () => {
     fs.unlinkSync(publicPath);
   });
 });
-
-
-function to32ByteBuffer(bigInt) {
-  const hexString = bigInt.toString(16).padStart(64, '0'); // Pad to 64 hex characters (32 bytes)
-  const buffer = Buffer.from(hexString, "hex");
-  return buffer; 
-}
-
-function g1Uncompressed(curve, p1Raw) {
-  const p1 = curve.G1.fromObject(p1Raw);
-
-  const buff = new Uint8Array(64); // 64 bytes for G1 uncompressed
-  curve.G1.toRprUncompressed(buff, 0, p1);
-
-  return Buffer.from(buff);
-}
-
-// Function to reverse endianness of a buffer
-function reverseEndianness(buffer) {
-  return Buffer.from(buffer.reverse());
-}
-
-async function negateAndSerializeG1(curve, reversedP1Uncompressed) {
-  if (!reversedP1Uncompressed || !(reversedP1Uncompressed instanceof Uint8Array || Buffer.isBuffer(reversedP1Uncompressed))) {
-    console.error('Invalid input to negateAndSerializeG1:', reversedP1Uncompressed);
-    throw new Error('Invalid input to negateAndSerializeG1');
-  }
-  // Negate the G1 point
-  const p1 = curve.G1.toAffine(curve.G1.fromRprUncompressed(reversedP1Uncompressed, 0));
-  const negatedP1 = curve.G1.neg(p1);
-
-  // Serialize the negated point
-  // The serialization method depends on your specific library
-  const serializedNegatedP1 = new Uint8Array(64); // 32 bytes for x and 32 bytes for y
-  curve.G1.toRprUncompressed(serializedNegatedP1, 0, negatedP1);
-  // curve.G1.toRprUncompressed(serializedNegatedP1, 32, negatedP1.y);
-  console.log(serializedNegatedP1)
-
-  // Change endianness if necessary
-  //const proof_a = reverseEndianness(serializedNegatedP1);
-
-  return serializedNegatedP1;
-}
-
-function g2Uncompressed(curve, p2Raw) {
-  const p2 = curve.G2.fromObject(p2Raw);
-
-  const buff = new Uint8Array(128); // 128 bytes for G2 uncompressed
-  curve.G2.toRprUncompressed(buff, 0, p2);
-
-  return Buffer.from(buff);
-}

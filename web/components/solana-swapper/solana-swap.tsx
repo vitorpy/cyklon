@@ -10,6 +10,8 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import Image from 'next/image'
 import { useConfidentialSwap } from '@/lib/cyklon-swap'
 import { PublicKey } from '@solana/web3.js'
+import { useWallet } from '@solana/wallet-adapter-react'
+import { useTokenBalance } from '@/hooks/useTokenBalance'
 
 interface Token {
   symbol: string;
@@ -19,11 +21,11 @@ interface Token {
 }
 
 const tokens: Token[] = [
-  { symbol: 'SOL', name: 'Solana', image: '/images/token-icons/solana.webp', address: '...' },
+  { symbol: 'SOL', name: 'Solana', image: '/images/token-icons/solana.webp', address: 'NATIVE' },
   { symbol: 'USDC', name: 'USD Coin', image: '/images/token-icons/usdc.webp', address: '...' },
   { symbol: 'RAY', name: 'Raydium', image: '/images/token-icons/PSigc4ie_400x400.webp', address: '...' },
   { symbol: 'SRM', name: 'Serum', image: '/images/token-icons/serum-logo.webp', address: '...' },
-  { symbol: 'PYUSD', name: 'PayPal USD', image: '/images/token-icons/PYUSD_Logo_(2).webp', address: '...' },
+  { symbol: 'PYUSD', name: 'PayPal USD', image: '/images/token-icons/PYUSD_Logo_(2).webp', address: 'CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM' },
 ]
 
 export function SolanaSwapComponent() {
@@ -36,6 +38,9 @@ export function SolanaSwapComponent() {
   const [isSwapping, setIsSwapping] = useState<boolean>(false)
   const [swapError, setSwapError] = useState<string | null>(null)
   const [minReceived, setMinReceived] = useState<number>(0)
+
+  const { publicKey } = useWallet()
+  const { balance: sourceTokenBalance } = useTokenBalance(publicKey, sourceToken.address)
 
   const confidentialSwap = useConfidentialSwap()
 
@@ -98,23 +103,29 @@ export function SolanaSwapComponent() {
       <div className="w-96 p-6 rounded-lg bg-base-200 shadow-xl overflow-auto">
         <h2 className="text-2xl font-base mb-6">Swap Tokens</h2>
         <div className="space-y-4">
-          <div className="flex items-center">
-            <div className="w-2/5 pr-2">
-              <TokenSelect
-                tokens={tokens}
-                selectedToken={sourceToken}
-                onSelect={setSourceToken}
-                disabledToken={destToken}
-              />
+          <div className="flex flex-col">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-sm text-gray-400">Balance:</span>
+              <span className="text-sm">{sourceTokenBalance?.toFixed(4) || '0'} {sourceToken.symbol}</span>
             </div>
-            <div className="w-3/5">
-              <Input
-                type="number"
-                value={sourceAmount}
-                onChange={(e) => handleSourceAmountChange(e.target.value)}
-                placeholder="0.00"
-                className="w-full bg-base-300 border-base-300 text-right"
-              />
+            <div className="flex items-center">
+              <div className="w-2/5 pr-2">
+                <TokenSelect
+                  tokens={tokens}
+                  selectedToken={sourceToken}
+                  onSelect={setSourceToken}
+                  disabledToken={destToken}
+                />
+              </div>
+              <div className="w-3/5">
+                <Input
+                  type="number"
+                  value={sourceAmount}
+                  onChange={(e) => handleSourceAmountChange(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full bg-base-300 border-base-300 text-right"
+                />
+              </div>
             </div>
           </div>
           <div className="flex justify-center">
