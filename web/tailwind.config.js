@@ -13,7 +13,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Helvetica Neue', 'Arial', 'sans-serif'],
+        sans: ['var(--font-helvetica-neue)'],
+        light: ['var(--font-helvetica-neue-light)'],
       },
     },
   },

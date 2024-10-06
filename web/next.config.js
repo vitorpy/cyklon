@@ -28,7 +28,7 @@ const plugins = [
   withNx,
 ];
 
-module.exports = withSentryConfig(composePlugins(...plugins)(nextConfig),
+const config = withSentryConfig(composePlugins(...plugins)(nextConfig),
   {
     org: "blackpool-dao",
     project: "blackpooldao",
@@ -37,3 +37,10 @@ module.exports = withSentryConfig(composePlugins(...plugins)(nextConfig),
     tunnelRoute: "/monitoring-tunnel",
   }
 );
+
+module.exports = {
+  ...config,
+  experimental: {
+    instrumentationHook: process.env.NODE_ENV === 'production',
+  },
+}
