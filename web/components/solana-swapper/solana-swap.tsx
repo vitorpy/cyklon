@@ -13,7 +13,6 @@ import { PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana
 import { createAssociatedTokenAccountInstruction, createSyncNativeInstruction, NATIVE_MINT, createCloseAccountInstruction, getAssociatedTokenAddress } from '@solana/spl-token'
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { useTokenBalance } from '@/hooks/useTokenBalance'
-import * as Sentry from "@sentry/nextjs";
 
 interface Token {
   symbol: string;
@@ -148,6 +147,7 @@ export function SolanaSwapComponent() {
       console.error(error);
 
       // Sentry error reporting
+      /*
       Sentry.captureException(error, {
         tags: {
           sourceToken: sourceToken.symbol,
@@ -162,6 +162,7 @@ export function SolanaSwapComponent() {
           isValidPool,
         },
       });
+      */
     } finally {
       setIsSwapping(false);
     }

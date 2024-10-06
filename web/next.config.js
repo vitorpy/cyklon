@@ -2,7 +2,7 @@
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { composePlugins, withNx } = require('@nx/next');
-const { withSentryConfig } = require("@sentry/nextjs");
+//const { withSentryConfig } = require("@sentry/nextjs");
 
 /**
  * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
