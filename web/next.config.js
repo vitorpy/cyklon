@@ -41,6 +41,6 @@ const config = withSentryConfig(composePlugins(...plugins)(nextConfig),
 module.exports = {
   ...config,
   experimental: {
-    instrumentationHook: process.env.NODE_ENV === 'production',
+    instrumentationHook: false,
   },
 }
