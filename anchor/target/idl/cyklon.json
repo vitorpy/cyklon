@@ -187,7 +187,7 @@
                   32
                 ]
               },
-              2
+              3
             ]
           }
         }
@@ -328,6 +328,11 @@
       "code": 6006,
       "name": "MathOverflow",
       "msg": "Math overflow"
+    },
+    {
+      "code": 6007,
+      "name": "InvalidGroth16Verifier",
+      "msg": "Unable to create Groth16Verifier"
     }
   ],
   "types": [
@@ -399,6 +404,10 @@
           {
             "name": "liquidity",
             "type": "u128"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
           }
         ]
       }

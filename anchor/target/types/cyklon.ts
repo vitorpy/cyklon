@@ -193,7 +193,7 @@ export type Cyklon = {
                   32
                 ]
               },
-              2
+              3
             ]
           }
         }
@@ -334,6 +334,11 @@ export type Cyklon = {
       "code": 6006,
       "name": "mathOverflow",
       "msg": "Math overflow"
+    },
+    {
+      "code": 6007,
+      "name": "invalidGroth16Verifier",
+      "msg": "Unable to create Groth16Verifier"
     }
   ],
   "types": [
@@ -405,6 +410,10 @@ export type Cyklon = {
           {
             "name": "liquidity",
             "type": "u128"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
           }
         ]
       }

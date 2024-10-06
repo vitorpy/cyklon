@@ -8,4 +8,5 @@ pub struct Pool {
     pub reserve_0: u64,
     pub reserve_1: u64,
     pub liquidity: u128,
+    pub bump: u8,
 }

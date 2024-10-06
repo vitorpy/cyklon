@@ -6,6 +6,7 @@ import * as snarkjs from "snarkjs";
 import * as path from "path";
 import { buildBn128, utils } from "ffjavascript";
 const { unstringifyBigInts } = utils;
+// @ts-expect-error Not properly typed
 import { g1Uncompressed, negateAndSerializeG1, g2Uncompressed, to32ByteBuffer } from "../src/utils";
 
 const convertToSigner = (wallet: anchor.Wallet): anchor.web3.Signer => ({
@@ -199,7 +200,7 @@ Token Mint 1: ${tokenMint1.toBase58()}`
     );
 
     try {
-      await program.methods
+      const tx = await program.methods
         .confidentialSwap(
           Array.from(proofA),
           Array.from(proofB),
@@ -220,7 +221,13 @@ Token Mint 1: ${tokenMint1.toBase58()}`
           associatedTokenProgram: anchor.utils.token.ASSOCIATED_PROGRAM_ID,
           systemProgram: anchor.web3.SystemProgram.programId,
         })
-        .rpc();
+        .transaction();
+
+      tx.instructions.unshift(
+        anchor.web3.ComputeBudgetProgram.setComputeUnitLimit({ units: 2_000_000 })
+      );
+
+      await provider.sendAndConfirm(tx);
 
       const userAccount0AfterSwap = await getAccount(provider.connection, userTokenAccount0.address);
       const userAccount1AfterSwap = await getAccount(provider.connection, userTokenAccount1.address);

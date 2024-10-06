@@ -16,10 +16,12 @@ pub struct InitializePool<'info> {
 impl<'info> InitializePool<'info> {
     pub fn initialize_pool(
         &mut self,
-) -> Result<()> {
+        bump: u8,
+    ) -> Result<()> {
         let pool = &mut self.pool;
         pool.token_mint_0 = self.token_mint_0.key();
         pool.token_mint_1 = self.token_mint_1.key();
+        pool.bump = bump;
         Ok(())
     }
 }
