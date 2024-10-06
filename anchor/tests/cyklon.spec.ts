@@ -6,6 +6,7 @@ import * as snarkjs from "snarkjs";
 import * as path from "path";
 import { buildBn128, utils } from "ffjavascript";
 const { unstringifyBigInts } = utils;
+import { g1Uncompressed, negateAndSerializeG1, g2Uncompressed, to32ByteBuffer } from "../src/utils";
 
 const convertToSigner = (wallet: anchor.Wallet): anchor.web3.Signer => ({
   publicKey: wallet.publicKey,
@@ -260,31 +261,27 @@ async function generateProof(
 
   const { proof, publicSignals } = await snarkjs.groth16.fullProve(input, wasmPath, zkeyPath);
 
+  console.log("Original proof:", JSON.stringify(proof, null, 2));
+  console.log("Public signals:", JSON.stringify(publicSignals, null, 2));
+
   const curve = await buildBn128();
   const proofProc = unstringifyBigInts(proof);
-  const publicSignalsProc = unstringifyBigInts(publicSignals);
+  const publicSignalsUnstrigified = unstringifyBigInts(publicSignals);
 
-  const proofA = curve.G1.toUncompressed(curve.G1.fromObject(proofProc.pi_a));
-  const proofB = curve.G2.toUncompressed(curve.G2.fromObject(proofProc.pi_b));
-  const proofC = curve.G1.toUncompressed(curve.G1.fromObject(proofProc.pi_c));
+  let proofA = g1Uncompressed(curve, proofProc.pi_a);
+  proofA = await negateAndSerializeG1(curve, proofA);
 
-  // Create two 32-byte arrays for public signals
-  const formattedPublicSignals = [
-    new Uint8Array(32),
-    new Uint8Array(32)
-  ];
+  const proofB = g2Uncompressed(curve, proofProc.pi_b);
+  const proofC = g1Uncompressed(curve, proofProc.pi_c);
 
-  // Fill the last 8 bytes of each public signal with the actual values
-  const newBalanceX = new anchor.BN(publicSignalsProc[0]).toArray('be', 8);
-  const newBalanceY = new anchor.BN(publicSignalsProc[1]).toArray('be', 8);
-
-  formattedPublicSignals[0].set(newBalanceX, 24);
-  formattedPublicSignals[1].set(newBalanceY, 24);
+  const formattedPublicSignals = publicSignalsUnstrigified.map(signal => {
+    return to32ByteBuffer(BigInt(signal));
+  });
 
   return { 
-    proofA: new Uint8Array(proofA.slice(0, 64)), 
+    proofA: new Uint8Array(proofA), 
     proofB: new Uint8Array(proofB), 
-    proofC: new Uint8Array(proofC.slice(0, 64)), 
+    proofC: new Uint8Array(proofC), 
     publicSignals: formattedPublicSignals 
   };
 }

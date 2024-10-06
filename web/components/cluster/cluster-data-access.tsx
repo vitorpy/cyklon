@@ -20,13 +20,18 @@ export enum ClusterNetwork {
   Custom = 'custom',
 }
 
+const getHeliusEndpoint = (cluster: string) => {
+  const HELIUS_API_KEY = process.env.NEXT_PUBLIC_HELIUS_API_KEY;
+  return `https://${cluster}.helius-rpc.com/?api-key=${HELIUS_API_KEY}`;
+}
+
 // By default, we don't configure the mainnet-beta cluster
 // The endpoint provided by clusterApiUrl('mainnet-beta') does not allow access from the browser due to CORS restrictions
 // To use the mainnet-beta cluster, provide a custom endpoint
 export const defaultClusters: Cluster[] = [
   {
     name: 'devnet',
-    endpoint: clusterApiUrl('devnet'),
+    endpoint: getHeliusEndpoint('devnet'),
     network: ClusterNetwork.Devnet,
   },
   { name: 'local', endpoint: 'http://localhost:8899' },

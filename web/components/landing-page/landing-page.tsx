@@ -18,6 +18,15 @@ export default function LandingPage() {
         <div className="max-w-xl mx-auto py-6 sm:px-6 lg:px-9 mt-[50px]">
           <SolanaSwapComponent />
         </div>
+        <div className="flex justify-center items-center text-white cursor-default">
+          <div className="w-96 bg-black text-white p-4 mt-4 rounded-lg shadow-xl">
+            <p className="mb-2">For testing, get tokens from these faucets:</p>
+            <ul className="list-disc list-inside">
+              <li><a href="https://faucet.paxos.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">PYUSD Devnet Faucet</a></li>
+              <li><a href="https://faucet.solana.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Solana Devnet Faucet</a></li>
+            </ul>
+          </div>
+        </div>
       </div>
       <div className="hidden sm:block sm:w-2/3 relative">
         <Image
