@@ -2,6 +2,7 @@
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { composePlugins, withNx } = require('@nx/next');
+const { withSentryConfig } = require("@sentry/nextjs");
 
 /**
  * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
@@ -27,4 +28,12 @@ const plugins = [
   withNx,
 ];
 
-module.exports = composePlugins(...plugins)(nextConfig);
+module.exports = withSentryConfig(composePlugins(...plugins)(nextConfig),
+  {
+    org: "blackpool-dao",
+    project: "blackpooldao",
+    authToken: process.env.SENTRY_AUTH_TOKEN,
+    silent: false,
+    tunnelRoute: "/monitoring-tunnel",
+  }
+);
