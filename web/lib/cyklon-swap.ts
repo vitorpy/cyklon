@@ -1,9 +1,9 @@
-import { AnchorProvider, utils} from '@coral-xyz/anchor';
-import { PublicKey, SystemProgram } from '@solana/web3.js';
+import { AnchorProvider, utils } from '@coral-xyz/anchor';
+import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
 import { getCyklonProgram, getCyklonProgramId } from '@blackpool/anchor';
 import { useAnchorProvider } from '../components/solana/solana-provider';
 import { useCluster } from '../components/cluster/cluster-data-access';
-import { getOrCreateAssociatedTokenAccount, getAccount } from '@solana/spl-token';
+import { getOrCreateAssociatedTokenAccount } from '@solana/spl-token';
 import * as snarkjs from 'snarkjs';
 import * as path from 'path';
 // @ts-expect-error ffjavascript is not typed.
@@ -14,7 +14,7 @@ const { unstringifyBigInts } = ffUtils;
 
 export interface SwapResult {
   success: boolean;
-  amount?: number;
+  transaction?: Transaction;
   error?: string;
 }
 
@@ -66,7 +66,7 @@ async function generateProof(
   };
 }
 
-export async function performConfidentialSwap(
+export async function prepareConfidentialSwap(
   provider: AnchorProvider,
   programId: PublicKey,
   sourceToken: PublicKey,
@@ -140,41 +140,38 @@ export async function performConfidentialSwap(
       publicInputs
     );
 
-    // Perform the confidential swap
-    await program.methods
-      .confidentialSwap(
-        Array.from(proofA),
-        Array.from(proofB),
-        Array.from(proofC),
-        publicSignals.map(signal => Array.from(signal))
-      )
-      .accounts({
-        // @ts-expect-error Anchor is finnick.
-        pool: poolPubkey,
-        userTokenAccountIn: userTokenAccountIn.address,
-        userTokenAccountOut: userTokenAccountOut.address,
-        poolTokenAccount0: poolTokenAccount0.address,
-        poolTokenAccount1: poolTokenAccount1.address,
-        tokenMint0: sourceToken,
-        tokenMint1: destToken,
-        user: payer.publicKey,
-        tokenProgram: utils.token.TOKEN_PROGRAM_ID,
-        associatedTokenProgram: utils.token.ASSOCIATED_PROGRAM_ID,
-        systemProgram: SystemProgram.programId,
-      })
-      .rpc();
+    // Create the transaction
+    const transaction = new Transaction();
 
-    // Verify the swap was successful
-    const userAccountOutAfterSwap = await getAccount(provider.connection, userTokenAccountOut.address);
-    const amountReceived = Number(userAccountOutAfterSwap.amount);
+    // Add the confidential swap instruction to the transaction
+    transaction.add(
+      await program.methods
+        .confidentialSwap(
+          Array.from(proofA),
+          Array.from(proofB),
+          Array.from(proofC),
+          publicSignals.map(signal => Array.from(signal))
+        )
+        .accounts({
+          // @ts-expect-error Anchor is finnick.
+          pool: poolPubkey,
+          userTokenAccountIn: userTokenAccountIn.address,
+          userTokenAccountOut: userTokenAccountOut.address,
+          poolTokenAccount0: poolTokenAccount0.address,
+          poolTokenAccount1: poolTokenAccount1.address,
+          tokenMint0: sourceToken,
+          tokenMint1: destToken,
+          user: payer.publicKey,
+          tokenProgram: utils.token.TOKEN_PROGRAM_ID,
+          associatedTokenProgram: utils.token.ASSOCIATED_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+        })
+        .instruction()
+    );
 
-    if (amountReceived > 0) {
-      return { success: true, amount: amountReceived };
-    } else {
-      return { success: false, error: "Swap failed: No tokens received" };
-    }
+    return { success: true, transaction };
   } catch (error) {
-    console.error('Error performing confidential swap:', error);
+    console.error('Error preparing confidential swap:', error);
     return { success: false, error: error as string };
   }
 }
@@ -187,6 +184,6 @@ export function useConfidentialSwap() {
   const programId = getCyklonProgramId(cluster);
 
   return async (sourceToken: PublicKey, destToken: PublicKey, amount: number, minReceived: number): Promise<SwapResult> => {
-    return performConfidentialSwap(provider, programId, sourceToken, destToken, amount, minReceived);
+    return prepareConfidentialSwap(provider, programId, sourceToken, destToken, amount, minReceived);
   };
 }
