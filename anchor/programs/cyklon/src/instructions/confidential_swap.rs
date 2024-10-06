@@ -38,19 +38,21 @@ impl<'info> ConfidentialSwap<'info> {
         proof_a: [u8; 64],
         proof_b: [u8; 128],
         proof_c: [u8; 64],
-        public_inputs: [[u8; 32]; 2], // Changed to fixed-size array
+        public_inputs: [[u8; 32]; 3], // Changed to 3 inputs
     ) -> Result<()> {
+        msg!("Confidential swap started");
+
         // Create a new Groth16Verifier instance
-        let mut verifier = Groth16Verifier::new(
+        let mut verifier_result = Groth16Verifier::new(
             &proof_a,
             &proof_b,
             &proof_c,
             &public_inputs,
             &VERIFYINGKEY,
-        ).map_err(|_| ErrorCode::InvalidProof)?;
+        ).map_err(|_| ErrorCode::InvalidGroth16Verifier)?;
 
         // Verify the proof
-        let verified = verifier.verify().map_err(|_| ErrorCode::InvalidProof)?;
+        let verified = verifier_result.verify().map_err(|_| ErrorCode::InvalidProof)?;
 
         if verified {
             let pool = &mut self.pool;
@@ -85,9 +87,21 @@ impl<'info> ConfidentialSwap<'info> {
             pool.reserve_0 = new_balance_x;
             pool.reserve_1 = new_balance_y;
 
+            let pool_token_mint_key_0 = pool.token_mint_0.key();
+            let pool_token_mint_key_1 = pool.token_mint_1.key();
+
+            let pool_seeds = &[
+                &b"pool"[..], 
+                pool_token_mint_key_0.as_ref(), 
+                pool_token_mint_key_1.as_ref(),
+                &[self.pool.bump],
+            ];
+
+            let signer_seeds = &[&pool_seeds[..]];
+
             // Perform token transfers
             transfer_checked(
-                CpiContext::new(
+                CpiContext::new_with_signer(
                     self.token_program.to_account_info(),
                     TransferChecked {
                         from: from_account.to_account_info(),
@@ -95,13 +109,14 @@ impl<'info> ConfidentialSwap<'info> {
                         authority: self.user.to_account_info(),
                         mint: from_mint.to_account_info(),
                     },
+                    signer_seeds,
                 ),
                 amount_in,
                 from_mint.decimals,
             )?;
 
             transfer_checked(
-                CpiContext::new(
+                CpiContext::new_with_signer(
                     self.token_program.to_account_info(),
                     TransferChecked {
                         from: to_account.to_account_info(),
@@ -109,6 +124,7 @@ impl<'info> ConfidentialSwap<'info> {
                         authority: self.pool.to_account_info(),
                         mint: to_mint.to_account_info(),
                     },
+                    signer_seeds,
                 ),
                 amount_out,
                 to_mint.decimals,

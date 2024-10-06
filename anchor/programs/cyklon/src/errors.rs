@@ -16,4 +16,6 @@ pub enum ErrorCode {
     SlippageExceeded,
     #[msg("Math overflow")]
     MathOverflow,
+    #[msg("Unable to create Groth16Verifier")]
+    InvalidGroth16Verifier,
 }

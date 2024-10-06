@@ -41,7 +41,7 @@ pub mod cyklon {
     use super::*;
 
     pub fn initialize_pool(ctx: Context<InitializePool>) -> Result<()> {
-        ctx.accounts.initialize_pool()
+        ctx.accounts.initialize_pool(ctx.bumps.pool)
     }
 
     pub fn add_liquidity(ctx: Context<AddLiquidity>, amount_0: u64, amount_1: u64) -> Result<()> {
@@ -53,7 +53,7 @@ pub mod cyklon {
         proof_a: [u8; 64],
         proof_b: [u8; 128],
         proof_c: [u8; 64],
-        public_inputs: [[u8; 32]; 2]
+        public_inputs: [[u8; 32]; 3]
     ) -> Result<()> {
         ctx.accounts.confidential_swap(proof_a, proof_b, proof_c, public_inputs)
     }
