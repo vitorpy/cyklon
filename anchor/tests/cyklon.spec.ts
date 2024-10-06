@@ -198,6 +198,17 @@ Token Mint 1: ${tokenMint1.toBase58()}`
       privateInputs,
       publicInputs
     );
+    
+    console.log("Accounts passed to the transaction:");
+    console.log({
+      pool: poolPubkey.toBase58(),
+      userTokenAccountIn: userTokenAccount0.address.toBase58(),
+      userTokenAccountOut: userTokenAccount1.address.toBase58(),
+      poolTokenAccount0: poolTokenAccount0.address.toBase58(),
+      poolTokenAccount1: poolTokenAccount1.address.toBase58(),
+      tokenMint0: tokenMint0.toBase58(),
+      tokenMint1: tokenMint1.toBase58(),
+    });
 
     try {
       const tx = await program.methods
