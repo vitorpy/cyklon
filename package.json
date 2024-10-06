@@ -19,6 +19,7 @@
     "@radix-ui/react-popover": "^1.1.1",
     "@radix-ui/react-slider": "^1.2.0",
     "@radix-ui/react-slot": "^1.1.0",
+    "@sentry/nextjs": "^8.33.1",
     "@solana-developers/preset-next": "3.0.1",
     "@solana/spl-token": "0.4.6",
     "@solana/wallet-adapter-base": "^0.9.23",
