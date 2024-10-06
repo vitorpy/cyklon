@@ -9,8 +9,9 @@ import { Slider } from "@/components/ui/slider"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import Image from 'next/image'
 import { useConfidentialSwap } from '@/lib/cyklon-swap'
-import { PublicKey } from '@solana/web3.js'
-import { useWallet } from '@solana/wallet-adapter-react'
+import { PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js'
+import { createAssociatedTokenAccountInstruction, createSyncNativeInstruction, NATIVE_MINT, createCloseAccountInstruction, getAssociatedTokenAddress } from '@solana/spl-token'
+import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { useTokenBalance } from '@/hooks/useTokenBalance'
 
 interface Token {
@@ -41,6 +42,8 @@ export function SolanaSwapComponent() {
 
   const { publicKey } = useWallet()
   const { balance: sourceTokenBalance } = useTokenBalance(publicKey, sourceToken.address)
+  const { connection } = useConnection()
+  const wallet = useWallet()
 
   const confidentialSwap = useConfidentialSwap()
 
@@ -73,30 +76,79 @@ export function SolanaSwapComponent() {
                       (sourceToken.symbol === 'SOL' && destToken.symbol === 'PYUSD');
 
   const handleConfidentialSwap = async () => {
-    setIsSwapping(true)
-    setSwapError(null)
+    setIsSwapping(true);
+    setSwapError(null);
     try {
-      const sourceTokenPublicKey = new PublicKey(sourceToken.address)
-      const destTokenPublicKey = new PublicKey(destToken.address)
+      if (!publicKey) throw new Error('Wallet not connected');
+
+      const sourceTokenPublicKey = sourceToken.address === 'NATIVE' ? NATIVE_MINT : new PublicKey(sourceToken.address);
+      const destTokenPublicKey = destToken.address === 'NATIVE' ? NATIVE_MINT : new PublicKey(destToken.address);
+      
+      const transaction = new Transaction();
+      let wrappedSolAccount: PublicKey | null = null;
+
+      // Wrap SOL if the source token is native SOL
+      if (sourceToken.address === 'NATIVE') {
+        wrappedSolAccount = await getAssociatedTokenAddress(NATIVE_MINT, publicKey);
+        transaction.add(
+          createAssociatedTokenAccountInstruction(
+            publicKey, // payer
+            wrappedSolAccount,
+            publicKey, // owner
+            NATIVE_MINT
+          ),
+          SystemProgram.transfer({
+            fromPubkey: publicKey,
+            toPubkey: wrappedSolAccount,
+            lamports: LAMPORTS_PER_SOL * parseFloat(sourceAmount)
+          }),
+          createSyncNativeInstruction(wrappedSolAccount)
+        );
+      }
+
+      // Add confidential swap instruction
       const result = await confidentialSwap(
         sourceTokenPublicKey,
         destTokenPublicKey,
         parseFloat(sourceAmount),
         minReceived
-      )
-      if (result.success) {
-        setDestAmount(result.amount?.toString() || '')
-        // Handle successful swap (e.g., show success message, update balances, etc.)
-      } else {
-        setSwapError(result.error || 'Swap failed')
+      );
+
+      if (!result.success || !result.transaction) {
+        throw new Error(result.error || 'Swap failed');
       }
+
+      transaction.add(result.transaction);
+
+      // Unwrap SOL if the destination token is native SOL
+      if (destToken.address === 'NATIVE') {
+        const wrappedSolAccount = await getAssociatedTokenAddress(NATIVE_MINT, publicKey);
+        transaction.add(
+          createCloseAccountInstruction(
+            wrappedSolAccount,
+            publicKey, // owner
+            publicKey  // destination
+          )
+        );
+      }
+
+      // Send and confirm the transaction
+      const signature = await wallet.sendTransaction(transaction, connection);
+      await connection.confirmTransaction(signature, 'confirmed');
+      console.log('Transaction confirmed:', signature);
+
+      // Handle successful swap
+      // setDestAmount(result.amount?.toString() || '');
+      // You might want to update balances or show a success message here
+      console.log('Swap successful:', result);
+
     } catch (error) {
-      setSwapError('An unexpected error occurred')
-      console.error(error)
+      setSwapError(error instanceof Error ? error.message : 'An unexpected error occurred');
+      console.error(error);
     } finally {
-      setIsSwapping(false)
+      setIsSwapping(false);
     }
-  }
+  };
 
   return (
     <div className="flex justify-center items-center text-white cursor-default">
