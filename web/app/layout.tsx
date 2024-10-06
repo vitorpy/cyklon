@@ -1,4 +1,3 @@
-import { helveticaNeue, helveticaNeueLight } from './fonts'
 import './global.css';
 import { UiLayout } from '@/components/ui/ui-layout';
 import { ClusterProvider } from '@/components/cluster/cluster-data-access';
@@ -20,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${helveticaNeue.variable} ${helveticaNeueLight.variable}`}>
+    <html lang="en">
       <head>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
       </head>
