@@ -38,7 +38,7 @@ impl<'info> ConfidentialSwap<'info> {
         proof_a: [u8; 64],
         proof_b: [u8; 128],
         proof_c: [u8; 64],
-        public_inputs: [[u8; 32]; 3], // Changed to 3 inputs
+        public_inputs: [[u8; 32]; 3],
     ) -> Result<()> {
         msg!("Confidential swap started");
 
@@ -63,10 +63,12 @@ impl<'info> ConfidentialSwap<'info> {
             let new_balance_y = u64::from_be_bytes(public_inputs[1][24..].try_into().unwrap());
             
             // Determine swap direction and calculate amount_in and amount_out
-            let (from_account, to_account, from_mint, to_mint, amount_in, amount_out) = if new_balance_x > pool.reserve_0 {
+            let (from_user_account, to_pool_account, from_pool_account, to_user_account, from_mint, to_mint, amount_in, amount_out) = if new_balance_x > pool.reserve_0 {
                 (
                     &self.user_token_account_in,
                     &self.pool_token_account_0,
+                    &self.pool_token_account_1,
+                    &self.user_token_account_out,
                     &self.token_mint_0,
                     &self.token_mint_1,
                     new_balance_x - pool.reserve_0,
@@ -76,6 +78,8 @@ impl<'info> ConfidentialSwap<'info> {
                 (
                     &self.user_token_account_in,
                     &self.pool_token_account_1,
+                    &self.pool_token_account_0,
+                    &self.user_token_account_out,
                     &self.token_mint_1,
                     &self.token_mint_0,
                     new_balance_y - pool.reserve_1,
@@ -101,26 +105,32 @@ impl<'info> ConfidentialSwap<'info> {
 
             // Perform token transfers
             transfer_checked(
-                CpiContext::new_with_signer(
+                CpiContext::new(
                     self.token_program.to_account_info(),
                     TransferChecked {
-                        from: from_account.to_account_info(),
-                        to: to_account.to_account_info(),
+                        from: from_user_account.to_account_info(),
+                        to: to_pool_account.to_account_info(),
                         authority: self.user.to_account_info(),
                         mint: from_mint.to_account_info(),
                     },
-                    signer_seeds,
                 ),
                 amount_in,
                 from_mint.decimals,
             )?;
 
+            msg!("Swap direction: from {:?} to {:?}", from_mint.key(), to_mint.key());
+            msg!("From user account: {:?}", from_user_account.key());
+            msg!("To pool account: {:?}", to_pool_account.key());
+            msg!("From pool account: {:?}", from_pool_account.key());
+            msg!("To user account: {:?}", to_user_account.key());
+            msg!("Pool authority: {:?}", self.pool.key());
+
             transfer_checked(
                 CpiContext::new_with_signer(
                     self.token_program.to_account_info(),
                     TransferChecked {
-                        from: to_account.to_account_info(),
-                        to: self.user_token_account_out.to_account_info(),
+                        from: from_pool_account.to_account_info(),
+                        to: to_user_account.to_account_info(),
                         authority: self.pool.to_account_info(),
                         mint: to_mint.to_account_info(),
                     },
