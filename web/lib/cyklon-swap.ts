@@ -81,9 +81,14 @@ export async function prepareConfidentialSwap(
     const program = getCyklonProgram(provider);
     const payer = provider.wallet;
 
-    // Find pool PDA
+    // Sort token public keys to ensure consistent pool seed calculation
+    const [token0, token1] = [sourceToken, destToken].sort((a, b) => 
+      a.toBuffer().compare(b.toBuffer())
+    );
+
+    // Find pool PDA using sorted token public keys
     const [poolPubkey] = PublicKey.findProgramAddressSync(
-      [Buffer.from("pool"), sourceToken.toBuffer(), destToken.toBuffer()],
+      [Buffer.from("pool"), token0.toBuffer(), token1.toBuffer()],
       programId
     );
 
@@ -92,7 +97,7 @@ export async function prepareConfidentialSwap(
     const destTokenProgramId = destTokenProgram === 'Token-2022' ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID;
 
     // Get user token accounts
-    const userTokenAccountIn = await getOrCreateAssociatedTokenAccount(
+    const userSourceTokenAccount = await getOrCreateAssociatedTokenAccount(
       provider.connection,
       // @ts-expect-error Anchor is finnick.
       payer.payer,
@@ -100,7 +105,7 @@ export async function prepareConfidentialSwap(
       payer.publicKey,
       false,
     );
-    const userTokenAccountOut = await getOrCreateAssociatedTokenAccount(
+    const userDestTokenAccount = await getOrCreateAssociatedTokenAccount(
       provider.connection,
       // @ts-expect-error Anchor is finnick.
       payer.payer,
@@ -110,7 +115,7 @@ export async function prepareConfidentialSwap(
     );
 
     // Get pool token accounts
-    const poolTokenAccount0 = await getOrCreateAssociatedTokenAccount(
+    const poolSourceTokenAccount = await getOrCreateAssociatedTokenAccount(
       provider.connection,
       // @ts-expect-error Anchor is finnick.
       payer.payer,
@@ -118,7 +123,7 @@ export async function prepareConfidentialSwap(
       poolPubkey,
       true,
     );
-    const poolTokenAccount1 = await getOrCreateAssociatedTokenAccount(
+    const poolDestTokenAccount = await getOrCreateAssociatedTokenAccount(
       provider.connection,
       // @ts-expect-error Anchor is finnick.
       payer.payer,
@@ -130,11 +135,14 @@ export async function prepareConfidentialSwap(
     // Fetch pool account data
     const poolAccount = await program.account.pool.fetch(poolPubkey);
 
+    // Determine if we're swapping from token0 to token1 or vice versa
+    const isSwapXtoY = sourceToken.equals(token0) ? 1 : 0;
+
     // Prepare inputs for proof generation
     const publicInputs = {
       publicBalanceX: poolAccount.reserve0.toNumber(),
       publicBalanceY: poolAccount.reserve1.toNumber(),
-      isSwapXtoY: 1, // Assuming we're always swapping from token0 to token1
+      isSwapXtoY: isSwapXtoY,
       totalLiquidity: poolAccount.reserve0.toNumber() + poolAccount.reserve1.toNumber()
     };
 
@@ -154,6 +162,15 @@ export async function prepareConfidentialSwap(
     
     
 
+    // Ensure the correct order of token accounts in the instruction
+    const [orderedUserTokenAccountIn, orderedUserTokenAccountOut] = isSwapXtoY
+      ? [userSourceTokenAccount, userDestTokenAccount]
+      : [userDestTokenAccount, userSourceTokenAccount];
+
+    const [orderedPoolTokenAccount0, orderedPoolTokenAccount1] = isSwapXtoY
+      ? [poolSourceTokenAccount, poolDestTokenAccount]
+      : [poolDestTokenAccount, poolSourceTokenAccount];
+
     // Add the confidential swap instruction to the transaction
     transaction.add(
       await program.methods
@@ -166,15 +183,15 @@ export async function prepareConfidentialSwap(
         .accounts({
           // @ts-expect-error Anchor is finnick.
           pool: poolPubkey,
-          userTokenAccountIn: userTokenAccountIn.address,
-          userTokenAccountOut: userTokenAccountOut.address,
-          poolTokenAccount0: poolTokenAccount0.address,
-          poolTokenAccount1: poolTokenAccount1.address,
-          tokenMint0: sourceToken,
-          tokenMint1: destToken,
+          userTokenAccountIn: orderedUserTokenAccountIn.address,
+          userTokenAccountOut: orderedUserTokenAccountOut.address,
+          poolTokenAccount0: orderedPoolTokenAccount0.address,
+          poolTokenAccount1: orderedPoolTokenAccount1.address,
+          tokenMint0: token0,
+          tokenMint1: token1,
           user: payer.publicKey,
-          tokenMint0Program: sourceTokenProgramId,
-          tokenMint1Program: destTokenProgramId,
+          tokenMint0Program: token0.equals(sourceToken) ? sourceTokenProgramId : destTokenProgramId,
+          tokenMint1Program: token1.equals(destToken) ? destTokenProgramId : sourceTokenProgramId,
           associatedTokenProgram: utils.token.ASSOCIATED_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
         })
