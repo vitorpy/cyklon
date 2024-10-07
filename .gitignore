@@ -48,3 +48,4 @@ test-ledger
 .yarn
 .nx-cache/
 .env.local
+.vercel
