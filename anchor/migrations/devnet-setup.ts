@@ -41,10 +41,14 @@ function getCyklonProgramId(network: string): PublicKey {
 async function createPYUSDWSOLPool(provider: AnchorProvider) {
   const program = getCyklonProgram(provider);
   const programId = getCyklonProgramId('devnet');
+  
+  const [token0, token1] = [PYUSD_MINT, NATIVE_MINT].sort((a, b) => 
+    a.toBuffer().compare(b.toBuffer())
+  );
 
-  // Find pool PDA
+  // Find pool PDA using sorted token public keys
   const [poolPubkey] = PublicKey.findProgramAddressSync(
-    [Buffer.from("pool"), PYUSD_MINT.toBuffer(), NATIVE_MINT.toBuffer()],
+    [Buffer.from("pool"), token0.toBuffer(), token1.toBuffer()],
     programId
   );
 

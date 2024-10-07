@@ -1,3 +1,5 @@
+'use server'
+
 import { AnchorProvider, utils } from '@coral-xyz/anchor';
 import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
 import { getCyklonProgram, getCyklonProgramId } from '@blackpool/anchor';
@@ -77,6 +79,8 @@ export async function prepareConfidentialSwap(
   sourceTokenProgram: string,
   destTokenProgram: string
 ): Promise<SwapResult> {
+  'use server'
+  
   try {
     const program = getCyklonProgram(provider);
     const payer = provider.wallet;
