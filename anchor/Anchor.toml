@@ -1,11 +1,14 @@
 [toolchain]
 
 [features]
-seeds = false
+resolution = true
 skip-lint = false
 
+[programs.devnet]
+cyklon = "CQW1DNS35zc9F8KvzYjf2ZKtmRp6ntxNdfRo2dZTXp2B"
+
 [programs.localnet]
-cyklon = "5WrVRh6pUTvyrjrTn4GKGebsZn2GnqBK2h7agfn2QvBX"
+cyklon = "6zu8p1W3e5JAMCPMAsxVBAE112r65zECYmMNUWE8f9m2"
 
 [registry]
 url = "https://api.apr.dev"
@@ -23,9 +26,10 @@ shutdown_wait = 2000
 upgradeable = false
 
 [test.validator]
-url = "https://api.mainnet-beta.solana.com"
 bind_address = "0.0.0.0"
+url = "https://api.mainnet-beta.solana.com"
 ledger = ".anchor/test-ledger"
 rpc_port = 8899
+
 [[test.validator.clone]]
 address = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"

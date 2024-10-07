@@ -9,6 +9,7 @@ import * as path from 'path';
 // @ts-expect-error ffjavascript is not typed.
 import { buildBn128, utils as ffUtils } from 'ffjavascript';
 import { g1Uncompressed, negateAndSerializeG1, g2Uncompressed, to32ByteBuffer } from "@blackpool/anchor";
+import { TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token';
 
 const { unstringifyBigInts } = ffUtils;
 
@@ -72,7 +73,9 @@ export async function prepareConfidentialSwap(
   sourceToken: PublicKey,
   destToken: PublicKey,
   amount: number,
-  minReceived: number
+  minReceived: number,
+  sourceTokenProgram: string,
+  destTokenProgram: string
 ): Promise<SwapResult> {
   try {
     const program = getCyklonProgram(provider);
@@ -84,20 +87,26 @@ export async function prepareConfidentialSwap(
       programId
     );
 
+    // Determine the token program for each token
+    const sourceTokenProgramId = sourceTokenProgram === 'Token-2022' ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID;
+    const destTokenProgramId = destTokenProgram === 'Token-2022' ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID;
+
     // Get user token accounts
     const userTokenAccountIn = await getOrCreateAssociatedTokenAccount(
       provider.connection,
       // @ts-expect-error Anchor is finnick.
       payer.payer,
       sourceToken,
-      payer.publicKey
+      payer.publicKey,
+      false,
     );
     const userTokenAccountOut = await getOrCreateAssociatedTokenAccount(
       provider.connection,
       // @ts-expect-error Anchor is finnick.
       payer.payer,
       destToken,
-      payer.publicKey
+      payer.publicKey,
+      false,
     );
 
     // Get pool token accounts
@@ -107,7 +116,7 @@ export async function prepareConfidentialSwap(
       payer.payer,
       sourceToken,
       poolPubkey,
-      true
+      true,
     );
     const poolTokenAccount1 = await getOrCreateAssociatedTokenAccount(
       provider.connection,
@@ -115,7 +124,7 @@ export async function prepareConfidentialSwap(
       payer.payer,
       destToken,
       poolPubkey,
-      true
+      true,
     );
 
     // Fetch pool account data
@@ -142,6 +151,8 @@ export async function prepareConfidentialSwap(
 
     // Create the transaction
     const transaction = new Transaction();
+    
+    
 
     // Add the confidential swap instruction to the transaction
     transaction.add(
@@ -162,7 +173,8 @@ export async function prepareConfidentialSwap(
           tokenMint0: sourceToken,
           tokenMint1: destToken,
           user: payer.publicKey,
-          tokenProgram: utils.token.TOKEN_PROGRAM_ID,
+          tokenMint0Program: sourceTokenProgramId,
+          tokenMint1Program: destTokenProgramId,
           associatedTokenProgram: utils.token.ASSOCIATED_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
         })
@@ -183,7 +195,7 @@ export function useConfidentialSwap() {
   // @ts-expect-error Weird typing issues.
   const programId = getCyklonProgramId(cluster);
 
-  return async (sourceToken: PublicKey, destToken: PublicKey, amount: number, minReceived: number): Promise<SwapResult> => {
-    return prepareConfidentialSwap(provider, programId, sourceToken, destToken, amount, minReceived);
+  return async (sourceToken: PublicKey, destToken: PublicKey, amount: number, minReceived: number, sourceTokenProgram: string, destTokenProgram: string): Promise<SwapResult> => {
+    return prepareConfidentialSwap(provider, programId, sourceToken, destToken, amount, minReceived, sourceTokenProgram, destTokenProgram);
   };
 }

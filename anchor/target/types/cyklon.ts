@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/cyklon.json`.
  */
 export type Cyklon = {
-  "address": "5WrVRh6pUTvyrjrTn4GKGebsZn2GnqBK2h7agfn2QvBX",
+  "address": "CQW1DNS35zc9F8KvzYjf2ZKtmRp6ntxNdfRo2dZTXp2B",
   "metadata": {
     "name": "cyklon",
     "version": "0.1.0",
@@ -57,7 +57,10 @@ export type Cyklon = {
           "signer": true
         },
         {
-          "name": "tokenProgram"
+          "name": "tokenMint0Program"
+        },
+        {
+          "name": "tokenMint1Program"
         },
         {
           "name": "systemProgram",
@@ -144,7 +147,10 @@ export type Cyklon = {
           "signer": true
         },
         {
-          "name": "tokenProgram"
+          "name": "tokenMint0Program"
+        },
+        {
+          "name": "tokenMint1Program"
         },
         {
           "name": "associatedTokenProgram",

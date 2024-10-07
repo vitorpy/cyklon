@@ -34,7 +34,7 @@ pub mod tests;
 
 use instructions::*;
 
-declare_id!("5WrVRh6pUTvyrjrTn4GKGebsZn2GnqBK2h7agfn2QvBX");
+declare_id!("CQW1DNS35zc9F8KvzYjf2ZKtmRp6ntxNdfRo2dZTXp2B");
 
 #[program]
 pub mod cyklon {

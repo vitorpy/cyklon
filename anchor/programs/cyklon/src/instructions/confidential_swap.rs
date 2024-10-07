@@ -27,7 +27,8 @@ pub struct ConfidentialSwap<'info> {
     #[account(mut)]
     pub token_mint_1: InterfaceAccount<'info, Mint>,
     pub user: Signer<'info>,
-    pub token_program: Interface<'info, TokenInterface>,
+    pub token_mint_0_program: Interface<'info, TokenInterface>,
+    pub token_mint_1_program: Interface<'info, TokenInterface>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
 }
@@ -63,7 +64,7 @@ impl<'info> ConfidentialSwap<'info> {
             let new_balance_y = u64::from_be_bytes(public_inputs[1][24..].try_into().unwrap());
             
             // Determine swap direction and calculate amount_in and amount_out
-            let (from_user_account, to_pool_account, from_pool_account, to_user_account, from_mint, to_mint, amount_in, amount_out) = if new_balance_x > pool.reserve_0 {
+            let (from_user_account, to_pool_account, from_pool_account, to_user_account, from_mint, to_mint, amount_in, amount_out, from_token_program, to_token_program) = if new_balance_x > pool.reserve_0 {
                 (
                     &self.user_token_account_in,
                     &self.pool_token_account_0,
@@ -73,6 +74,8 @@ impl<'info> ConfidentialSwap<'info> {
                     &self.token_mint_1,
                     new_balance_x - pool.reserve_0,
                     pool.reserve_1 - new_balance_y,
+                    &self.token_mint_0_program,
+                    &self.token_mint_1_program,
                 )
             } else {
                 (
@@ -84,6 +87,8 @@ impl<'info> ConfidentialSwap<'info> {
                     &self.token_mint_0,
                     new_balance_y - pool.reserve_1,
                     pool.reserve_0 - new_balance_x,
+                    &self.token_mint_1_program,
+                    &self.token_mint_0_program,
                 )
             };
 
@@ -106,7 +111,7 @@ impl<'info> ConfidentialSwap<'info> {
             // Perform token transfers
             transfer_checked(
                 CpiContext::new(
-                    self.token_program.to_account_info(),
+                    from_token_program.to_account_info(),
                     TransferChecked {
                         from: from_user_account.to_account_info(),
                         to: to_pool_account.to_account_info(),
@@ -127,7 +132,7 @@ impl<'info> ConfidentialSwap<'info> {
 
             transfer_checked(
                 CpiContext::new_with_signer(
-                    self.token_program.to_account_info(),
+                    to_token_program.to_account_info(),
                     TransferChecked {
                         from: from_pool_account.to_account_info(),
                         to: to_user_account.to_account_info(),
