@@ -19,7 +19,8 @@ pub struct AddLiquidity<'info> {
     pub token_mint_0: InterfaceAccount<'info, Mint>,
     pub token_mint_1: InterfaceAccount<'info, Mint>,
     pub user: Signer<'info>,
-    pub token_program: Interface<'info, TokenInterface>,
+    pub token_mint_0_program: Interface<'info, TokenInterface>,
+    pub token_mint_1_program: Interface<'info, TokenInterface>,
     pub system_program: Program<'info, System>,
 }
 
@@ -47,7 +48,7 @@ impl<'info> AddLiquidity<'info> {
         // Transfer tokens from user to pool
         transfer_checked(
             CpiContext::new(
-                self.token_program.to_account_info(),
+                self.token_mint_0_program.to_account_info(),
                 TransferChecked {
                     from: self.user_token_account_0.to_account_info(),
                     to: self.pool_token_account_0.to_account_info(),
@@ -61,7 +62,7 @@ impl<'info> AddLiquidity<'info> {
 
         transfer_checked(
             CpiContext::new(
-                self.token_program.to_account_info(),
+                self.token_mint_1_program.to_account_info(),
                 TransferChecked {
                     from: self.user_token_account_1.to_account_info(),
                     to: self.pool_token_account_1.to_account_info(),

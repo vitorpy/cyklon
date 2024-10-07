@@ -1,5 +1,5 @@
 {
-  "address": "5WrVRh6pUTvyrjrTn4GKGebsZn2GnqBK2h7agfn2QvBX",
+  "address": "CQW1DNS35zc9F8KvzYjf2ZKtmRp6ntxNdfRo2dZTXp2B",
   "metadata": {
     "name": "cyklon",
     "version": "0.1.0",
@@ -51,7 +51,10 @@
           "signer": true
         },
         {
-          "name": "token_program"
+          "name": "token_mint_0_program"
+        },
+        {
+          "name": "token_mint_1_program"
         },
         {
           "name": "system_program",
@@ -138,7 +141,10 @@
           "signer": true
         },
         {
-          "name": "token_program"
+          "name": "token_mint_0_program"
+        },
+        {
+          "name": "token_mint_1_program"
         },
         {
           "name": "associated_token_program",
