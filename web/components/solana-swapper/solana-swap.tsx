@@ -108,6 +108,22 @@ export function SolanaSwapComponent() {
         );
       }
 
+      // Check and create associated token account for destination token if needed
+      const destTokenAccount = await getAssociatedTokenAddress(destTokenPublicKey, publicKey);
+      const destTokenAccountInfo = await connection.getAccountInfo(destTokenAccount);
+      
+      if (!destTokenAccountInfo) {
+        console.log('Creating associated token account for destination token');
+        transaction.add(
+          createAssociatedTokenAccountInstruction(
+            publicKey, // payer
+            destTokenAccount,
+            publicKey, // owner
+            destTokenPublicKey
+          )
+        );
+      }
+
       // Add confidential swap instruction
       const result = await confidentialSwap(
         sourceTokenPublicKey,
