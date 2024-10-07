@@ -3,7 +3,7 @@ import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
 import { getCyklonProgram, getCyklonProgramId } from '@blackpool/anchor';
 import { useAnchorProvider } from '../components/solana/solana-provider';
 import { useCluster } from '../components/cluster/cluster-data-access';
-import { getOrCreateAssociatedTokenAccount } from '@solana/spl-token';
+import { getAssociatedTokenAddress } from '@solana/spl-token';
 import * as snarkjs from 'snarkjs';
 import * as path from 'path';
 // @ts-expect-error ffjavascript is not typed.
@@ -96,40 +96,32 @@ export async function prepareConfidentialSwap(
     const sourceTokenProgramId = sourceTokenProgram === 'Token-2022' ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID;
     const destTokenProgramId = destTokenProgram === 'Token-2022' ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID;
 
-    // Get user token accounts
-    const userSourceTokenAccount = await getOrCreateAssociatedTokenAccount(
-      provider.connection,
-      // @ts-expect-error Anchor is finnick.
-      payer.payer,
+    // Get user token account addresses
+    const userSourceTokenAccount = await getAssociatedTokenAddress(
       sourceToken,
       payer.publicKey,
       false,
+      sourceTokenProgramId
     );
-    const userDestTokenAccount = await getOrCreateAssociatedTokenAccount(
-      provider.connection,
-      // @ts-expect-error Anchor is finnick.
-      payer.payer,
+    const userDestTokenAccount = await getAssociatedTokenAddress(
       destToken,
       payer.publicKey,
       false,
+      destTokenProgramId
     );
 
-    // Get pool token accounts
-    const poolSourceTokenAccount = await getOrCreateAssociatedTokenAccount(
-      provider.connection,
-      // @ts-expect-error Anchor is finnick.
-      payer.payer,
+    // Get pool token account addresses
+    const poolSourceTokenAccount = await getAssociatedTokenAddress(
       sourceToken,
       poolPubkey,
       true,
+      sourceTokenProgramId
     );
-    const poolDestTokenAccount = await getOrCreateAssociatedTokenAccount(
-      provider.connection,
-      // @ts-expect-error Anchor is finnick.
-      payer.payer,
+    const poolDestTokenAccount = await getAssociatedTokenAddress(
       destToken,
       poolPubkey,
       true,
+      destTokenProgramId
     );
 
     // Fetch pool account data
@@ -183,10 +175,10 @@ export async function prepareConfidentialSwap(
         .accounts({
           // @ts-expect-error Anchor is finnick.
           pool: poolPubkey,
-          userTokenAccountIn: orderedUserTokenAccountIn.address,
-          userTokenAccountOut: orderedUserTokenAccountOut.address,
-          poolTokenAccount0: orderedPoolTokenAccount0.address,
-          poolTokenAccount1: orderedPoolTokenAccount1.address,
+          userTokenAccountIn: orderedUserTokenAccountIn,
+          userTokenAccountOut: orderedUserTokenAccountOut,
+          poolTokenAccount0: orderedPoolTokenAccount0,
+          poolTokenAccount1: orderedPoolTokenAccount1,
           tokenMint0: token0,
           tokenMint1: token1,
           user: payer.publicKey,
