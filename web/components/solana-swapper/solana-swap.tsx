@@ -110,7 +110,12 @@ export function SolanaSwapComponent() {
 
       // Check and create associated token account for destination token if needed
       const destTokenAccount = await getAssociatedTokenAddress(destTokenPublicKey, publicKey);
-      const destTokenAccountInfo = await connection.getAccountInfo(destTokenAccount);
+      let destTokenAccountInfo;
+      try {
+        destTokenAccountInfo = await connection.getAccountInfo(destTokenAccount);
+      } catch (error) {
+        destTokenAccountInfo = null;
+      }
       
       if (!destTokenAccountInfo) {
         console.log('Creating associated token account for destination token');
