@@ -7,46 +7,7 @@ import { useAnchorProvider } from '../components/solana/solana-provider';
 import { useCluster } from '../components/cluster/cluster-data-access';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function handleGenerateProof(privateInputs: any, publicInputs: any) {
-  try {
-    // Serialize BigInt values to strings
-    const serializedPrivateInputs = {
-      privateAmount: privateInputs.privateAmount.toString(),
-      privateMinReceived: privateInputs.privateMinReceived.toString()
-    };
-
-    const serializedPublicInputs = {
-      ...publicInputs,
-      publicBalanceX: publicInputs.publicBalanceX.toString(),
-      publicBalanceY: publicInputs.publicBalanceY.toString(),
-      totalLiquidity: publicInputs.totalLiquidity.toString()
-    };
-
-    const response = await fetch('/api/generate-proof', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ 
-        privateInputs: serializedPrivateInputs, 
-        publicInputs: serializedPublicInputs 
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to generate proof');
-    }
-
-    const proof = await response.json();
-    console.log('Proof generated:', proof);
-    return proof;
-  } catch (error) {
-    console.error('Error generating proof:', error);
-    throw error;
-  }
-}
+import { generateProof } from './prepare-proof';
 
 export interface SwapResult {
   success: boolean;
@@ -131,15 +92,13 @@ export async function prepareConfidentialSwap(
     };
 
     // Generate proof
-    const { proofA, proofB, proofC, publicSignals } = await handleGenerateProof(
+    const { proofA, proofB, proofC, publicSignals } = await generateProof(
       privateInputs,
       publicInputs
     );
 
     // Create the transaction
     const transaction = new Transaction();
-    
-    
 
     // Ensure the correct order of token accounts in the instruction
     const [orderedUserTokenAccountIn, orderedUserTokenAccountOut] = isSwapXtoY

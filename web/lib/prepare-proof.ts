@@ -1,50 +1,18 @@
-import { g1Uncompressed, negateAndSerializeG1, g2Uncompressed, to32ByteBuffer } from "@blackpool/anchor";
-import { list } from '@vercel/blob';
-import { promises as fs } from 'fs';
-import path from 'path';
+'use client'
 
-async function getOrDownloadFile(filename: string): Promise<string> {
-    // Ensure the filename is properly sanitized to prevent directory traversal
-    // eslint-disable-next-line no-useless-escape
-    const sanitizedFilename = path.normalize(filename).replace(/^(\.\.[\/\\])+/, '');
-    const tempFilePath = path.join('/tmp', sanitizedFilename);
-  
-    try {
-      // Check if the file already exists in /tmp
-      await fs.access(tempFilePath);
-      console.log(`File ${sanitizedFilename} found in /tmp`);
-      return tempFilePath;
-    } catch (error) {
-      // File doesn't exist in /tmp, download it from Blob storage
-      console.log(`File ${sanitizedFilename} not found in /tmp, downloading from Blob storage`);
-  
-      try {
-        // List blobs to find the file
-        const { blobs } = await list({ prefix: path.dirname(sanitizedFilename) });
-        const blob = blobs.find(b => b.pathname === sanitizedFilename);
-  
-        if (!blob) {
-          throw new Error(`File ${sanitizedFilename} not found in Blob storage`);
-        }
-  
-        // Download the file
-        const response = await fetch(blob.url);
-        const buffer = await response.arrayBuffer();
-  
-        // Ensure the directory exists
-        await fs.mkdir(path.dirname(tempFilePath), { recursive: true });
-  
-        // Write the file to /tmp
-        await fs.writeFile(tempFilePath, Buffer.from(buffer));
-  
-        console.log(`File ${sanitizedFilename} downloaded and saved to /tmp`);
-        return tempFilePath;
-      } catch (downloadError) {
-        console.error(`Error downloading file ${sanitizedFilename}:`, downloadError);
-        throw downloadError;
-      }
-    }
+import { g1Uncompressed, negateAndSerializeG1, g2Uncompressed, to32ByteBuffer } from "@blackpool/anchor";
+
+declare const snarkjs: {
+  groth16: {
+    fullProve: (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      input: any,
+      wasmPath: string,
+      zkeyPath: string
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ) => Promise<{ proof: any; publicSignals: any }>
   }
+};
 
 export async function generateProof(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -57,14 +25,12 @@ export async function generateProof(
   // Use dynamic imports for modules that might cause issues in server context
   // @ts-expect-error ffjavascript is not typed.
   const { buildBn128, utils: ffUtils } = await import('ffjavascript');
-  const snarkjs = await import('snarkjs');
-
   const { unstringifyBigInts } = ffUtils;
 
   console.log("Generating proof for inputs:", { privateInputs, publicInputs });
 
-  const wasmPath = await getOrDownloadFile("zk/swap.wasm");
-  const zkeyPath = await getOrDownloadFile("zk/swap_final.zkey");
+  const wasmPath = "zk/swap.wasm";
+  const zkeyPath = "zk/swap_final.zkey";
 
   const input = {
     privateAmount: privateInputs.privateAmount.toString(),
