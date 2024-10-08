@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Header } from '../ui/header';
 import { SolanaSwapComponent } from '../solana-swapper/solana-swap';
-import Image from 'next/image';
+import Image from "next/legacy/image";
 import NewsletterInput from '../ui/newsletter-input';
 import ContactForm from '../ui/contact-form';
 
