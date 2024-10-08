@@ -1,12 +1,7 @@
 'use server'
 
 import path from 'path';
-// @ts-expect-error ffjavascript is not typed.
-import { buildBn128, utils as ffUtils } from 'ffjavascript';
 import { g1Uncompressed, negateAndSerializeG1, g2Uncompressed, to32ByteBuffer } from "@blackpool/anchor";
-import * as snarkjs from 'snarkjs';
-
-const { unstringifyBigInts } = ffUtils;
 
 export async function generateProof(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -14,7 +9,14 @@ export async function generateProof(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   publicInputs: any
 ): Promise<{ proofA: Uint8Array, proofB: Uint8Array, proofC: Uint8Array, publicSignals: Uint8Array[] }> {
-  'use server'
+  // Remove the 'use server' directive here as it's already at the top of the file
+  
+  // Use dynamic imports for modules that might cause issues in server context
+  // @ts-expect-error ffjavascript is not typed.
+  const { buildBn128, utils: ffUtils } = await import('ffjavascript');
+  const snarkjs = await import('snarkjs');
+
+  const { unstringifyBigInts } = ffUtils;
 
   console.log("Generating proof for inputs:", { privateInputs, publicInputs });
 
