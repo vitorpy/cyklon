@@ -23,6 +23,18 @@ describe('cyklon', () => {
   let poolPubkey: anchor.web3.PublicKey;
   let tokenMint0: anchor.web3.PublicKey;
   let tokenMint1: anchor.web3.PublicKey;
+  const tokenMint0Decimals = 6;
+  const tokenMint1Decimals = 9;  // Updated to 9 decimals
+
+  async function getTokenDecimals(mintAddress: anchor.web3.PublicKey): Promise<number> {
+    if (mintAddress.equals(tokenMint0)) {
+      return tokenMint0Decimals;
+    } else if (mintAddress.equals(tokenMint1)) {
+      return tokenMint1Decimals;
+    } else {
+      throw new Error("Invalid mint address");
+    }
+  }
 
   const setupMint = async () => {
     const airdropSignature = await provider.connection.requestAirdrop(
@@ -32,8 +44,8 @@ describe('cyklon', () => {
     await provider.connection.confirmTransaction(airdropSignature);
 
     const signer = convertToSigner(payer);
-    tokenMint0 = await createMint(provider.connection, signer, signer.publicKey, null, 6);
-    tokenMint1 = await createMint(provider.connection, signer, signer.publicKey, null, 6);
+    tokenMint0 = await createMint(provider.connection, signer, signer.publicKey, null, tokenMint0Decimals);
+    tokenMint1 = await createMint(provider.connection, signer, signer.publicKey, null, tokenMint1Decimals);
 
     [poolPubkey] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from("pool"), tokenMint0.toBuffer(), tokenMint1.toBuffer()],
@@ -102,8 +114,8 @@ Token Mint 1: ${tokenMint1.toBase58()}`
       true
     );
 
-    const amount0 = 1000000; // 1 token with 6 decimals
-    const amount1 = 2000000; // 2 tokens with 6 decimals
+    const amount0 = 1_000_000; // 1 token with 6 decimals
+    const amount1 = 2_000_000_000; // 2 tokens with 9 decimals
     await mintTo(provider.connection, convertToSigner(payer), tokenMint0, userTokenAccount0.address, convertToSigner(payer), amount0);
     await mintTo(provider.connection, convertToSigner(payer), tokenMint1, userTokenAccount1.address, convertToSigner(payer), amount1);
 
@@ -145,6 +157,14 @@ Token Mint 1: ${tokenMint1.toBase58()}`
   });
 
   it('Confidential Swap', async () => {
+    const normalizeAmount = (amount: number, decimals: number) => {
+      return BigInt(amount) * BigInt(10 ** (9 - decimals));
+    };
+
+    const denormalizeAmount = (amount: bigint, decimals: number) => {
+      return Number(amount / BigInt(10 ** (9 - decimals)));
+    };
+
     const poolAccount = await program.account.pool.fetch(poolPubkey);
 
     const userTokenAccount0 = await getOrCreateAssociatedTokenAccount(
@@ -175,18 +195,24 @@ Token Mint 1: ${tokenMint1.toBase58()}`
       true
     );
     
-    const amountToMint = 1000000; // 1 token with 6 decimals
+    const amountToMint = 1_000_000; // 1 token with 6 decimals for tokenMint0
     await mintTo(provider.connection, convertToSigner(payer), tokenMint0, userTokenAccount0.address, convertToSigner(payer), amountToMint);
 
-    const privateAmount = 100000; // 0.1 token
-    const privateMinReceived = 99000; // 0.099 token (1% slippage)
+    const decimals0 = await getTokenDecimals(tokenMint0);
+    const decimals1 = await getTokenDecimals(tokenMint1);
+
+    const normalizedReserve0 = normalizeAmount(poolAccount.reserve0.toNumber(), decimals0);
+    const normalizedReserve1 = normalizeAmount(poolAccount.reserve1.toNumber(), decimals1);
+
+    const privateAmount = normalizeAmount(100_000, decimals0); // 0.1 token of tokenMint0
+    const privateMinReceived = normalizeAmount(99_000_000, decimals1); // 0.099 token of tokenMint1 (1% slippage)
     const isSwapXtoY = 1; // Swapping token0 for token1
     
     const publicInputs = {
-      publicBalanceX: poolAccount.reserve0.toNumber(),
-      publicBalanceY: poolAccount.reserve1.toNumber(),
+      publicBalanceX: normalizedReserve0,
+      publicBalanceY: normalizedReserve1,
       isSwapXtoY: isSwapXtoY,
-      totalLiquidity: poolAccount.reserve0.toNumber() + poolAccount.reserve1.toNumber()
+      totalLiquidity: normalizedReserve0 + normalizedReserve1
     };
 
     const privateInputs = {
@@ -247,6 +273,13 @@ Token Mint 1: ${tokenMint1.toBase58()}`
       expect(Number(userAccount0AfterSwap.amount)).toBeLessThan(amountToMint);
       expect(Number(userAccount1AfterSwap.amount)).toBeGreaterThan(0);
 
+      // You might want to add more precise checks here using the normalized values
+      const normalizedAmount0After = normalizeAmount(Number(userAccount0AfterSwap.amount), decimals0);
+      const normalizedAmount1After = normalizeAmount(Number(userAccount1AfterSwap.amount), decimals1);
+
+      expect(normalizedAmount0After).toBeLessThan(normalizeAmount(amountToMint, decimals0));
+      expect(normalizedAmount1After).toBeGreaterThan(BigInt(0));
+
       const poolAccount0AfterSwap = await getAccount(provider.connection, poolTokenAccount0.address);
       const poolAccount1AfterSwap = await getAccount(provider.connection, poolTokenAccount1.address);
 
@@ -261,8 +294,8 @@ Token Mint 1: ${tokenMint1.toBase58()}`
 });
 
 async function generateProof(
-  privateInputs: any,
-  publicInputs: any
+  privateInputs: { privateAmount: bigint, privateMinReceived: bigint },
+  publicInputs: { publicBalanceX: bigint, publicBalanceY: bigint, isSwapXtoY: number, totalLiquidity: bigint }
 ): Promise<{ proofA: Uint8Array, proofB: Uint8Array, proofC: Uint8Array, publicSignals: Uint8Array[] }> {
   console.log("Generating proof for inputs:", { privateInputs, publicInputs });
 

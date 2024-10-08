@@ -15,6 +15,16 @@ export interface SwapResult {
   error?: string;
 }
 
+const NORMALIZATION_FACTOR = 9; // Normalize to 9 decimal places
+
+const normalizeAmount = (amount: bigint, decimals: number): bigint => {
+  return amount * BigInt(10 ** (NORMALIZATION_FACTOR - decimals));
+};
+
+const denormalizeAmount = (amount: bigint, decimals: number): bigint => {
+  return amount / BigInt(10 ** (NORMALIZATION_FACTOR - decimals));
+};
+
 export async function prepareConfidentialSwap(
   provider: AnchorProvider,
   programId: PublicKey,
@@ -23,7 +33,9 @@ export async function prepareConfidentialSwap(
   amount: bigint,
   minReceived: bigint,
   sourceTokenProgram: string,
-  destTokenProgram: string
+  destTokenProgram: string,
+  sourceDecimals: number,
+  destDecimals: number
 ): Promise<SwapResult> {
   try {
     const program = getCyklonProgram(provider);
@@ -75,20 +87,26 @@ export async function prepareConfidentialSwap(
     // Fetch pool account data
     const poolAccount = await program.account.pool.fetch(poolPubkey);
 
+    // Normalize amounts
+    const normalizedAmount = normalizeAmount(amount, sourceDecimals);
+    const normalizedMinReceived = normalizeAmount(minReceived, destDecimals);
+    const normalizedReserve0 = normalizeAmount(BigInt(poolAccount.reserve0), sourceDecimals);
+    const normalizedReserve1 = normalizeAmount(BigInt(poolAccount.reserve1), destDecimals);
+
     // Determine if we're swapping from token0 to token1 or vice versa
     const isSwapXtoY = sourceToken.equals(token0) ? 1 : 0;
 
     // Prepare inputs for proof generation
     const publicInputs = {
-      publicBalanceX: BigInt(poolAccount.reserve0),
-      publicBalanceY: BigInt(poolAccount.reserve1),
+      publicBalanceX: normalizedReserve0,
+      publicBalanceY: normalizedReserve1,
       isSwapXtoY: isSwapXtoY,
-      totalLiquidity: BigInt(poolAccount.reserve0) + BigInt(poolAccount.reserve1)
+      totalLiquidity: normalizedReserve0 + normalizedReserve1
     };
 
     const privateInputs = {
-      privateAmount: BigInt(amount),
-      privateMinReceived: BigInt(minReceived)
+      privateAmount: normalizedAmount,
+      privateMinReceived: normalizedMinReceived
     };
 
     // Generate proof
@@ -151,7 +169,7 @@ export function useConfidentialSwap() {
   // @ts-expect-error Weird typing issues.
   const programId = getCyklonProgramId(cluster);
 
-  return async (sourceToken: PublicKey, destToken: PublicKey, amount: bigint, minReceived: bigint, sourceTokenProgram: string, destTokenProgram: string): Promise<SwapResult> => {
-    return prepareConfidentialSwap(provider, programId, sourceToken, destToken, amount, minReceived, sourceTokenProgram, destTokenProgram);
+  return async (sourceToken: PublicKey, destToken: PublicKey, amount: bigint, minReceived: bigint, sourceTokenProgram: string, destTokenProgram: string, sourceDecimals: number, destDecimals: number): Promise<SwapResult> => {
+    return prepareConfidentialSwap(provider, programId, sourceToken, destToken, amount, minReceived, sourceTokenProgram, destTokenProgram, sourceDecimals, destDecimals);
   };
 }
