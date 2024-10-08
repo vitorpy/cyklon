@@ -49,3 +49,4 @@ test-ledger
 .nx-cache/
 .env.local
 .vercel
+.env.development.local
