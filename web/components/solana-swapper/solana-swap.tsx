@@ -132,13 +132,14 @@ export function SolanaSwapComponent() {
 
       // Add confidential swap instruction
       const sourceAmountInteger = BigInt(Math.floor(parseFloat(sourceAmount) * 10 ** sourceToken.decimals));
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const minReceivedInteger = BigInt(Math.floor(minReceived * 10 ** destToken.decimals));
 
       const result = await confidentialSwap(
         sourceTokenPublicKey,
         destTokenPublicKey,
         sourceAmountInteger,
-        minReceivedInteger,
+        1n, //minReceivedInteger,
         sourceToken.tokenProgram,
         destToken.tokenProgram
       );
