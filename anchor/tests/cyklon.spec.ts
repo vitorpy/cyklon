@@ -6,7 +6,6 @@ import * as snarkjs from "snarkjs";
 import * as path from "path";
 import { buildBn128, utils } from "ffjavascript";
 const { unstringifyBigInts } = utils;
-// @ts-expect-error Not properly typed
 import { g1Uncompressed, negateAndSerializeG1, g2Uncompressed, to32ByteBuffer } from "../src/utils";
 
 const convertToSigner = (wallet: anchor.Wallet): anchor.web3.Signer => ({
@@ -123,7 +122,8 @@ Token Mint 1: ${tokenMint1.toBase58()}`
           tokenMint0: tokenMint0,
           tokenMint1: tokenMint1,
           user: payer.publicKey,
-          tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+          tokenMint0Program: anchor.utils.token.TOKEN_PROGRAM_ID,
+          tokenMint1Program: anchor.utils.token.TOKEN_PROGRAM_ID,
         })
         .rpc();
 
@@ -228,7 +228,8 @@ Token Mint 1: ${tokenMint1.toBase58()}`
           tokenMint0: tokenMint0,
           tokenMint1: tokenMint1,
           user: payer.publicKey,
-          tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+          tokenMint0Program: anchor.utils.token.TOKEN_PROGRAM_ID,
+          tokenMint1Program: anchor.utils.token.TOKEN_PROGRAM_ID,
           associatedTokenProgram: anchor.utils.token.ASSOCIATED_PROGRAM_ID,
           systemProgram: anchor.web3.SystemProgram.programId,
         })

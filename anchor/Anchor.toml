@@ -8,7 +8,7 @@ skip-lint = false
 cyklon = "CQW1DNS35zc9F8KvzYjf2ZKtmRp6ntxNdfRo2dZTXp2B"
 
 [programs.localnet]
-cyklon = "6zu8p1W3e5JAMCPMAsxVBAE112r65zECYmMNUWE8f9m2"
+cyklon = "CQW1DNS35zc9F8KvzYjf2ZKtmRp6ntxNdfRo2dZTXp2B"
 
 [registry]
 url = "https://api.apr.dev"
