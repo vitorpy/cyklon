@@ -21,14 +21,15 @@ interface Token {
   image: string;
   address: string;
   tokenProgram: string;
+  decimals: number;
 }
 
 const tokens: Token[] = [
-  { symbol: 'SOL', name: 'Solana', image: '/images/token-icons/solana.webp', address: 'NATIVE', tokenProgram: 'SPL-Token' },
-  { symbol: 'USDC', name: 'USD Coin', image: '/images/token-icons/usdc.webp', address: '...', tokenProgram: 'SPL-Token' },
-  { symbol: 'RAY', name: 'Raydium', image: '/images/token-icons/PSigc4ie_400x400.webp', address: '...', tokenProgram: 'SPL-Token' },
-  { symbol: 'SRM', name: 'Serum', image: '/images/token-icons/serum-logo.webp', address: '...', tokenProgram: 'SPL-Token' },
-  { symbol: 'PYUSD', name: 'PayPal USD', image: '/images/token-icons/PYUSD_Logo_(2).webp', address: 'CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM', tokenProgram: 'Token-2022' },
+  { symbol: 'SOL', name: 'Solana', image: '/images/token-icons/solana.webp', address: 'NATIVE', tokenProgram: 'SPL-Token', decimals: 9 },
+  { symbol: 'USDC', name: 'USD Coin', image: '/images/token-icons/usdc.webp', address: '...', tokenProgram: 'SPL-Token', decimals: 6 },
+  { symbol: 'RAY', name: 'Raydium', image: '/images/token-icons/PSigc4ie_400x400.webp', address: '...', tokenProgram: 'SPL-Token', decimals: 6 },
+  { symbol: 'SRM', name: 'Serum', image: '/images/token-icons/serum-logo.webp', address: '...', tokenProgram: 'SPL-Token', decimals: 6 },
+  { symbol: 'PYUSD', name: 'PayPal USD', image: '/images/token-icons/PYUSD_Logo_(2).webp', address: 'CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM', tokenProgram: 'Token-2022', decimals: 6 },
 ]
 
 export function SolanaSwapComponent() {
@@ -130,11 +131,14 @@ export function SolanaSwapComponent() {
       }
 
       // Add confidential swap instruction
+      const sourceAmountInteger = BigInt(Math.floor(parseFloat(sourceAmount) * 10 ** sourceToken.decimals));
+      const minReceivedInteger = BigInt(Math.floor(minReceived * 10 ** destToken.decimals));
+
       const result = await confidentialSwap(
         sourceTokenPublicKey,
         destTokenPublicKey,
-        parseFloat(sourceAmount),
-        minReceived,
+        sourceAmountInteger,
+        minReceivedInteger,
         sourceToken.tokenProgram,
         destToken.tokenProgram
       );
