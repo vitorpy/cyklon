@@ -1,7 +1,52 @@
 'use server'
 
-import path from 'path';
 import { g1Uncompressed, negateAndSerializeG1, g2Uncompressed, to32ByteBuffer } from "@blackpool/anchor";
+import { list } from '@vercel/blob';
+import { promises as fs } from 'fs';
+import path from 'path';
+
+async function getOrDownloadFile(filename: string): Promise<string> {
+    // Ensure the filename is properly sanitized to prevent directory traversal
+    // eslint-disable-next-line no-useless-escape
+    const sanitizedFilename = path.normalize(filename).replace(/^(\.\.[\/\\])+/, '');
+    const tempFilePath = path.join('/tmp', sanitizedFilename);
+  
+    try {
+      // Check if the file already exists in /tmp
+      await fs.access(tempFilePath);
+      console.log(`File ${sanitizedFilename} found in /tmp`);
+      return tempFilePath;
+    } catch (error) {
+      // File doesn't exist in /tmp, download it from Blob storage
+      console.log(`File ${sanitizedFilename} not found in /tmp, downloading from Blob storage`);
+  
+      try {
+        // List blobs to find the file
+        const { blobs } = await list({ prefix: path.dirname(sanitizedFilename) });
+        const blob = blobs.find(b => b.pathname === sanitizedFilename);
+  
+        if (!blob) {
+          throw new Error(`File ${sanitizedFilename} not found in Blob storage`);
+        }
+  
+        // Download the file
+        const response = await fetch(blob.url);
+        const buffer = await response.arrayBuffer();
+  
+        // Ensure the directory exists
+        await fs.mkdir(path.dirname(tempFilePath), { recursive: true });
+  
+        // Write the file to /tmp
+        await fs.writeFile(tempFilePath, Buffer.from(buffer));
+  
+        console.log(`File ${sanitizedFilename} downloaded and saved to /tmp`);
+        return tempFilePath;
+      } catch (downloadError) {
+        console.error(`Error downloading file ${sanitizedFilename}:`, downloadError);
+        throw downloadError;
+      }
+    }
+  }
 
 export async function generateProof(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -20,8 +65,8 @@ export async function generateProof(
 
   console.log("Generating proof for inputs:", { privateInputs, publicInputs });
 
-  const wasmPath = path.join(process.cwd(), "public", "zk", "swap.wasm");
-  const zkeyPath = path.join(process.cwd(), "public", "zk", "swap_final.zkey");
+  const wasmPath = await getOrDownloadFile("zk/swap.wasm");
+  const zkeyPath = await getOrDownloadFile("zk/swap_final.zkey");
 
   const input = {
     privateAmount: privateInputs.privateAmount.toString(),
