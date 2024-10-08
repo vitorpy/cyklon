@@ -9,7 +9,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required inputs' }, { status: 400 });
     }
 
-    const proof = await generateProof(privateInputs, publicInputs);
+    // Deserialize string values back to BigInt
+    const deserializedPrivateInputs = {
+      privateAmount: BigInt(privateInputs.privateAmount),
+      privateMinReceived: BigInt(privateInputs.privateMinReceived)
+    };
+
+    const deserializedPublicInputs = {
+      ...publicInputs,
+      publicBalanceX: BigInt(publicInputs.publicBalanceX),
+      publicBalanceY: BigInt(publicInputs.publicBalanceY),
+      totalLiquidity: BigInt(publicInputs.totalLiquidity)
+    };
+
+    const proof = await generateProof(deserializedPrivateInputs, deserializedPublicInputs);
     return NextResponse.json(proof);
   } catch (error) {
     console.error('Error generating proof:', error);
