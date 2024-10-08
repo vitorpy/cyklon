@@ -20,8 +20,8 @@ export async function prepareConfidentialSwap(
   programId: PublicKey,
   sourceToken: PublicKey,
   destToken: PublicKey,
-  amount: number,
-  minReceived: number,
+  amount: bigint,
+  minReceived: bigint,
   sourceTokenProgram: string,
   destTokenProgram: string
 ): Promise<SwapResult> {
@@ -152,7 +152,7 @@ export function useConfidentialSwap() {
   // @ts-expect-error Weird typing issues.
   const programId = getCyklonProgramId(cluster);
 
-  return async (sourceToken: PublicKey, destToken: PublicKey, amount: number, minReceived: number, sourceTokenProgram: string, destTokenProgram: string): Promise<SwapResult> => {
+  return async (sourceToken: PublicKey, destToken: PublicKey, amount: bigint, minReceived: bigint, sourceTokenProgram: string, destTokenProgram: string): Promise<SwapResult> => {
     return prepareConfidentialSwap(provider, programId, sourceToken, destToken, amount, minReceived, sourceTokenProgram, destTokenProgram);
   };
 }
