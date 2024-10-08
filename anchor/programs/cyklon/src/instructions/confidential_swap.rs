@@ -43,6 +43,12 @@ impl<'info> ConfidentialSwap<'info> {
     ) -> Result<()> {
         msg!("Confidential swap started");
 
+        // Extract necessary values before mutable borrow
+        let decimals_0 = self.token_mint_0.decimals;
+        let decimals_1 = self.token_mint_1.decimals;
+        let reserve_0 = self.pool.reserve_0;
+        let reserve_1 = self.pool.reserve_1;
+
         // Create a new Groth16Verifier instance
         let mut verifier_result = Groth16Verifier::new(
             &proof_a,
@@ -56,15 +62,16 @@ impl<'info> ConfidentialSwap<'info> {
         let verified = verifier_result.verify().map_err(|_| ErrorCode::InvalidProof)?;
 
         if verified {
-            let pool = &mut self.pool;
+            // Extract normalized values from public inputs
+            let normalized_new_balance_x = u64::from_be_bytes(public_inputs[0][24..].try_into().unwrap());
+            let normalized_new_balance_y = u64::from_be_bytes(public_inputs[1][24..].try_into().unwrap());
             
-            // Extract values from public inputs
-            // We'll use only the last 8 bytes of each 32-byte input for u64 conversion
-            let new_balance_x = u64::from_be_bytes(public_inputs[0][24..].try_into().unwrap());
-            let new_balance_y = u64::from_be_bytes(public_inputs[1][24..].try_into().unwrap());
+            // Denormalize the balances
+            let new_balance_x = Self::denormalize_amount(normalized_new_balance_x, decimals_0);
+            let new_balance_y = Self::denormalize_amount(normalized_new_balance_y, decimals_1);
             
             // Determine swap direction and calculate amount_in and amount_out
-            let (from_user_account, to_pool_account, from_pool_account, to_user_account, from_mint, to_mint, amount_in, amount_out, from_token_program, to_token_program) = if new_balance_x > pool.reserve_0 {
+            let (from_user_account, to_pool_account, from_pool_account, to_user_account, from_mint, to_mint, amount_in, amount_out, from_token_program, to_token_program) = if new_balance_x > reserve_0 {
                 (
                     &self.user_token_account_in,
                     &self.pool_token_account_0,
@@ -72,8 +79,8 @@ impl<'info> ConfidentialSwap<'info> {
                     &self.user_token_account_out,
                     &self.token_mint_0,
                     &self.token_mint_1,
-                    new_balance_x - pool.reserve_0,
-                    pool.reserve_1 - new_balance_y,
+                    new_balance_x - reserve_0,
+                    reserve_1 - new_balance_y,
                     &self.token_mint_0_program,
                     &self.token_mint_1_program,
                 )
@@ -85,19 +92,19 @@ impl<'info> ConfidentialSwap<'info> {
                     &self.user_token_account_out,
                     &self.token_mint_1,
                     &self.token_mint_0,
-                    new_balance_y - pool.reserve_1,
-                    pool.reserve_0 - new_balance_x,
+                    new_balance_y - reserve_1,
+                    reserve_0 - new_balance_x,
                     &self.token_mint_1_program,
                     &self.token_mint_0_program,
                 )
             };
 
             // Update pool reserves
-            pool.reserve_0 = new_balance_x;
-            pool.reserve_1 = new_balance_y;
+            self.pool.reserve_0 = new_balance_x;
+            self.pool.reserve_1 = new_balance_y;
 
-            let pool_token_mint_key_0 = pool.token_mint_0.key();
-            let pool_token_mint_key_1 = pool.token_mint_1.key();
+            let pool_token_mint_key_0 = self.pool.token_mint_0.key();
+            let pool_token_mint_key_1 = self.pool.token_mint_1.key();
 
             let pool_seeds = &[
                 &b"pool"[..], 
@@ -123,13 +130,6 @@ impl<'info> ConfidentialSwap<'info> {
                 from_mint.decimals,
             )?;
 
-            msg!("Swap direction: from {:?} to {:?}", from_mint.key(), to_mint.key());
-            msg!("From user account: {:?}", from_user_account.key());
-            msg!("To pool account: {:?}", to_pool_account.key());
-            msg!("From pool account: {:?}", from_pool_account.key());
-            msg!("To user account: {:?}", to_user_account.key());
-            msg!("Pool authority: {:?}", self.pool.key());
-
             transfer_checked(
                 CpiContext::new_with_signer(
                     to_token_program.to_account_info(),
@@ -149,5 +149,11 @@ impl<'info> ConfidentialSwap<'info> {
         } else {
             Err(ErrorCode::InvalidProof.into())
         }
+    }
+
+    // Helper function to denormalize amounts
+    fn denormalize_amount(normalized_amount: u64, decimals: u8) -> u64 {
+        let normalization_factor = 10u64.pow(9 - decimals as u32);
+        normalized_amount / normalization_factor
     }
 }

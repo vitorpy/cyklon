@@ -152,7 +152,9 @@ export function SolanaSwapComponent() {
         sourceAmountInteger,
         1n, //minReceivedInteger,
         sourceToken.tokenProgram,
-        destToken.tokenProgram
+        destToken.tokenProgram,
+        sourceToken.decimals,
+        destToken.decimals
       );
 
       if (!result.success || !result.transaction) {
