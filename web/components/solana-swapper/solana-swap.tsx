@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Slider } from "@/components/ui/slider"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import Image from "next/legacy/image"
+import Image from "next/image"
 import { useConfidentialSwap } from '@/lib/cyklon-swap'
 import { PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js'
 import { createAssociatedTokenAccountInstruction, createSyncNativeInstruction, NATIVE_MINT, createCloseAccountInstruction, getAssociatedTokenAddress } from '@solana/spl-token'
@@ -342,7 +342,10 @@ function TokenSelect({ tokens, selectedToken, onSelect, disabledToken }: TokenSe
               width={20}
               height={20}
               className="mr-2 rounded-full"
-            />
+              style={{
+                maxWidth: "100%",
+                height: "auto"
+              }} />
             <span className="truncate">{selectedToken?.symbol || 'Select Token'}</span>
           </div>
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -373,7 +376,10 @@ function TokenSelect({ tokens, selectedToken, onSelect, disabledToken }: TokenSe
                       width={20}
                       height={20}
                       className="mr-2 rounded-full"
-                    />
+                      style={{
+                        maxWidth: "100%",
+                        height: "auto"
+                      }} />
                     {token.symbol} - {token.name}
                   </div>
                 </CommandItem>
@@ -386,5 +392,5 @@ function TokenSelect({ tokens, selectedToken, onSelect, disabledToken }: TokenSe
         )}
       </PopoverContent>
     </Popover>
-  )
+  );
 }
