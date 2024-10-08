@@ -42,7 +42,6 @@ export function SolanaSwapComponent() {
   const [isSwapping, setIsSwapping] = useState<boolean>(false)
   const [swapError, setSwapError] = useState<string | null>(null)
   const [minReceived, setMinReceived] = useState<number>(0)
-  const [isGeneratingProof, setIsGeneratingProof] = useState(false)
 
   const { publicKey } = useWallet()
   const { balance: sourceTokenBalance } = useTokenBalance(publicKey, sourceToken.address)
@@ -91,8 +90,13 @@ export function SolanaSwapComponent() {
       const transaction = new Transaction();
       let wrappedSolAccount: PublicKey | null = null;
 
+      console.log('Starting confidential swap process');
+      console.log('Source token:', sourceToken.symbol, sourceTokenPublicKey.toBase58());
+      console.log('Destination token:', destToken.symbol, destTokenPublicKey.toBase58());
+
       // Wrap SOL if the source token is native SOL
       if (sourceToken.address === 'NATIVE') {
+        console.log('Wrapping SOL');
         wrappedSolAccount = await getAssociatedTokenAddress(NATIVE_MINT, publicKey);
         transaction.add(
           createAssociatedTokenAccountInstruction(
@@ -108,6 +112,7 @@ export function SolanaSwapComponent() {
           }),
           createSyncNativeInstruction(wrappedSolAccount)
         );
+        console.log('Added SOL wrapping instructions');
       }
 
       // Check and create associated token account for destination token if needed
@@ -129,12 +134,16 @@ export function SolanaSwapComponent() {
             destTokenPublicKey
           )
         );
+        console.log('Added create associated token account instruction');
       }
 
       // Add confidential swap instruction
       const sourceAmountInteger = BigInt(Math.floor(parseFloat(sourceAmount) * 10 ** sourceToken.decimals));
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const minReceivedInteger = BigInt(Math.floor(minReceived * 10 ** destToken.decimals));
+
+      console.log('Preparing confidential swap');
+      console.log('Source amount:', sourceAmountInteger.toString());
+      console.log('Min received:', minReceivedInteger.toString());
 
       // The proof generation is now handled within prepareConfidentialSwap
       const result = await confidentialSwap(
@@ -150,10 +159,13 @@ export function SolanaSwapComponent() {
         throw new Error(result.error || 'Swap failed');
       }
 
+      console.log('Confidential swap preparation successful');
       transaction.add(result.transaction);
+      console.log('Added confidential swap instruction');
 
       // Unwrap SOL if the destination token is native SOL
       if (destToken.address === 'NATIVE') {
+        console.log('Adding SOL unwrapping instruction');
         const wrappedSolAccount = await getAssociatedTokenAddress(NATIVE_MINT, publicKey);
         transaction.add(
           createCloseAccountInstruction(
@@ -162,21 +174,24 @@ export function SolanaSwapComponent() {
             publicKey  // destination
           )
         );
+        console.log('Added SOL unwrapping instruction');
       }
+
+      console.log('Transaction built. Instruction count:', transaction.instructions.length);
+      console.log('Sending transaction...');
 
       // Send and confirm the transaction
       const signature = await wallet.sendTransaction(transaction, connection);
+      console.log('Transaction sent. Signature:', signature);
       await connection.confirmTransaction(signature, 'confirmed');
       console.log('Transaction confirmed:', signature);
 
       // Handle successful swap
-      // setDestAmount(result.amount?.toString() || '');
-      // You might want to update balances or show a success message here
-      console.log('Swap successful:', result);
+      console.log('Swap successful');
 
     } catch (error) {
+      console.error('Swap error:', error);
       setSwapError(error instanceof Error ? error.message : 'An unexpected error occurred');
-      console.error(error);
 
       // Sentry error reporting
       Sentry.captureException(error, {
