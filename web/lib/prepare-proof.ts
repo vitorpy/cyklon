@@ -47,7 +47,9 @@ async function getOrDownloadFile(filename: string): Promise<string> {
   }
 
 export async function generateProof(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   privateInputs: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   publicInputs: any
 ): Promise<{ proofA: Uint8Array, proofB: Uint8Array, proofC: Uint8Array, publicSignals: Uint8Array[] }> {
   // Remove the 'use server' directive here as it's already at the top of the file

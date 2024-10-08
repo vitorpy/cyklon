@@ -11,12 +11,28 @@ import { TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function handleGenerateProof(privateInputs: any, publicInputs: any) {
   try {
+    // Serialize BigInt values to strings
+    const serializedPrivateInputs = {
+      privateAmount: privateInputs.privateAmount.toString(),
+      privateMinReceived: privateInputs.privateMinReceived.toString()
+    };
+
+    const serializedPublicInputs = {
+      ...publicInputs,
+      publicBalanceX: publicInputs.publicBalanceX.toString(),
+      publicBalanceY: publicInputs.publicBalanceY.toString(),
+      totalLiquidity: publicInputs.totalLiquidity.toString()
+    };
+
     const response = await fetch('/api/generate-proof', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ privateInputs, publicInputs }),
+      body: JSON.stringify({ 
+        privateInputs: serializedPrivateInputs, 
+        publicInputs: serializedPublicInputs 
+      }),
     });
 
     if (!response.ok) {
