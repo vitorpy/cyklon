@@ -42,6 +42,7 @@ export function SolanaSwapComponent() {
   const [isSwapping, setIsSwapping] = useState<boolean>(false)
   const [swapError, setSwapError] = useState<string | null>(null)
   const [minReceived, setMinReceived] = useState<number>(0)
+  const [isGeneratingProof, setIsGeneratingProof] = useState(false)
 
   const { publicKey } = useWallet()
   const { balance: sourceTokenBalance } = useTokenBalance(publicKey, sourceToken.address)
@@ -135,6 +136,7 @@ export function SolanaSwapComponent() {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const minReceivedInteger = BigInt(Math.floor(minReceived * 10 ** destToken.decimals));
 
+      // The proof generation is now handled within prepareConfidentialSwap
       const result = await confidentialSwap(
         sourceTokenPublicKey,
         destTokenPublicKey,
