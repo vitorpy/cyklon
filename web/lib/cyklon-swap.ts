@@ -80,15 +80,15 @@ export async function prepareConfidentialSwap(
 
     // Prepare inputs for proof generation
     const publicInputs = {
-      publicBalanceX: poolAccount.reserve0.toNumber(),
-      publicBalanceY: poolAccount.reserve1.toNumber(),
+      publicBalanceX: BigInt(poolAccount.reserve0),
+      publicBalanceY: BigInt(poolAccount.reserve1),
       isSwapXtoY: isSwapXtoY,
-      totalLiquidity: poolAccount.reserve0.toNumber() + poolAccount.reserve1.toNumber()
+      totalLiquidity: BigInt(poolAccount.reserve0) + BigInt(poolAccount.reserve1)
     };
 
     const privateInputs = {
-      privateAmount: amount,
-      privateMinReceived: minReceived
+      privateAmount: BigInt(amount),
+      privateMinReceived: BigInt(minReceived)
     };
 
     // Generate proof

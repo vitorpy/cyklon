@@ -16,12 +16,14 @@ export function getCyklonProgram(provider: AnchorProvider) {
 }
 
 // This is a helper function to get the program ID for the Cyklon program depending on the cluster.
-export function getCyklonProgramId(cluster: Cluster) {
+export function getCyklonProgramId(cluster: Cluster | 'localnet') {
   switch (cluster) {
+    case 'localnet':
+      return new PublicKey('CQW1DNS35zc9F8KvzYjf2ZKtmRp6ntxNdfRo2dZTXp2B');
     case 'devnet':
     case 'testnet':
       // This is the program ID for the Counter program on devnet and testnet.
-      return new PublicKey('5WrVRh6pUTvyrjrTn4GKGebsZn2GnqBK2h7agfn2QvBX');
+      return CYKLON_PROGRAM_ID;
     case 'mainnet-beta':
     default:
       return CYKLON_PROGRAM_ID;

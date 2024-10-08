@@ -183,9 +183,18 @@ export function SolanaSwapComponent() {
       // Send and confirm the transaction
       const signature = await wallet.sendTransaction(transaction, connection);
       console.log('Transaction sent. Signature:', signature);
-      await connection.confirmTransaction(signature, 'confirmed');
-      console.log('Transaction confirmed:', signature);
+      try {
+        await connection.confirmTransaction(signature, 'confirmed');
+        console.log('Transaction confirmed:', signature);
+      } catch (error) {
+        console.error('Transaction confirmation failed:', error);
+        
+        const simulation = await connection.simulateTransaction(transaction);
+        console.log('Transaction simulation:', simulation);
 
+        throw error;
+      }
+      
       // Handle successful swap
       console.log('Swap successful');
 
