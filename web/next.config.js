@@ -8,7 +8,11 @@ const { withSentryConfig } = require("@sentry/nextjs");
  * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
  **/
 const nextConfig = {
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.optimization.splitChunks = false;
+    }
+
     config.externals = [
       ...(config.externals || []),
       'bigint',
