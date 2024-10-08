@@ -4,7 +4,8 @@
         {
             "type": "chrome",
             "request": "launch",
-            "name": "chrome",
+            "runtimeExecutable": "/usr/bin/brave-browser",
+            "name": "brave",
             "url": "http://localhost:3000",
             "webRoot": "${workspaceFolder}/web",
             "userDataDir": false
