@@ -7,7 +7,30 @@ import { useAnchorProvider } from '../components/solana/solana-provider';
 import { useCluster } from '../components/cluster/cluster-data-access';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token';
-import { generateProof } from './prepare-proof';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function handleGenerateProof(privateInputs: any, publicInputs: any) {
+  try {
+    const response = await fetch('/api/generate-proof', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ privateInputs, publicInputs }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to generate proof');
+    }
+
+    const proof = await response.json();
+    console.log('Proof generated:', proof);
+    return proof;
+  } catch (error) {
+    console.error('Error generating proof:', error);
+    throw error;
+  }
+}
 
 export interface SwapResult {
   success: boolean;
@@ -92,7 +115,7 @@ export async function prepareConfidentialSwap(
     };
 
     // Generate proof
-    const { proofA, proofB, proofC, publicSignals } = await generateProof(
+    const { proofA, proofB, proofC, publicSignals } = await handleGenerateProof(
       privateInputs,
       publicInputs
     );
@@ -118,7 +141,8 @@ export async function prepareConfidentialSwap(
           Array.from(proofA),
           Array.from(proofB),
           Array.from(proofC),
-          publicSignals.map(signal => Array.from(signal))
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          publicSignals.map((signal: any) => Array.from(signal))
         )
         .accounts({
           // @ts-expect-error Anchor is finnick.
@@ -141,7 +165,7 @@ export async function prepareConfidentialSwap(
     return { success: true, transaction };
   } catch (error) {
     console.error('Error preparing confidential swap:', error);
-    return { success: false, error: error as string };
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
 }
 
