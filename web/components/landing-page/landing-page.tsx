@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Header } from '../ui/header';
 import { SolanaSwapComponent } from '../solana-swapper/solana-swap';
-import Image from 'next/image';
+import Image from "next/image";
 import NewsletterInput from '../ui/newsletter-input';
 import ContactForm from '../ui/contact-form';
 
@@ -32,9 +32,11 @@ export default function LandingPage() {
         <Image
           src="/images/background.jpg"
           alt="Background"
-          layout="fill"
-          objectFit="cover"
-        />
+          fill
+          sizes="100vw"
+          style={{
+            objectFit: "cover"
+          }} />
       </div>
     </div>,
     // Panel 2: New content
@@ -43,9 +45,11 @@ export default function LandingPage() {
         <Image
           src="/images/newsletter.jpg"
           alt="Newsletter Background"
-          layout="fill"
-          objectFit="contain"
-        />
+          fill
+          sizes="100vw"
+          style={{
+            objectFit: "contain"
+          }} />
       </div>
       <div className='w-full sm:w-1/2 relative p-4 flex flex-col items-center justify-center text-black'>
         <Header title="Newsletter" subtitle="Sign up with your email address to receive news and updates" />
@@ -70,9 +74,11 @@ export default function LandingPage() {
         <Image
           src="/images/about.jpeg"
           alt="Background"
-          layout="fill"
-          objectFit="contain"
-        />
+          fill
+          sizes="100vw"
+          style={{
+            objectFit: "contain"
+          }} />
       </div>
       <div className='w-full sm:w-2/5 relative p-4 flex flex-col items-center justify-center'>
         <div className='flex flex-col items-center justify-center w-full'>
