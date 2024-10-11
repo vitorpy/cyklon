@@ -161,9 +161,11 @@ Token Mint 1: ${tokenMint1.toBase58()}`
       return BigInt(amount) * BigInt(10 ** (9 - decimals));
     };
 
+    /*
     const denormalizeAmount = (amount: bigint, decimals: number) => {
       return Number(amount / BigInt(10 ** (9 - decimals)));
     };
+    */
 
     const poolAccount = await program.account.pool.fetch(poolPubkey);
 
@@ -204,19 +206,18 @@ Token Mint 1: ${tokenMint1.toBase58()}`
     const normalizedReserve0 = normalizeAmount(poolAccount.reserve0.toNumber(), decimals0);
     const normalizedReserve1 = normalizeAmount(poolAccount.reserve1.toNumber(), decimals1);
 
-    const privateAmount = normalizeAmount(100_000, decimals0); // 0.1 token of tokenMint0
+    const privateInputAmount = normalizeAmount(100_000, decimals0); // 0.1 token of tokenMint0
     const privateMinReceived = normalizeAmount(99_000_000, decimals1); // 0.099 token of tokenMint1 (1% slippage)
     const isSwapXtoY = 1; // Swapping token0 for token1
     
     const publicInputs = {
       publicBalanceX: normalizedReserve0,
       publicBalanceY: normalizedReserve1,
-      isSwapXtoY: isSwapXtoY,
-      totalLiquidity: normalizedReserve0 + normalizedReserve1
+      isSwapXtoY: isSwapXtoY
     };
 
     const privateInputs = {
-      privateAmount: privateAmount,
+      privateInputAmount: privateInputAmount,
       privateMinReceived: privateMinReceived
     };
 
@@ -294,21 +295,20 @@ Token Mint 1: ${tokenMint1.toBase58()}`
 });
 
 async function generateProof(
-  privateInputs: { privateAmount: bigint, privateMinReceived: bigint },
-  publicInputs: { publicBalanceX: bigint, publicBalanceY: bigint, isSwapXtoY: number, totalLiquidity: bigint }
+  privateInputs: { privateInputAmount: bigint, privateMinReceived: bigint },
+  publicInputs: { publicBalanceX: bigint, publicBalanceY: bigint, isSwapXtoY: number }
 ): Promise<{ proofA: Uint8Array, proofB: Uint8Array, proofC: Uint8Array, publicSignals: Uint8Array[] }> {
   console.log("Generating proof for inputs:", { privateInputs, publicInputs });
 
-  const wasmPath = path.join(__dirname, "../../swap_js", "swap.wasm");
-  const zkeyPath = path.join(__dirname, "../../", "swap_final.zkey");
+  const wasmPath = path.join(__dirname, "../../circuits/swap_js", "swap.wasm");
+  const zkeyPath = path.join(__dirname, "../../circuits", "swap_0001.zkey");
 
   const input = {
-    privateAmount: privateInputs.privateAmount.toString(),
+    privateInputAmount: privateInputs.privateInputAmount.toString(),
     privateMinReceived: privateInputs.privateMinReceived.toString(),
     publicBalanceX: publicInputs.publicBalanceX.toString(),
     publicBalanceY: publicInputs.publicBalanceY.toString(),
-    isSwapXtoY: publicInputs.isSwapXtoY.toString(),
-    totalLiquidity: publicInputs.totalLiquidity.toString()
+    isSwapXtoY: publicInputs.isSwapXtoY.toString()
   };
 
   const { proof, publicSignals } = await snarkjs.groth16.fullProve(input, wasmPath, zkeyPath);

@@ -15,10 +15,8 @@ declare const snarkjs: {
 };
 
 export async function generateProof(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  privateInputs: any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  publicInputs: any
+  privateInputs: { privateInputAmount: bigint, privateMinReceived: bigint },
+  publicInputs: { publicBalanceX: bigint, publicBalanceY: bigint, isSwapXtoY: number }
 ): Promise<{ proofA: Uint8Array, proofB: Uint8Array, proofC: Uint8Array, publicSignals: Uint8Array[] }> {
   // Remove the 'use server' directive here as it's already at the top of the file
   
@@ -33,12 +31,11 @@ export async function generateProof(
   const zkeyPath = "zk/swap_final.zkey";
 
   const input = {
-    privateAmount: privateInputs.privateAmount.toString(),
+    privateInputAmount: privateInputs.privateInputAmount.toString(),
     privateMinReceived: privateInputs.privateMinReceived.toString(),
     publicBalanceX: publicInputs.publicBalanceX.toString(),
     publicBalanceY: publicInputs.publicBalanceY.toString(),
-    isSwapXtoY: publicInputs.isSwapXtoY.toString(),
-    totalLiquidity: publicInputs.totalLiquidity.toString()
+    isSwapXtoY: publicInputs.isSwapXtoY.toString()
   };
 
   const { proof, publicSignals } = await snarkjs.groth16.fullProve(input, wasmPath, zkeyPath);

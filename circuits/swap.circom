@@ -3,10 +3,11 @@ pragma circom 2.0.0;
 include "node_modules/circomlib/circuits/comparators.circom";
 include "node_modules/circomlib/circuits/bitify.circom";
 include "node_modules/circomlib/circuits/mux1.circom";
+include "division.circom";
 
-template ZKConstantSumAMM() {
+template ZKConstantProductAMM() {
     // Private inputs
-    signal input privateAmount;
+    signal input privateInputAmount;
     signal input privateMinReceived;
 
     // Public inputs
@@ -14,16 +15,13 @@ template ZKConstantSumAMM() {
     signal input publicBalanceY;
     signal input isSwapXtoY; // 1 if swapping X to Y, 0 if swapping Y to X
 
-    // Public constant (total liquidity)
-    signal input totalLiquidity;
-
     // Outputs
     signal output newBalanceX;
     signal output newBalanceY;
     signal output amountReceived;
 
-    // Verify total liquidity
-    publicBalanceX + publicBalanceY === totalLiquidity;
+    // Calculate constant product
+    signal constantProduct <== publicBalanceX * publicBalanceY;
 
     // Determine swap direction and calculate amounts
     component muxInput = Mux1();
@@ -38,22 +36,25 @@ template ZKConstantSumAMM() {
     muxOutput.s <== isSwapXtoY;
     signal outputBalance <== muxOutput.out;
 
-    // Calculate new balances
-    signal newInputBalance <== inputBalance + privateAmount;
-    amountReceived <== outputBalance - (totalLiquidity - newInputBalance);
+    // Calculate new input balance
+    signal newInputBalance <== inputBalance + privateInputAmount;
+
+    // Calculate new output balance (y = k / x)
+    component division = ReciprocalDivision(252);
+    division.dividend <== constantProduct;
+    division.divisor <== newInputBalance;
+    signal newOutputBalance <== division.quotient;
 
     // Assign new balances
-    component muxNewX = Mux1();
-    muxNewX.c[0] <== publicBalanceX;
-    muxNewX.c[1] <== newInputBalance;
-    muxNewX.s <== isSwapXtoY;
-    newBalanceX <== muxNewX.out;
+    signal intermediate1 <== (1 - isSwapXtoY) * newOutputBalance;
+    newBalanceX <== isSwapXtoY * newInputBalance + intermediate1;
+    signal intermediate2 <== (1 - isSwapXtoY) * newInputBalance;
+    newBalanceY <== isSwapXtoY * newOutputBalance + intermediate2;
 
-    component muxNewY = Mux1();
-    muxNewY.c[0] <== totalLiquidity - newInputBalance;
-    muxNewY.c[1] <== totalLiquidity - newBalanceX;
-    muxNewY.s <== isSwapXtoY;
-    newBalanceY <== muxNewY.out;
+    // Calculate amount received
+    signal intermediate3 <== isSwapXtoY * (publicBalanceY - newOutputBalance);
+    signal intermediate4 <== (1 - isSwapXtoY) * (publicBalanceX - newOutputBalance);
+    amountReceived <== intermediate3 + intermediate4;
 
     // Verify minimum received amount
     component checkMinReceived = GreaterEqThan(252);
@@ -62,8 +63,8 @@ template ZKConstantSumAMM() {
     checkMinReceived.out === 1;
 
     // Range check for private inputs
-    component privateAmountCheck = Num2Bits(252);
-    privateAmountCheck.in <== privateAmount;
+    component privateInputAmountCheck = Num2Bits(252);
+    privateInputAmountCheck.in <== privateInputAmount;
 
     component privateMinReceivedCheck = Num2Bits(252);
     privateMinReceivedCheck.in <== privateMinReceived;
@@ -78,6 +79,9 @@ template ZKConstantSumAMM() {
     positiveBalance2.in[0] <== newBalanceY;
     positiveBalance2.in[1] <== 0;
     positiveBalance2.out === 1;
+
+    // Verify constant product
+    // newBalanceX * newBalanceY === constantProduct;
 }
 
-component main = ZKConstantSumAMM();
+component main = ZKConstantProductAMM();
