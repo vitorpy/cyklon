@@ -18,4 +18,8 @@ pub enum ErrorCode {
     MathOverflow,
     #[msg("Unable to create Groth16Verifier")]
     InvalidGroth16Verifier,
+    #[msg("Invalid token order")]
+    InvalidTokenOrder,
+    #[msg("Invalid swap amount")]
+    InvalidSwapAmount,
 }

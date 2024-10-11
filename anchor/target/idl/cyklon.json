@@ -339,6 +339,16 @@
       "code": 6007,
       "name": "InvalidGroth16Verifier",
       "msg": "Unable to create Groth16Verifier"
+    },
+    {
+      "code": 6008,
+      "name": "InvalidTokenOrder",
+      "msg": "Invalid token order"
+    },
+    {
+      "code": 6009,
+      "name": "InvalidSwapAmount",
+      "msg": "Invalid swap amount"
     }
   ],
   "types": [

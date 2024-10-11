@@ -2,6 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{transfer_checked, Mint, TokenAccount, TokenInterface, TransferChecked};
 
 use crate::state::Pool;
+use crate::errors::ErrorCode;
 use crate::events::LiquidityAdded;
 
 #[derive(Accounts)]
@@ -30,6 +31,11 @@ impl<'info> AddLiquidity<'info> {
         amount_0: u64,
         amount_1: u64,
     ) -> Result<()> {
+        // Add this check at the beginning of the function
+        if self.token_mint_0.key() >= self.token_mint_1.key() {
+            return Err(ErrorCode::InvalidTokenOrder.into());
+        }
+
         let pool = &mut self.pool;
         
         // Calculate the liquidity to be added

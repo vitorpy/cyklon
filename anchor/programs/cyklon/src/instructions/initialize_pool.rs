@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token_interface::Mint;
 use crate::state::Pool;
+use crate::errors::ErrorCode;
 
 #[derive(Accounts)]
 pub struct InitializePool<'info> {
@@ -18,6 +19,11 @@ impl<'info> InitializePool<'info> {
         &mut self,
         bump: u8,
     ) -> Result<()> {
+        // Add this check at the beginning of the function
+        if self.token_mint_0.key() >= self.token_mint_1.key() {
+            return Err(ErrorCode::InvalidTokenOrder.into());
+        }
+
         let pool = &mut self.pool;
         pool.token_mint_0 = self.token_mint_0.key();
         pool.token_mint_1 = self.token_mint_1.key();
