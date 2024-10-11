@@ -66,9 +66,15 @@ impl<'info> ConfidentialSwap<'info> {
             let normalized_new_balance_x = u64::from_be_bytes(public_inputs[0][24..].try_into().unwrap());
             let normalized_new_balance_y = u64::from_be_bytes(public_inputs[1][24..].try_into().unwrap());
             
+            msg!("Normalized new balance x: {}", normalized_new_balance_x); 
+            msg!("Normalized new balance y: {}", normalized_new_balance_y);
+            
             // Denormalize the balances
             let new_balance_x = Self::denormalize_amount(normalized_new_balance_x, decimals_0);
             let new_balance_y = Self::denormalize_amount(normalized_new_balance_y, decimals_1);
+            
+            msg!("New balance x: {}", new_balance_x);
+            msg!("New balance y: {}", new_balance_y);
             
             // Determine swap direction and calculate amount_in and amount_out
             let (from_user_account, to_pool_account, from_pool_account, to_user_account, from_mint, to_mint, amount_in, amount_out, from_token_program, to_token_program) = if new_balance_x > reserve_0 {
@@ -115,6 +121,15 @@ impl<'info> ConfidentialSwap<'info> {
 
             let signer_seeds = &[&pool_seeds[..]];
 
+            msg!("Performing token transfers");
+
+            msg!("From: {:?}", from_user_account.to_account_info().key());
+            msg!("To: {:?}", to_pool_account.to_account_info().key());
+            msg!("Authority: {:?}", self.user.to_account_info().key());
+            msg!("Mint: {:?}", from_mint.to_account_info().key());
+            msg!("Amount: {:?}", amount_in);
+            msg!("Decimals: {:?}", from_mint.decimals); 
+
             // Perform token transfers
             transfer_checked(
                 CpiContext::new(
@@ -129,6 +144,12 @@ impl<'info> ConfidentialSwap<'info> {
                 amount_in,
                 from_mint.decimals,
             )?;
+
+            msg!("To: {:?}", to_user_account.to_account_info().key());
+            msg!("Authority: {:?}", self.pool.to_account_info().key());
+            msg!("Mint: {:?}", to_mint.to_account_info().key());
+            msg!("Amount: {:?}", amount_out);
+            msg!("Decimals: {:?}", to_mint.decimals);
 
             transfer_checked(
                 CpiContext::new_with_signer(
