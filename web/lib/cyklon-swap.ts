@@ -130,22 +130,20 @@ export async function prepareConfidentialSwap(
     const publicInputs = {
       publicBalanceX: normalizedReserve0,
       publicBalanceY: normalizedReserve1,
-      isSwapXtoY: isSwapXtoY,
-      totalLiquidity: normalizedReserve0 + normalizedReserve1
+      isSwapXtoY: isSwapXtoY
     };
 
     const privateInputs = {
-      privateAmount: normalizedAmount,
+      privateInputAmount: normalizedAmount,
       privateMinReceived: normalizedMinReceived
     };
 
     console.log(`Circuit inputs:
-      privateAmount: ${privateInputs.privateAmount}
+      privateInputAmount: ${privateInputs.privateInputAmount}
       privateMinReceived: ${privateInputs.privateMinReceived}
       publicBalanceX: ${publicInputs.publicBalanceX}
       publicBalanceY: ${publicInputs.publicBalanceY}
       isSwapXtoY: ${publicInputs.isSwapXtoY}
-      totalLiquidity: ${publicInputs.totalLiquidity}
     `);
 
     // Generate proof

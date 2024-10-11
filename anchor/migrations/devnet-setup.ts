@@ -10,7 +10,7 @@ import * as anchor from '@coral-xyz/anchor';
 import { createAssociatedTokenAccountInstruction, createSyncNativeInstruction } from '@solana/spl-token';
 import { AnchorProvider, web3, Program, Idl } from '@coral-xyz/anchor';
 import { PublicKey, SystemProgram, Connection, Keypair } from '@solana/web3.js';
-import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddress, TOKEN_2022_PROGRAM_ID, NATIVE_MINT } from '@solana/spl-token';
+import { TOKEN_PROGRAM_ID, getAssociatedTokenAddress, TOKEN_2022_PROGRAM_ID, NATIVE_MINT } from '@solana/spl-token';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';

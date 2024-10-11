@@ -65,9 +65,11 @@ impl<'info> ConfidentialSwap<'info> {
             // Extract normalized values from public inputs
             let normalized_new_balance_x = u64::from_be_bytes(public_inputs[0][24..].try_into().unwrap());
             let normalized_new_balance_y = u64::from_be_bytes(public_inputs[1][24..].try_into().unwrap());
+            let is_swap_x_to_y = u64::from_be_bytes(public_inputs[2][24..].try_into().unwrap()) != 0;
             
             msg!("Normalized new balance x: {}", normalized_new_balance_x); 
             msg!("Normalized new balance y: {}", normalized_new_balance_y);
+            msg!("Is swap X to Y: {}", is_swap_x_to_y);
             
             // Denormalize the balances
             let new_balance_x = Self::denormalize_amount(normalized_new_balance_x, decimals_0);
@@ -77,20 +79,7 @@ impl<'info> ConfidentialSwap<'info> {
             msg!("New balance y: {}", new_balance_y);
             
             // Determine swap direction and calculate amount_in and amount_out
-            let (from_user_account, to_pool_account, from_pool_account, to_user_account, from_mint, to_mint, amount_in, amount_out, from_token_program, to_token_program) = if new_balance_x > reserve_0 {
-                (
-                    &self.user_token_account_in,
-                    &self.pool_token_account_0,
-                    &self.pool_token_account_1,
-                    &self.user_token_account_out,
-                    &self.token_mint_0,
-                    &self.token_mint_1,
-                    new_balance_x - reserve_0,
-                    reserve_1 - new_balance_y,
-                    &self.token_mint_0_program,
-                    &self.token_mint_1_program,
-                )
-            } else {
+            let (from_user_account, to_pool_account, from_pool_account, to_user_account, from_mint, to_mint, amount_in, amount_out, from_token_program, to_token_program) = if is_swap_x_to_y {
                 (
                     &self.user_token_account_in,
                     &self.pool_token_account_1,
@@ -102,6 +91,19 @@ impl<'info> ConfidentialSwap<'info> {
                     reserve_0 - new_balance_x,
                     &self.token_mint_1_program,
                     &self.token_mint_0_program,
+                )
+            } else {
+                (
+                    &self.user_token_account_in,
+                    &self.pool_token_account_0,
+                    &self.pool_token_account_1,
+                    &self.user_token_account_out,
+                    &self.token_mint_0,
+                    &self.token_mint_1,
+                    new_balance_x - reserve_0,
+                    reserve_1 - new_balance_y,
+                    &self.token_mint_0_program,
+                    &self.token_mint_1_program,
                 )
             };
 
