@@ -345,6 +345,16 @@ export type Cyklon = {
       "code": 6007,
       "name": "invalidGroth16Verifier",
       "msg": "Unable to create Groth16Verifier"
+    },
+    {
+      "code": 6008,
+      "name": "invalidTokenOrder",
+      "msg": "Invalid token order"
+    },
+    {
+      "code": 6009,
+      "name": "invalidSwapAmount",
+      "msg": "Invalid swap amount"
     }
   ],
   "types": [

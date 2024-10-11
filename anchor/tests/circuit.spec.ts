@@ -11,6 +11,7 @@ function isWithinTolerance(actual: bigint, expected: bigint, tolerancePercent: n
 }
 
 describe("ZK Constant Sum AMM Swap", () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let circuit: any;
 
   beforeAll(async () => {
@@ -112,6 +113,7 @@ describe("ZK Constant Sum AMM Swap", () => {
 });
 
 describe("ReciprocalDivision", () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let divisionCircuit: any;
 
   beforeAll(async () => {

@@ -15,12 +15,9 @@ declare const snarkjs: {
 };
 
 export async function generateProof(
-  privateInputs: { privateInputAmount: bigint, privateMinReceived: bigint },
+  privateInputs: { privateInputAmount: string, privateMinReceived: string },
   publicInputs: { publicBalanceX: bigint, publicBalanceY: bigint, isSwapXtoY: number }
 ): Promise<{ proofA: Uint8Array, proofB: Uint8Array, proofC: Uint8Array, publicSignals: Uint8Array[] }> {
-  // Remove the 'use server' directive here as it's already at the top of the file
-  
-  // Use dynamic imports for modules that might cause issues in server context
   // @ts-expect-error ffjavascript is not typed.
   const { buildBn128, utils: ffUtils } = await import('ffjavascript');
   const { unstringifyBigInts } = ffUtils;
@@ -31,8 +28,8 @@ export async function generateProof(
   const zkeyPath = "zk/swap_final.zkey";
 
   const input = {
-    privateInputAmount: privateInputs.privateInputAmount.toString(),
-    privateMinReceived: privateInputs.privateMinReceived.toString(),
+    privateInputAmount: privateInputs.privateInputAmount,
+    privateMinReceived: privateInputs.privateMinReceived,
     publicBalanceX: publicInputs.publicBalanceX.toString(),
     publicBalanceY: publicInputs.publicBalanceY.toString(),
     isSwapXtoY: publicInputs.isSwapXtoY.toString()

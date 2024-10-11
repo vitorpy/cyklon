@@ -15,20 +15,6 @@ export interface SwapResult {
   error?: string;
 }
 
-const NORMALIZATION_FACTOR = 9; // Normalize to 9 decimal places
-
-const normalizeAmount = (amount: bigint, decimals: number): bigint => {
-  const result = amount * BigInt(10 ** (NORMALIZATION_FACTOR - decimals));
-  console.log(`Normalizing: amount=${amount}, decimals=${decimals}, result=${result}`);
-  return result;
-};
-
-const denormalizeAmount = (amount: bigint, decimals: number): bigint => {
-  const result = amount / BigInt(10 ** (NORMALIZATION_FACTOR - decimals));
-  console.log(`Denormalizing: amount=${amount}, decimals=${decimals}, result=${result}`);
-  return result;
-};
-
 export async function prepareConfidentialSwap(
   provider: AnchorProvider,
   programId: PublicKey,
@@ -109,33 +95,20 @@ export async function prepareConfidentialSwap(
       reserve1: ${poolAccount.reserve1.toString()}
     `);
 
-    // Normalize amounts
-    const normalizedAmount = normalizeAmount(amount, sourceDecimals);
-    const normalizedMinReceived = normalizeAmount(minReceived, destDecimals);
-    const normalizedReserve0 = normalizeAmount(BigInt(poolAccount.reserve0), sourceToken.equals(token0) ? sourceDecimals : destDecimals);
-    const normalizedReserve1 = normalizeAmount(BigInt(poolAccount.reserve1), sourceToken.equals(token0) ? destDecimals : sourceDecimals);
-
-    console.log(`Normalized values:
-      normalizedAmount: ${normalizedAmount.toString()}
-      normalizedMinReceived: ${normalizedMinReceived.toString()}
-      normalizedReserve0: ${normalizedReserve0.toString()}
-      normalizedReserve1: ${normalizedReserve1.toString()}
-    `);
-
     // Determine if we're swapping from token0 to token1 or vice versa
     const isSwapXtoY = sourceToken.equals(token0) ? 1 : 0;
     console.log(`isSwapXtoY: ${isSwapXtoY}`);
 
     // Prepare inputs for proof generation
     const publicInputs = {
-      publicBalanceX: normalizedReserve0,
-      publicBalanceY: normalizedReserve1,
+      publicBalanceX: poolAccount.reserve0.toString(),
+      publicBalanceY: poolAccount.reserve1.toString(),
       isSwapXtoY: isSwapXtoY
     };
 
     const privateInputs = {
-      privateInputAmount: normalizedAmount,
-      privateMinReceived: normalizedMinReceived
+      privateInputAmount: amount.toString(),
+      privateMinReceived: minReceived.toString()
     };
 
     console.log(`Circuit inputs:
