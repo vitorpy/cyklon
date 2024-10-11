@@ -111,15 +111,9 @@ async function createPYUSDWSOLPool(provider: AnchorProvider) {
       .initializePool()
       .accounts({
         pool: poolPubkey,
-        tokenMint0: PYUSD_MINT,
-        tokenMint1: NATIVE_MINT,
-        poolTokenAccount0: poolPYUSDAccount,
-        poolTokenAccount1: poolWSOLAccount,
-        user: provider.wallet.publicKey,
+        tokenMint0: token0,
+        tokenMint1: token1,
         systemProgram: SystemProgram.programId,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        token2022Program: TOKEN_2022_PROGRAM_ID,
-        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
       })
       .rpc();
 
