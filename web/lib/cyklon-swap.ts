@@ -15,20 +15,6 @@ export interface SwapResult {
   error?: string;
 }
 
-const NORMALIZATION_FACTOR = 9; // Normalize to 9 decimal places
-
-const normalizeAmount = (amount: bigint, decimals: number): bigint => {
-  const result = amount * BigInt(10 ** (NORMALIZATION_FACTOR - decimals));
-  console.log(`Normalizing: amount=${amount}, decimals=${decimals}, result=${result}`);
-  return result;
-};
-
-const denormalizeAmount = (amount: bigint, decimals: number): bigint => {
-  const result = amount / BigInt(10 ** (NORMALIZATION_FACTOR - decimals));
-  console.log(`Denormalizing: amount=${amount}, decimals=${decimals}, result=${result}`);
-  return result;
-};
-
 export async function prepareConfidentialSwap(
   provider: AnchorProvider,
   programId: PublicKey,
@@ -55,97 +41,82 @@ export async function prepareConfidentialSwap(
     const payer = provider.wallet;
 
     // Sort token public keys to ensure consistent pool seed calculation
-    const [token0, token1] = [sourceToken, destToken].sort((a, b) => 
+    const [tokenX, tokenY] = [sourceToken, destToken].sort((a, b) => 
       a.toBuffer().compare(b.toBuffer())
     );
 
+    // Determine if we're swapping from X to Y
+    const isSwapXtoY = sourceToken.equals(tokenX) ? 1 : 0;
+
     // Find pool PDA using sorted token public keys
     const [poolPubkey] = PublicKey.findProgramAddressSync(
-      [Buffer.from("pool"), token0.toBuffer(), token1.toBuffer()],
+      [Buffer.from("pool"), tokenX.toBuffer(), tokenY.toBuffer()],
       programId
     );
 
     // Determine the token program for each token
-    const sourceTokenProgramId = sourceTokenProgram === 'Token-2022' ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID;
-    const destTokenProgramId = destTokenProgram === 'Token-2022' ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID;
+    const tokenXProgramId = tokenX.equals(sourceToken) ? (sourceTokenProgram === 'Token-2022' ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID) : (destTokenProgram === 'Token-2022' ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID);
+    const tokenYProgramId = tokenY.equals(destToken) ? (destTokenProgram === 'Token-2022' ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID) : (sourceTokenProgram === 'Token-2022' ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID);
 
     // Get user token account addresses
-    const userSourceTokenAccount = await getAssociatedTokenAddress(
-      sourceToken,
+    const userTokenAccountX = await getAssociatedTokenAddress(
+      tokenX,
       payer.publicKey,
       false,
-      sourceTokenProgramId
+      tokenXProgramId
     );
-    const userDestTokenAccount = await getAssociatedTokenAddress(
-      destToken,
+    const userTokenAccountY = await getAssociatedTokenAddress(
+      tokenY,
       payer.publicKey,
       false,
-      destTokenProgramId
+      tokenYProgramId
     );
 
     // Get pool token account addresses
-    const poolSourceTokenAccount = await getAssociatedTokenAddress(
-      sourceToken,
+    const poolTokenAccountX = await getAssociatedTokenAddress(
+      tokenX,
       poolPubkey,
       true,
-      sourceTokenProgramId
+      tokenXProgramId
     );
-    const poolDestTokenAccount = await getAssociatedTokenAddress(
-      destToken,
+    const poolTokenAccountY = await getAssociatedTokenAddress(
+      tokenY,
       poolPubkey,
       true,
-      destTokenProgramId
+      tokenYProgramId
     );
     
-    console.log(`Token order:
-      token0: ${token0.toBase58()} (decimals: ${sourceToken.equals(token0) ? sourceDecimals : destDecimals})
-      token1: ${token1.toBase58()} (decimals: ${sourceToken.equals(token0) ? destDecimals : sourceDecimals})
-    `);
-
     // Fetch pool account data
     const poolAccount = await program.account.pool.fetch(poolPubkey);
     console.log(`Pool account data:
-      reserve0: ${poolAccount.reserve0.toString()}
-      reserve1: ${poolAccount.reserve1.toString()}
+      reserveX: ${poolAccount.reserveX.toString()}
+      reserveY: ${poolAccount.reserveY.toString()}
     `);
 
-    // Normalize amounts
-    const normalizedAmount = normalizeAmount(amount, sourceDecimals);
-    const normalizedMinReceived = normalizeAmount(minReceived, destDecimals);
-    const normalizedReserve0 = normalizeAmount(BigInt(poolAccount.reserve0), sourceToken.equals(token0) ? sourceDecimals : destDecimals);
-    const normalizedReserve1 = normalizeAmount(BigInt(poolAccount.reserve1), sourceToken.equals(token0) ? destDecimals : sourceDecimals);
-
-    console.log(`Normalized values:
-      normalizedAmount: ${normalizedAmount.toString()}
-      normalizedMinReceived: ${normalizedMinReceived.toString()}
-      normalizedReserve0: ${normalizedReserve0.toString()}
-      normalizedReserve1: ${normalizedReserve1.toString()}
+    console.log(`Token order:
+      tokenX: ${tokenX.toBase58()} (decimals: ${tokenX.equals(sourceToken) ? sourceDecimals : destDecimals})
+      tokenY: ${tokenY.toBase58()} (decimals: ${tokenY.equals(destToken) ? destDecimals : sourceDecimals})
+      isSwapXtoY: ${isSwapXtoY}
     `);
-
-    // Determine if we're swapping from token0 to token1 or vice versa
-    const isSwapXtoY = sourceToken.equals(token0) ? 1 : 0;
-    console.log(`isSwapXtoY: ${isSwapXtoY}`);
 
     // Prepare inputs for proof generation
     const publicInputs = {
-      publicBalanceX: normalizedReserve0,
-      publicBalanceY: normalizedReserve1,
-      isSwapXtoY: isSwapXtoY,
-      totalLiquidity: normalizedReserve0 + normalizedReserve1
+      publicBalanceX: poolAccount.reserveX.toString(),
+      publicBalanceY: poolAccount.reserveY.toString(),
+      isSwapXtoY: isSwapXtoY
     };
 
     const privateInputs = {
-      privateAmount: normalizedAmount,
-      privateMinReceived: normalizedMinReceived
+      privateInputAmount: amount.toString(),
+      privateMinReceived: minReceived.toString()
     };
 
     console.log(`Circuit inputs:
-      privateAmount: ${privateInputs.privateAmount}
+      privateInputAmount: ${privateInputs.privateInputAmount}
       privateMinReceived: ${privateInputs.privateMinReceived}
       publicBalanceX: ${publicInputs.publicBalanceX}
       publicBalanceY: ${publicInputs.publicBalanceY}
       isSwapXtoY: ${publicInputs.isSwapXtoY}
-      totalLiquidity: ${publicInputs.totalLiquidity}
     `);
 
     // Generate proof
@@ -157,34 +128,6 @@ export async function prepareConfidentialSwap(
     // Create the transaction
     const transaction = new Transaction();
 
-    // Ensure the correct order of token accounts in the instruction
-    const [orderedUserTokenAccountIn, orderedUserTokenAccountOut] = isSwapXtoY
-      ? [userSourceTokenAccount, userDestTokenAccount]
-      : [userDestTokenAccount, userSourceTokenAccount];
-
-    const [orderedPoolTokenAccount0, orderedPoolTokenAccount1] = isSwapXtoY
-      ? [poolSourceTokenAccount, poolDestTokenAccount]
-      : [poolDestTokenAccount, poolSourceTokenAccount];
-
-    const accounts = {
-      pool: poolPubkey,
-      userTokenAccountIn: orderedUserTokenAccountIn,
-      userTokenAccountOut: orderedUserTokenAccountOut,
-      poolTokenAccount0: orderedPoolTokenAccount0,
-      poolTokenAccount1: orderedPoolTokenAccount1,
-      tokenMint0: token0,
-      tokenMint1: token1,
-      user: payer.publicKey,
-      tokenMint0Program: token0.equals(sourceToken) ? sourceTokenProgramId : destTokenProgramId,
-      tokenMint1Program: token1.equals(destToken) ? destTokenProgramId : sourceTokenProgramId,
-      associatedTokenProgram: utils.token.ASSOCIATED_PROGRAM_ID,
-      systemProgram: SystemProgram.programId,
-    };
-    
-    for (const [key, value] of Object.entries(accounts)) {
-      console.log(`Account ${key}: ${value.toBase58()}`);
-    }
-
     // Add the confidential swap instruction to the transaction
     transaction.add(
       await program.methods
@@ -195,7 +138,20 @@ export async function prepareConfidentialSwap(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           publicSignals.map((signal: any) => Array.from(signal))
         )
-        .accounts(accounts)
+        .accountsPartial({
+          tokenMintX: tokenX,
+          tokenMintY: tokenY,
+          tokenMintXProgram: tokenXProgramId,
+          tokenMintYProgram: tokenYProgramId,
+          pool: poolPubkey,
+          userTokenAccountX: userTokenAccountX,
+          userTokenAccountY: userTokenAccountY,
+          poolTokenAccountX: poolTokenAccountX,
+          poolTokenAccountY: poolTokenAccountY,
+          user: payer.publicKey,
+          associatedTokenProgram: utils.token.ASSOCIATED_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+        })
         .instruction()
     );
 

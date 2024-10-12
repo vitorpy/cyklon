@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/cyklon.json`.
  */
 export type Cyklon = {
-  "address": "AaUdpmosfnb93hvP8K1jBpcDbagVok5zPLv5PDF6Mfsa",
+  "address": "GKkoBt4y1oXfUDkRjZG2wj6PQxw39dxZw6MNMM6tYaBy",
   "metadata": {
     "name": "cyklon",
     "version": "0.1.0",
@@ -27,40 +27,279 @@ export type Cyklon = {
       ],
       "accounts": [
         {
+          "name": "tokenMintX"
+        },
+        {
+          "name": "tokenMintY"
+        },
+        {
+          "name": "tokenMintXProgram"
+        },
+        {
+          "name": "tokenMintYProgram"
+        },
+        {
           "name": "pool",
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.token_mint_x",
+                "account": "pool"
+              },
+              {
+                "kind": "account",
+                "path": "pool.token_mint_y",
+                "account": "pool"
+              }
+            ]
+          }
         },
         {
-          "name": "userTokenAccount0",
-          "writable": true
+          "name": "userTokenAccountX",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "account",
+                "path": "tokenMintXProgram"
+              },
+              {
+                "kind": "account",
+                "path": "tokenMintX"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
         },
         {
-          "name": "userTokenAccount1",
-          "writable": true
+          "name": "userTokenAccountY",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "account",
+                "path": "tokenMintYProgram"
+              },
+              {
+                "kind": "account",
+                "path": "tokenMintY"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
         },
         {
-          "name": "poolTokenAccount0",
-          "writable": true
+          "name": "poolTokenAccountX",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "account",
+                "path": "tokenMintXProgram"
+              },
+              {
+                "kind": "account",
+                "path": "tokenMintX"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
         },
         {
-          "name": "poolTokenAccount1",
-          "writable": true
-        },
-        {
-          "name": "tokenMint0"
-        },
-        {
-          "name": "tokenMint1"
+          "name": "poolTokenAccountY",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "account",
+                "path": "tokenMintYProgram"
+              },
+              {
+                "kind": "account",
+                "path": "tokenMintY"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
         },
         {
           "name": "user",
           "signer": true
         },
         {
-          "name": "tokenMint0Program"
-        },
-        {
-          "name": "tokenMint1Program"
+          "name": "associatedTokenProgram",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         },
         {
           "name": "systemProgram",
@@ -92,6 +331,20 @@ export type Cyklon = {
       ],
       "accounts": [
         {
+          "name": "tokenMintX",
+          "writable": true
+        },
+        {
+          "name": "tokenMintY",
+          "writable": true
+        },
+        {
+          "name": "tokenMintXProgram"
+        },
+        {
+          "name": "tokenMintYProgram"
+        },
+        {
           "name": "pool",
           "writable": true,
           "pda": {
@@ -107,50 +360,248 @@ export type Cyklon = {
               },
               {
                 "kind": "account",
-                "path": "pool.token_mint_0",
+                "path": "pool.token_mint_x",
                 "account": "pool"
               },
               {
                 "kind": "account",
-                "path": "pool.token_mint_1",
+                "path": "pool.token_mint_y",
                 "account": "pool"
               }
             ]
           }
         },
         {
-          "name": "userTokenAccountIn",
-          "writable": true
+          "name": "userTokenAccountX",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "account",
+                "path": "tokenMintXProgram"
+              },
+              {
+                "kind": "account",
+                "path": "tokenMintX"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
         },
         {
-          "name": "userTokenAccountOut",
-          "writable": true
+          "name": "userTokenAccountY",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "account",
+                "path": "tokenMintYProgram"
+              },
+              {
+                "kind": "account",
+                "path": "tokenMintY"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
         },
         {
-          "name": "poolTokenAccount0",
-          "writable": true
+          "name": "poolTokenAccountX",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "account",
+                "path": "tokenMintXProgram"
+              },
+              {
+                "kind": "account",
+                "path": "tokenMintX"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
         },
         {
-          "name": "poolTokenAccount1",
-          "writable": true
-        },
-        {
-          "name": "tokenMint0",
-          "writable": true
-        },
-        {
-          "name": "tokenMint1",
-          "writable": true
+          "name": "poolTokenAccountY",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "account",
+                "path": "tokenMintYProgram"
+              },
+              {
+                "kind": "account",
+                "path": "tokenMintY"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
         },
         {
           "name": "user",
           "signer": true
-        },
-        {
-          "name": "tokenMint0Program"
-        },
-        {
-          "name": "tokenMint1Program"
         },
         {
           "name": "associatedTokenProgram",
@@ -234,20 +685,20 @@ export type Cyklon = {
               },
               {
                 "kind": "account",
-                "path": "tokenMint0"
+                "path": "tokenMintX"
               },
               {
                 "kind": "account",
-                "path": "tokenMint1"
+                "path": "tokenMintY"
               }
             ]
           }
         },
         {
-          "name": "tokenMint0"
+          "name": "tokenMintX"
         },
         {
-          "name": "tokenMint1"
+          "name": "tokenMintY"
         },
         {
           "name": "payer",
@@ -345,6 +796,16 @@ export type Cyklon = {
       "code": 6007,
       "name": "invalidGroth16Verifier",
       "msg": "Unable to create Groth16Verifier"
+    },
+    {
+      "code": 6008,
+      "name": "invalidTokenOrder",
+      "msg": "Invalid token order"
+    },
+    {
+      "code": 6009,
+      "name": "invalidSwapAmount",
+      "msg": "Invalid swap amount"
     }
   ],
   "types": [
@@ -398,19 +859,19 @@ export type Cyklon = {
         "kind": "struct",
         "fields": [
           {
-            "name": "tokenMint0",
+            "name": "tokenMintX",
             "type": "pubkey"
           },
           {
-            "name": "tokenMint1",
+            "name": "tokenMintY",
             "type": "pubkey"
           },
           {
-            "name": "reserve0",
+            "name": "reserveX",
             "type": "u64"
           },
           {
-            "name": "reserve1",
+            "name": "reserveY",
             "type": "u64"
           },
           {
