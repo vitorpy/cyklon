@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/cyklon.json`.
  */
 export type Cyklon = {
-  "address": "Ba7aKagZn6HWCLphWNC5cNqUVsngAcFJf4bMJ49MwgX1",
+  "address": "GLjWeJsaZ5zDrqRdgUaxYrjYsvoZmYPbASRUL9R7FQs3",
   "metadata": {
     "name": "cyklon",
     "version": "0.1.0",
