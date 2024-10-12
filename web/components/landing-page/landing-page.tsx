@@ -9,6 +9,16 @@ import ContactForm from '../ui/contact-form';
 
 export default function LandingPage() {
   const [showBanner, setShowBanner] = useState(true);
+  const [currentImage, setCurrentImage] = useState(1);
+  const totalImages = 6;
+
+  const nextImage = () => {
+    setCurrentImage((prev) => (prev % totalImages) + 1);
+  };
+
+  const prevImage = () => {
+    setCurrentImage((prev) => (prev === 1 ? totalImages : prev - 1));
+  };
 
   return (
     <div className="w-full">
@@ -61,20 +71,32 @@ export default function LandingPage() {
       </div>
 
       {/* Panel 2 */}
-      <div className="flex w-full second-panel-style" style={{ minHeight: '90vh' }}>
-        <div className='hidden sm:block sm:w-1/2 overflow-y-auto px-4 relative'>
+      <div className="flex w-full second-panel-style items-center justify-center" style={{ minHeight: '90vh' }}>
+        <div className="relative w-full">
           <Image
-            src="/images/newsletter.jpg"
-            alt="Newsletter Background"
-            fill
-            sizes="100vw"
+            src={`/images/explainer/${currentImage}.svg`}
+            alt={`Explainer ${currentImage}`}
+            width={1920}
+            height={1080}
             style={{
-              objectFit: "contain"
-            }} />
-        </div>
-        <div className='w-full sm:w-1/2 relative p-4 flex flex-col items-center justify-center text-black'>
-          <Header title="Newsletter" subtitle="Sign up with your email address to receive news and updates" />
-          <NewsletterInput />
+              objectFit: "cover"
+            }}
+            className="mx-auto"
+          />
+          <button
+            onClick={prevImage}
+            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-r"
+            aria-label="Previous image"
+          >
+            <i className="fas fa-chevron-left text-2xl"></i>
+          </button>
+          <button
+            onClick={nextImage}
+            className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-l"
+            aria-label="Next image"
+          >
+            <i className="fas fa-chevron-right text-2xl"></i>
+          </button>
         </div>
       </div>
 
@@ -85,9 +107,8 @@ export default function LandingPage() {
           <ContactForm />
         </div>
         <div className='w-full sm:w-1/2 relative p-4 flex flex-col items-center justify-center'>
-          <div className='flex flex-col items-center justify-center w-full'>
-            <Header title="Jump in the pool" />
-          </div>
+          <Header title="Newsletter" subtitle="Sign up with your email address to receive news and updates" />
+          <NewsletterInput />
         </div>
       </div>
 
@@ -105,7 +126,7 @@ export default function LandingPage() {
         </div>
         <div className='w-full sm:w-2/5 relative p-4 flex flex-col items-center justify-center'>
           <div className='flex flex-col items-center justify-center w-full'>
-            <Header title="About Us" subtitle="Darklake is a privacy-preserving AMM for Solana." isWhite={true} />
+            <Header title="About Us" subtitle="Solana's first DEX delivering real-time, MEV-resistant order execution." isWhite={true} />
             <div className="flex space-x-6">
               <a href="https://twitter.com/blackpooldao" target="_blank" rel="noopener noreferrer" className="text-3xl text-white hover:text-blue-600">
                 <i className="fab fa-x-twitter"></i>
