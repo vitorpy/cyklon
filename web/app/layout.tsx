@@ -6,7 +6,7 @@ import { ReactQueryProvider } from './react-query-provider';
 import { CSPostHogProvider } from './providers';
 
 export const metadata = {
-  title: 'Darkpool',
+  title: 'Darklake',
   description: 'A privacy-preserving AMM.',
 };
 
