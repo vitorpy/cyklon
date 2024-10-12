@@ -14,6 +14,8 @@ import { createAssociatedTokenAccountInstruction, createSyncNativeInstruction, N
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { useTokenBalance } from '@/hooks/useTokenBalance'
 import * as Sentry from "@sentry/nextjs";
+import Link from 'next/link'
+import { useCluster } from '@/components/cluster/cluster-data-access'
 
 interface Token {
   symbol: string;
@@ -42,11 +44,13 @@ export function SolanaSwapComponent() {
   const [isSwapping, setIsSwapping] = useState<boolean>(false)
   const [swapError, setSwapError] = useState<string | null>(null)
   const [minReceived, setMinReceived] = useState<number>(0)
+  const [swapSuccess, setSwapSuccess] = useState<string | null>(null)
 
   const { publicKey } = useWallet()
   const { balance: sourceTokenBalance } = useTokenBalance(publicKey, sourceToken.address)
   const { connection } = useConnection()
   const wallet = useWallet()
+  const { cluster } = useCluster()
 
   const confidentialSwap = useConfidentialSwap()
 
@@ -81,6 +85,7 @@ export function SolanaSwapComponent() {
   const handleConfidentialSwap = async () => {
     setIsSwapping(true);
     setSwapError(null);
+    setSwapSuccess(null);
     try {
       if (!publicKey) throw new Error('Wallet not connected');
 
@@ -210,6 +215,7 @@ export function SolanaSwapComponent() {
       
       // Handle successful swap
       console.log('Swap successful');
+      setSwapSuccess(signature);
 
     } catch (error) {
       console.error('Swap error:', error);
@@ -332,6 +338,19 @@ export function SolanaSwapComponent() {
             {isSwapping ? 'Swapping...' : isValidPool ? 'Swap' : 'This pool isn\'t available yet.'}
           </Button>
           {swapError && <div className="text-red-500 text-sm">{swapError}</div>}
+          {swapSuccess && (
+            <div className="text-white text-sm mt-2">
+              Swap successful!{' '}
+              <Link 
+                href={`https://explorer.solana.com/tx/${swapSuccess}?cluster=${cluster.network}`}
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="underline hover:text-blue-300"
+              >
+                View transaction
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>
