@@ -14,25 +14,13 @@ import { createAssociatedTokenAccountInstruction, createSyncNativeInstruction, N
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { useTokenBalance } from '@/hooks/useTokenBalance'
 import * as Sentry from "@sentry/nextjs";
-import Link from 'next/link'
-import { useCluster } from '@/components/cluster/cluster-data-access'
+import Link from 'next/link';
+import { useCluster } from '@/components/cluster/cluster-data-access';
+import { useSwapEstimate } from '@/hooks/useSwapEstimate';
+import { Token } from '@/types/token';
+import tokenList from '@/constants/tokens.json';
 
-interface Token {
-  symbol: string;
-  name: string;
-  image: string;
-  address: string;
-  tokenProgram: string;
-  decimals: number;
-}
-
-const tokens: Token[] = [
-  { symbol: 'SOL', name: 'Solana', image: '/images/token-icons/solana.webp', address: 'NATIVE', tokenProgram: 'SPL-Token', decimals: 9 },
-  { symbol: 'USDC', name: 'USD Coin', image: '/images/token-icons/usdc.webp', address: '...', tokenProgram: 'SPL-Token', decimals: 6 },
-  { symbol: 'RAY', name: 'Raydium', image: '/images/token-icons/PSigc4ie_400x400.webp', address: '...', tokenProgram: 'SPL-Token', decimals: 6 },
-  { symbol: 'SRM', name: 'Serum', image: '/images/token-icons/serum-logo.webp', address: '...', tokenProgram: 'SPL-Token', decimals: 6 },
-  { symbol: 'PYUSD', name: 'PayPal USD', image: '/images/token-icons/PYUSD_Logo_(2).webp', address: 'CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM', tokenProgram: 'Token-2022', decimals: 6 },
-]
+const tokens: Token[] = tokenList;
 
 export function SolanaSwapComponent() {
   const [sourceToken, setSourceToken] = useState<Token>(tokens.find(t => t.symbol === 'PYUSD') || tokens[0])
@@ -54,6 +42,8 @@ export function SolanaSwapComponent() {
 
   const confidentialSwap = useConfidentialSwap()
 
+  const estimatedDestAmount = useSwapEstimate(sourceToken, destToken, sourceAmount);
+
   const handleSwap = () => {
     setSourceToken(destToken)
     setDestToken(sourceToken)
@@ -62,22 +52,24 @@ export function SolanaSwapComponent() {
   }
 
   const handleSourceAmountChange = (value: string) => {
-    setSourceAmount(value)
-    const numValue = parseFloat(value)
-    if (!isNaN(numValue)) {
-      const estimatedDestAmount = numValue * 0.98 // Mock calculation
-      setDestAmount(estimatedDestAmount.toFixed(2))
-      setMinReceived(estimatedDestAmount * (1 - slippage[0] / 100))
+    setSourceAmount(value);
+    if (estimatedDestAmount) {
+      setDestAmount(estimatedDestAmount);
+      const numValue = parseFloat(estimatedDestAmount);
+      setMinReceived(numValue * (1 - slippage[0] / 100));
     } else {
-      setDestAmount('')
-      setMinReceived(0)
+      setDestAmount('');
+      setMinReceived(0);
     }
-  }
+  };
 
   useEffect(() => {
-    handleSourceAmountChange(sourceAmount)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sourceAmount, sourceToken, destToken])
+    if (estimatedDestAmount) {
+      setDestAmount(estimatedDestAmount);
+      const numValue = parseFloat(estimatedDestAmount);
+      setMinReceived(numValue * (1 - slippage[0] / 100));
+    }
+  }, [estimatedDestAmount, slippage]);
 
   const isValidPool = (sourceToken.symbol === 'PYUSD' && destToken.symbol === 'SOL') ||
                       (sourceToken.symbol === 'SOL' && destToken.symbol === 'PYUSD');
