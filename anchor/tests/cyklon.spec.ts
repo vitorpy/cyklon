@@ -1,7 +1,7 @@
 import * as anchor from '@coral-xyz/anchor';
 import { Program } from '@coral-xyz/anchor';
 import { Cyklon } from '../target/types/cyklon';
-import { createMint, mintTo, getAccount, getOrCreateAssociatedTokenAccount } from '@solana/spl-token';
+import { createMint, mintTo, getAccount, getOrCreateAssociatedTokenAccount, TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token';
 import * as snarkjs from "snarkjs";
 import * as path from "path";
 import { buildBn128, utils } from "ffjavascript";
@@ -25,6 +25,8 @@ describe('cyklon', () => {
   let tokenY: anchor.web3.PublicKey;
   const tokenMint0Decimals = 6;
   const tokenMint1Decimals = 9;  // Updated to 9 decimals
+  let tokenXProgramId: anchor.web3.PublicKey;
+  let tokenYProgramId: anchor.web3.PublicKey;
 
   const setupMint = async () => {
     const airdropSignature = await provider.connection.requestAirdrop(
@@ -34,16 +36,20 @@ describe('cyklon', () => {
     await provider.connection.confirmTransaction(airdropSignature);
 
     const signer = convertToSigner(payer);
-    const tokenMint0 = await createMint(provider.connection, signer, signer.publicKey, null, tokenMint0Decimals);
-    const tokenMint1 = await createMint(provider.connection, signer, signer.publicKey, null, tokenMint1Decimals);
+    const tokenMint0 = await createMint(provider.connection, signer, signer.publicKey, null, tokenMint0Decimals, undefined, undefined, TOKEN_2022_PROGRAM_ID);
+    const tokenMint1 = await createMint(provider.connection, signer, signer.publicKey, null, tokenMint1Decimals, undefined, undefined, TOKEN_PROGRAM_ID);
 
     // Sort token mints by address
     if (tokenMint0.toBuffer().compare(tokenMint1.toBuffer()) < 0) {
       tokenX = tokenMint0;
       tokenY = tokenMint1;
+      tokenXProgramId = TOKEN_2022_PROGRAM_ID;
+      tokenYProgramId = TOKEN_PROGRAM_ID;
     } else {
       tokenX = tokenMint1;
       tokenY = tokenMint0;
+      tokenXProgramId = TOKEN_PROGRAM_ID;
+      tokenYProgramId = TOKEN_2022_PROGRAM_ID;
     }
 
     [poolPubkey] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -64,8 +70,8 @@ Token Y: ${tokenY.toBase58()}`
       await program.methods
         .initializePool()
         .accounts({
-          tokenMint0: tokenX,
-          tokenMint1: tokenY,
+          tokenMintX: tokenX,
+          tokenMintY: tokenY,
           payer: payer.publicKey,
         })
         .rpc();
@@ -80,8 +86,8 @@ Token Y: ${tokenY.toBase58()}`
     await setupPool();
 
     const poolAccount = await program.account.pool.fetch(poolPubkey);
-    expect(poolAccount.tokenMint0.equals(tokenX)).toBe(true);
-    expect(poolAccount.tokenMint1.equals(tokenY)).toBe(true);
+    expect(poolAccount.tokenMintX.equals(tokenX)).toBe(true);
+    expect(poolAccount.tokenMintY.equals(tokenY)).toBe(true);
   });
   
   it('Add Liquidity', async () => {
@@ -89,13 +95,22 @@ Token Y: ${tokenY.toBase58()}`
       provider.connection,
       convertToSigner(payer),
       tokenX,
-      payer.publicKey
+      payer.publicKey,
+      false,
+      undefined,
+      undefined,
+      tokenXProgramId
     );
+    
     const userTokenAccountY = await getOrCreateAssociatedTokenAccount(
       provider.connection,
       convertToSigner(payer),
       tokenY,
-      payer.publicKey
+      payer.publicKey,
+      false,
+      undefined,
+      undefined,
+      tokenYProgramId
     );
 
     const poolTokenAccountX = await getOrCreateAssociatedTokenAccount(
@@ -103,20 +118,27 @@ Token Y: ${tokenY.toBase58()}`
       convertToSigner(payer),
       tokenX,
       poolPubkey,
-      true
+      true,
+      undefined,
+      undefined,
+      tokenXProgramId
     );
+
     const poolTokenAccountY = await getOrCreateAssociatedTokenAccount(
       provider.connection,
       convertToSigner(payer),
       tokenY,
       poolPubkey,
-      true
+      true,
+      undefined,
+      undefined,
+      tokenYProgramId
     );
 
     const amountX = 1_000_000; // 1 token with 6 decimals
     const amountY = 2_000_000_000; // 2 tokens with 9 decimals
-    await mintTo(provider.connection, convertToSigner(payer), tokenX, userTokenAccountX.address, convertToSigner(payer), amountX);
-    await mintTo(provider.connection, convertToSigner(payer), tokenY, userTokenAccountY.address, convertToSigner(payer), amountY);
+    await mintTo(provider.connection, convertToSigner(payer), tokenX, userTokenAccountX.address, convertToSigner(payer), amountX, undefined, undefined, tokenXProgramId);
+    await mintTo(provider.connection, convertToSigner(payer), tokenY, userTokenAccountY.address, convertToSigner(payer), amountY, undefined, undefined, tokenYProgramId);
 
     try {
       await program.methods
@@ -124,27 +146,27 @@ Token Y: ${tokenY.toBase58()}`
           new anchor.BN(amountX),
           new anchor.BN(amountY)
         )
-        .accounts({
+        .accountsPartial({
+          tokenMintX: tokenX,
+          tokenMintY: tokenY,
+          tokenMintXProgram: tokenXProgramId,
+          tokenMintYProgram: tokenYProgramId,
           pool: poolPubkey,
-          userTokenAccount0: userTokenAccountX.address,
-          userTokenAccount1: userTokenAccountY.address,
-          poolTokenAccount0: poolTokenAccountX.address,
-          poolTokenAccount1: poolTokenAccountY.address,
-          tokenMint0: tokenX,
-          tokenMint1: tokenY,
+          userTokenAccountX: userTokenAccountX.address,
+          userTokenAccountY: userTokenAccountY.address,
+          poolTokenAccountX: poolTokenAccountX.address,
+          poolTokenAccountY: poolTokenAccountY.address,
           user: payer.publicKey,
-          tokenMint0Program: anchor.utils.token.TOKEN_PROGRAM_ID,
-          tokenMint1Program: anchor.utils.token.TOKEN_PROGRAM_ID,
         })
         .rpc();
 
       const updatedPoolAccount = await program.account.pool.fetch(poolPubkey);
 
-      expect(updatedPoolAccount.reserve0.toNumber()).toBe(amountX);
-      expect(updatedPoolAccount.reserve1.toNumber()).toBe(amountY);
+      expect(updatedPoolAccount.reserveX.toNumber()).toBe(amountX);
+      expect(updatedPoolAccount.reserveY.toNumber()).toBe(amountY);
 
-      const userAccountXInfo = await getAccount(provider.connection, userTokenAccountX.address);
-      const userAccountYInfo = await getAccount(provider.connection, userTokenAccountY.address);
+      const userAccountXInfo = await getAccount(provider.connection, userTokenAccountX.address, undefined, tokenXProgramId);
+      const userAccountYInfo = await getAccount(provider.connection, userTokenAccountY.address, undefined, tokenYProgramId);
 
       expect(Number(userAccountXInfo.amount)).toBe(0);
       expect(Number(userAccountYInfo.amount)).toBe(0);
@@ -153,7 +175,7 @@ Token Y: ${tokenY.toBase58()}`
       console.error("Error adding liquidity:", error);
       throw error;
     }
-  });
+  }, 10000000);
 
   it('Confidential Swap', async () => {
     const poolAccount = await program.account.pool.fetch(poolPubkey);
@@ -162,13 +184,22 @@ Token Y: ${tokenY.toBase58()}`
       provider.connection,
       convertToSigner(payer),
       tokenX,
-      payer.publicKey
+      payer.publicKey,
+      true,
+      undefined,
+      undefined,
+      tokenXProgramId
     );
+    
     const userTokenAccountY = await getOrCreateAssociatedTokenAccount(
       provider.connection,
       convertToSigner(payer),
       tokenY,
-      payer.publicKey
+      payer.publicKey,
+      true,
+      undefined,
+      undefined,
+      tokenYProgramId
     );
 
     const poolTokenAccountX = await getOrCreateAssociatedTokenAccount(
@@ -176,22 +207,29 @@ Token Y: ${tokenY.toBase58()}`
       convertToSigner(payer),
       tokenX,
       poolPubkey,
-      true
+      true,
+      undefined,
+      undefined,
+      tokenXProgramId
     );
+
     const poolTokenAccountY = await getOrCreateAssociatedTokenAccount(
       provider.connection,
       convertToSigner(payer),
       tokenY,
       poolPubkey,
-      true
+      true,
+      undefined,
+      undefined,
+      tokenYProgramId
     );
     
     const amountToMint = 1_000_000; // 1 token with 6 decimals for tokenX
-    await mintTo(provider.connection, convertToSigner(payer), tokenX, userTokenAccountX.address, convertToSigner(payer), amountToMint);
+    await mintTo(provider.connection, convertToSigner(payer), tokenX, userTokenAccountX.address, convertToSigner(payer), amountToMint, undefined, undefined, tokenXProgramId);
 
     const publicInputs = {
-      publicBalanceX: poolAccount.reserve0.toString(),
-      publicBalanceY: poolAccount.reserve1.toString(),
+      publicBalanceX: poolAccount.reserveX.toString(),
+      publicBalanceY: poolAccount.reserveY.toString(),
       isSwapXtoY: 1 // Swapping tokenX for tokenY
     };
 
@@ -205,17 +243,6 @@ Token Y: ${tokenY.toBase58()}`
       publicInputs
     );
     
-    console.log("Accounts passed to the transaction:");
-    console.log({
-      pool: poolPubkey.toBase58(),
-      userTokenAccountIn: userTokenAccountX.address.toBase58(),
-      userTokenAccountOut: userTokenAccountY.address.toBase58(),
-      poolTokenAccount0: poolTokenAccountX.address.toBase58(),
-      poolTokenAccount1: poolTokenAccountY.address.toBase58(),
-      tokenMint0: tokenX.toBase58(),
-      tokenMint1: tokenY.toBase58(),
-    });
-
     try {
       const tx = await program.methods
         .confidentialSwap(
@@ -224,20 +251,17 @@ Token Y: ${tokenY.toBase58()}`
           Array.from(proofC),
           publicSignals.map(signal => Array.from(signal))
         )
-        .accounts({
-          // @ts-expect-error Anchor is annoying as fuck.
+        .accountsPartial({
+          tokenMintX: tokenX,
+          tokenMintY: tokenY,
+          tokenMintXProgram: tokenXProgramId,
+          tokenMintYProgram: tokenYProgramId,
           pool: poolPubkey,
-          userTokenAccountIn: userTokenAccountX.address,
-          userTokenAccountOut: userTokenAccountY.address,
-          poolTokenAccount0: poolTokenAccountX.address,
-          poolTokenAccount1: poolTokenAccountY.address,
-          tokenMint0: tokenX,
-          tokenMint1: tokenY,
+          userTokenAccountX: userTokenAccountX.address,
+          userTokenAccountY: userTokenAccountY.address,
+          poolTokenAccountX: poolTokenAccountX.address,
+          poolTokenAccountY: poolTokenAccountY.address,
           user: payer.publicKey,
-          tokenMint0Program: anchor.utils.token.TOKEN_PROGRAM_ID,
-          tokenMint1Program: anchor.utils.token.TOKEN_PROGRAM_ID,
-          associatedTokenProgram: anchor.utils.token.ASSOCIATED_PROGRAM_ID,
-          systemProgram: anchor.web3.SystemProgram.programId,
         })
         .transaction();
 
@@ -247,14 +271,14 @@ Token Y: ${tokenY.toBase58()}`
 
       await provider.sendAndConfirm(tx);
 
-      const userAccountXAfterSwap = await getAccount(provider.connection, userTokenAccountX.address);
-      const userAccountYAfterSwap = await getAccount(provider.connection, userTokenAccountY.address);
+      const userAccountXAfterSwap = await getAccount(provider.connection, userTokenAccountX.address, undefined, tokenXProgramId);
+      const userAccountYAfterSwap = await getAccount(provider.connection, userTokenAccountY.address, undefined, tokenYProgramId);
 
       expect(Number(userAccountXAfterSwap.amount)).toBeLessThan(amountToMint);
       expect(Number(userAccountYAfterSwap.amount)).toBeGreaterThan(0);
 
-      const poolAccountXAfterSwap = await getAccount(provider.connection, poolTokenAccountX.address);
-      const poolAccountYAfterSwap = await getAccount(provider.connection, poolTokenAccountY.address);
+      const poolAccountXAfterSwap = await getAccount(provider.connection, poolTokenAccountX.address, undefined, tokenXProgramId);
+      const poolAccountYAfterSwap = await getAccount(provider.connection, poolTokenAccountY.address, undefined, tokenYProgramId);
 
       expect(Number(poolAccountXAfterSwap.amount)).toBeGreaterThan(0);
       expect(Number(poolAccountYAfterSwap.amount)).toBeGreaterThan(0);
@@ -297,6 +321,8 @@ async function generateProof(
 
   const proofB = g2Uncompressed(curve, proofProc.pi_b);
   const proofC = g1Uncompressed(curve, proofProc.pi_c);
+
+  await curve.terminate();
 
   const formattedPublicSignals = publicSignalsUnstrigified.map(signal => {
     return to32ByteBuffer(BigInt(signal));

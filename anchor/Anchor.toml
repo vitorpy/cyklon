@@ -5,10 +5,10 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-cyklon = "GLjWeJsaZ5zDrqRdgUaxYrjYsvoZmYPbASRUL9R7FQs3"
+cyklon = "GKkoBt4y1oXfUDkRjZG2wj6PQxw39dxZw6MNMM6tYaBy"
 
 [programs.localnet]
-cyklon = "GLjWeJsaZ5zDrqRdgUaxYrjYsvoZmYPbASRUL9R7FQs3"
+cyklon = "GKkoBt4y1oXfUDkRjZG2wj6PQxw39dxZw6MNMM6tYaBy"
 
 [registry]
 url = "https://api.apr.dev"
@@ -33,3 +33,9 @@ rpc_port = 8899
 
 [[test.validator.clone]]
 address = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+
+[[test.validator.clone]]
+address = "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+
+[[test.validator.clone]]
+address = "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
