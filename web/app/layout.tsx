@@ -6,8 +6,8 @@ import { ReactQueryProvider } from './react-query-provider';
 import { CSPostHogProvider } from './providers';
 
 export const metadata = {
-  title: 'Blackpool',
-  description: 'A privacy-preserving AMM by Blackpool Capital.',
+  title: 'Darkpool',
+  description: 'A privacy-preserving AMM.',
 };
 
 const links: { label: string; path: string }[] = [
