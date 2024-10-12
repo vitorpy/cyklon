@@ -27,7 +27,7 @@ export async function subscribeToNewsletter(data: SubscribeData): Promise<boolea
         smsBlacklisted: false,
         includeListIds: [parseInt(LIST_ID)],
         templateId: 1,
-        redirectionUrl: 'https://blackpool.capital/newsletter',
+        redirectionUrl: 'https://darklake.fi/newsletter',
       },
       {
         headers: {
