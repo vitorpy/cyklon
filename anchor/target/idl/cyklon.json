@@ -1,5 +1,5 @@
 {
-  "address": "GLjWeJsaZ5zDrqRdgUaxYrjYsvoZmYPbASRUL9R7FQs3",
+  "address": "GKkoBt4y1oXfUDkRjZG2wj6PQxw39dxZw6MNMM6tYaBy",
   "metadata": {
     "name": "cyklon",
     "version": "0.1.0",
@@ -21,40 +21,279 @@
       ],
       "accounts": [
         {
+          "name": "token_mint_x"
+        },
+        {
+          "name": "token_mint_y"
+        },
+        {
+          "name": "token_mint_x_program"
+        },
+        {
+          "name": "token_mint_y_program"
+        },
+        {
           "name": "pool",
-          "writable": true
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.token_mint_x",
+                "account": "Pool"
+              },
+              {
+                "kind": "account",
+                "path": "pool.token_mint_y",
+                "account": "Pool"
+              }
+            ]
+          }
         },
         {
-          "name": "user_token_account_0",
-          "writable": true
+          "name": "user_token_account_x",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "account",
+                "path": "token_mint_x_program"
+              },
+              {
+                "kind": "account",
+                "path": "token_mint_x"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
         },
         {
-          "name": "user_token_account_1",
-          "writable": true
+          "name": "user_token_account_y",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "account",
+                "path": "token_mint_y_program"
+              },
+              {
+                "kind": "account",
+                "path": "token_mint_y"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
         },
         {
-          "name": "pool_token_account_0",
-          "writable": true
+          "name": "pool_token_account_x",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "account",
+                "path": "token_mint_x_program"
+              },
+              {
+                "kind": "account",
+                "path": "token_mint_x"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
         },
         {
-          "name": "pool_token_account_1",
-          "writable": true
-        },
-        {
-          "name": "token_mint_0"
-        },
-        {
-          "name": "token_mint_1"
+          "name": "pool_token_account_y",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "account",
+                "path": "token_mint_y_program"
+              },
+              {
+                "kind": "account",
+                "path": "token_mint_y"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
         },
         {
           "name": "user",
           "signer": true
         },
         {
-          "name": "token_mint_0_program"
-        },
-        {
-          "name": "token_mint_1_program"
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         },
         {
           "name": "system_program",
@@ -86,6 +325,20 @@
       ],
       "accounts": [
         {
+          "name": "token_mint_x",
+          "writable": true
+        },
+        {
+          "name": "token_mint_y",
+          "writable": true
+        },
+        {
+          "name": "token_mint_x_program"
+        },
+        {
+          "name": "token_mint_y_program"
+        },
+        {
           "name": "pool",
           "writable": true,
           "pda": {
@@ -101,50 +354,248 @@
               },
               {
                 "kind": "account",
-                "path": "pool.token_mint_0",
+                "path": "pool.token_mint_x",
                 "account": "Pool"
               },
               {
                 "kind": "account",
-                "path": "pool.token_mint_1",
+                "path": "pool.token_mint_y",
                 "account": "Pool"
               }
             ]
           }
         },
         {
-          "name": "user_token_account_in",
-          "writable": true
+          "name": "user_token_account_x",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "account",
+                "path": "token_mint_x_program"
+              },
+              {
+                "kind": "account",
+                "path": "token_mint_x"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
         },
         {
-          "name": "user_token_account_out",
-          "writable": true
+          "name": "user_token_account_y",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "account",
+                "path": "token_mint_y_program"
+              },
+              {
+                "kind": "account",
+                "path": "token_mint_y"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
         },
         {
-          "name": "pool_token_account_0",
-          "writable": true
+          "name": "pool_token_account_x",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "account",
+                "path": "token_mint_x_program"
+              },
+              {
+                "kind": "account",
+                "path": "token_mint_x"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
         },
         {
-          "name": "pool_token_account_1",
-          "writable": true
-        },
-        {
-          "name": "token_mint_0",
-          "writable": true
-        },
-        {
-          "name": "token_mint_1",
-          "writable": true
+          "name": "pool_token_account_y",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "account",
+                "path": "token_mint_y_program"
+              },
+              {
+                "kind": "account",
+                "path": "token_mint_y"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
         },
         {
           "name": "user",
           "signer": true
-        },
-        {
-          "name": "token_mint_0_program"
-        },
-        {
-          "name": "token_mint_1_program"
         },
         {
           "name": "associated_token_program",
@@ -228,20 +679,20 @@
               },
               {
                 "kind": "account",
-                "path": "token_mint_0"
+                "path": "token_mint_x"
               },
               {
                 "kind": "account",
-                "path": "token_mint_1"
+                "path": "token_mint_y"
               }
             ]
           }
         },
         {
-          "name": "token_mint_0"
+          "name": "token_mint_x"
         },
         {
-          "name": "token_mint_1"
+          "name": "token_mint_y"
         },
         {
           "name": "payer",
@@ -402,19 +853,19 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "token_mint_0",
+            "name": "token_mint_x",
             "type": "pubkey"
           },
           {
-            "name": "token_mint_1",
+            "name": "token_mint_y",
             "type": "pubkey"
           },
           {
-            "name": "reserve_0",
+            "name": "reserve_x",
             "type": "u64"
           },
           {
-            "name": "reserve_1",
+            "name": "reserve_y",
             "type": "u64"
           },
           {
