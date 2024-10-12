@@ -71,7 +71,7 @@ export default function LandingPage() {
       </div>
 
       {/* Panel 2 */}
-      <div className="flex w-full second-panel-style items-center justify-center" style={{ minHeight: '90vh' }}>
+      <div className="flex w-full second-panel-style items-center justify-center" style={{ minHeight: '100vh' }}>
         <div className="relative w-full">
           <Image
             src={`/images/explainer/${currentImage}.svg`}
@@ -101,7 +101,7 @@ export default function LandingPage() {
       </div>
 
       {/* Panel 3 */}
-      <div className="w-full third-panel-style flex flex-col sm:flex-row text-black" style={{ minHeight: '90vh' }}>
+      <div className="w-full third-panel-style flex flex-col sm:flex-row text-black" style={{ minHeight: '75vh' }}>
         <div className='w-full sm:w-1/2 relative p-4 flex flex-col items-center justify-center'>
           <Header title="Contact Us" subtitle="Have questions or feedback? Contact us below" />
           <ContactForm />
@@ -113,7 +113,7 @@ export default function LandingPage() {
       </div>
 
       {/* Panel 4 */}
-      <div className="w-full bg-black flex flex-col-reverse sm:flex-row text-white" style={{ minHeight: '90vh' }}>
+      <div className="w-full bg-black flex flex-col-reverse sm:flex-row text-white" style={{ minHeight: '100vh' }}>
         <div className='hidden sm:block sm:w-3/5 relative'>
           <Image
             src="/images/about.jpeg"
