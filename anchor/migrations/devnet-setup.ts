@@ -243,19 +243,27 @@ async function createPYUSDWSOLPool(provider: AnchorProvider) {
     console.log("SOL wrapped to WSOL. Transaction signature:", wrapSolSig);
 
     // Call add_liquidity method on Cyklon
+    const [sortedToken0, sortedToken1] = [PYUSD_MINT, NATIVE_MINT].sort((a, b) => 
+      a.toBuffer().compare(b.toBuffer())
+    );
+
+    const [sortedAmount0, sortedAmount1] = sortedToken0.equals(PYUSD_MINT) 
+      ? [PYUSD_AMOUNT, WSOL_AMOUNT] 
+      : [WSOL_AMOUNT, PYUSD_AMOUNT];
+
     const addLiquidityTx = await program.methods
-      .addLiquidity(new anchor.BN(PYUSD_AMOUNT), new anchor.BN(WSOL_AMOUNT))
+      .addLiquidity(new anchor.BN(sortedAmount0), new anchor.BN(sortedAmount1))
       .accounts({
         pool: poolPubkey,
-        tokenMint0: PYUSD_MINT,
-        tokenMint1: NATIVE_MINT,
-        poolTokenAccount0: poolPYUSDAccount,
-        poolTokenAccount1: poolWSOLAccount,
-        userTokenAccount0: userPYUSDAccount,
-        userTokenAccount1: userWSOLAccount,
+        tokenMint0: sortedToken0,
+        tokenMint1: sortedToken1,
+        poolTokenAccount0: sortedToken0.equals(PYUSD_MINT) ? poolPYUSDAccount : poolWSOLAccount,
+        poolTokenAccount1: sortedToken0.equals(PYUSD_MINT) ? poolWSOLAccount : poolPYUSDAccount,
+        userTokenAccount0: sortedToken0.equals(PYUSD_MINT) ? userPYUSDAccount : userWSOLAccount,
+        userTokenAccount1: sortedToken0.equals(PYUSD_MINT) ? userWSOLAccount : userPYUSDAccount,
         user: provider.wallet.publicKey,
-        tokenMint0Program: TOKEN_2022_PROGRAM_ID, // Use Token-2022 for PYUSD
-        tokenMint1Program: TOKEN_PROGRAM_ID, // Use regular SPL Token for WSOL
+        tokenMint0Program: sortedToken0.equals(PYUSD_MINT) ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID,
+        tokenMint1Program: sortedToken0.equals(PYUSD_MINT) ? TOKEN_PROGRAM_ID : TOKEN_2022_PROGRAM_ID,
         systemProgram: SystemProgram.programId,
       })
       .rpc();

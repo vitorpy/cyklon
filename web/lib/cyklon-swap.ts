@@ -96,7 +96,7 @@ export async function prepareConfidentialSwap(
     `);
 
     // Determine if we're swapping from token0 to token1 or vice versa
-    const isSwapXtoY = sourceToken.equals(token0) ? 1 : 0;
+    const isSwapXtoY = sourceToken.equals(token0) ? 0 : 1; // Changed from 1 to 0
     console.log(`isSwapXtoY: ${isSwapXtoY}`);
 
     // Prepare inputs for proof generation
@@ -129,11 +129,11 @@ export async function prepareConfidentialSwap(
     const transaction = new Transaction();
 
     // Ensure the correct order of token accounts in the instruction
-    const [orderedUserTokenAccountIn, orderedUserTokenAccountOut] = isSwapXtoY
+    const [orderedUserTokenAccountIn, orderedUserTokenAccountOut] = isSwapXtoY === 0
       ? [userSourceTokenAccount, userDestTokenAccount]
       : [userDestTokenAccount, userSourceTokenAccount];
 
-    const [orderedPoolTokenAccount0, orderedPoolTokenAccount1] = isSwapXtoY
+    const [orderedPoolTokenAccount0, orderedPoolTokenAccount1] = isSwapXtoY === 0
       ? [poolSourceTokenAccount, poolDestTokenAccount]
       : [poolDestTokenAccount, poolSourceTokenAccount];
 
@@ -151,10 +151,16 @@ export async function prepareConfidentialSwap(
       associatedTokenProgram: utils.token.ASSOCIATED_PROGRAM_ID,
       systemProgram: SystemProgram.programId,
     };
-    
-    for (const [key, value] of Object.entries(accounts)) {
-      console.log(`Account ${key}: ${value.toBase58()}`);
-    }
+
+    // Add these console logs to verify the account addresses
+    console.log(`User token account in (source): ${userSourceTokenAccount.toBase58()}`);
+    console.log(`User token account out (dest): ${userDestTokenAccount.toBase58()}`);
+    console.log(`Pool source token account: ${poolSourceTokenAccount.toBase58()}`);
+    console.log(`Pool dest token account: ${poolDestTokenAccount.toBase58()}`);
+    console.log(`Ordered user token account in: ${orderedUserTokenAccountIn.toBase58()}`);
+    console.log(`Ordered user token account out: ${orderedUserTokenAccountOut.toBase58()}`);
+    console.log(`Ordered pool token account 0: ${orderedPoolTokenAccount0.toBase58()}`);
+    console.log(`Ordered pool token account 1: ${orderedPoolTokenAccount1.toBase58()}`);
 
     // Add the confidential swap instruction to the transaction
     transaction.add(

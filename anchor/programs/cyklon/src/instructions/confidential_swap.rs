@@ -122,6 +122,23 @@ impl<'info> ConfidentialSwap<'info> {
             let signer_seeds = &[&pool_seeds[..]];
 
             msg!("Performing token transfers");
+            
+            // Add these debug messages before the transfers
+            msg!("Amount sent: {}", amount_sent);
+            msg!("From user account balance: {}", from_user_account.amount);
+            msg!("To pool account balance: {}", to_pool_account.amount);
+            msg!("From pool account balance: {}", from_pool_account.amount);
+            msg!("To user account balance: {}", to_user_account.amount);
+
+            msg!("user_token_account_in: {}", self.user_token_account_in.key());
+            msg!("user_token_account_out: {}", self.user_token_account_out.key());
+            msg!("pool_token_account_0: {}", self.pool_token_account_0.key());
+            msg!("pool_token_account_1: {}", self.pool_token_account_1.key());
+
+            msg!("user_token_account_in balance: {}", self.user_token_account_in.amount);
+            msg!("user_token_account_out balance: {}", self.user_token_account_out.amount);
+            msg!("pool_token_account_0 balance: {}", self.pool_token_account_0.amount);
+            msg!("pool_token_account_1 balance: {}", self.pool_token_account_1.amount);
 
             // Transfer from user to pool
             transfer_checked(

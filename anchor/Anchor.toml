@@ -5,10 +5,10 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-cyklon = "Ba7aKagZn6HWCLphWNC5cNqUVsngAcFJf4bMJ49MwgX1"
+cyklon = "GLjWeJsaZ5zDrqRdgUaxYrjYsvoZmYPbASRUL9R7FQs3"
 
 [programs.localnet]
-cyklon = "Ba7aKagZn6HWCLphWNC5cNqUVsngAcFJf4bMJ49MwgX1"
+cyklon = "GLjWeJsaZ5zDrqRdgUaxYrjYsvoZmYPbASRUL9R7FQs3"
 
 [registry]
 url = "https://api.apr.dev"
