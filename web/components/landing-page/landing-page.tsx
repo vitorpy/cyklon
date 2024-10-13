@@ -40,6 +40,19 @@ export default function LandingPage() {
     posthog.capture('Previous Image Clicked', { currentImage: currentImage });
   };
 
+  const scrollToNewsletter = () => {
+    const newsletterSection = document.getElementById('newsletter-section');
+    if (newsletterSection) {
+      newsletterSection.scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => {
+        const emailInput = document.getElementById('newsletter-email');
+        if (emailInput) {
+          (emailInput as HTMLInputElement).focus();
+        }
+      }, 1000); // Delay to ensure smooth scroll completes
+    }
+  };
+
   return (
     <div className="w-full">
       {showBanner && (
@@ -57,22 +70,42 @@ export default function LandingPage() {
       
       {/* Panel 1 */}
       <div className="relative w-full flex flex-col items-center justify-center" style={{ minHeight: '90vh' }}>
-        <div className="z-10 text-center px-4 bg-transparent">
+        <div className="z-10 text-center px-4 bg-transparent mb-8">
           <Header title="Secure. Private. Efficient." subtitle="Darklake: Advanced privacy-preserving trading platform powered by Solana technology." />
-          <div className="max-w-xl mx-auto py-6 sm:px-6 lg:px-9 mt-[50px]">
-            <SolanaSwapComponent />
-          </div>
-          <div className="flex justify-center items-center text-white cursor-default mt-4">
-            <div className="w-96 bg-black text-white p-4 rounded-lg shadow-xl">
-              <p className="mb-2">For testing, get tokens from these faucets:</p>
-              <ul className="list-disc list-inside">
-                <li><a href="https://faucet.paxos.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">PYUSD Devnet Faucet</a></li>
-                <li><a href="https://faucet.solana.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Solana Devnet Faucet</a></li>
-              </ul>
-            </div>
-          </div>
         </div>
         
+        <div className="flex flex-col md:flex-row justify-center items-start gap-8 w-full max-w-6xl px-4">
+          <div className="w-full md:w-1/2">
+            <SolanaSwapComponent />
+          </div>
+          
+          <div className="w-full md:w-1/2 bg-transparent text-black p-6">
+            <h2 className="text-2xl font-bold mb-4">Welcome to Darklake</h2>
+            <p className="mb-4">Explore the future of decentralized trading &ndash; now on Solana&apos;s devnet.</p>
+            
+            <h3 className="text-xl font-semibold mb-2">What This Means for You:</h3>
+            <ul className="list-disc list-inside mb-4">
+              <li>Risk-free testing environment</li>
+              <li>Your feedback shapes our platform</li>
+            </ul>
+            
+            <h3 className="text-xl font-semibold mb-2">Get Started:</h3>
+            <ul className="list-disc list-inside mb-4">
+              <li><a href="https://faucet.paxos.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Get PYUSD test tokens</a></li>
+              <li><a href="https://faucet.solana.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Get SOL test tokens</a></li>
+              <li>Start exploring Darklake</li>
+            </ul>
+            
+            <p className="mb-2">Stay updated on our mainnet launch:</p>
+            <a 
+              onClick={scrollToNewsletter}
+              className="text-blue-400 hover:underline cursor-pointer"
+            >
+              Subscribe to Our Newsletter
+            </a>
+          </div>
+        </div>
+
         {/* Scroll to learn more */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-center text-black">
           <p className="mb-2">Scroll to learn more</p>
@@ -116,7 +149,7 @@ export default function LandingPage() {
           <Header title="Contact Us" subtitle="Have questions or feedback? Contact us below" />
           <ContactForm />
         </div>
-        <div className='w-full sm:w-1/2 relative p-4 flex flex-col items-center justify-center'>
+        <div id="newsletter-section" className='w-full sm:w-1/2 relative p-4 flex flex-col items-center justify-center'>
           <Header title="Newsletter" subtitle="Sign up with your email address to receive news and updates" />
           <NewsletterInput />
         </div>
