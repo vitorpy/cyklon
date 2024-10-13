@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { Header } from '../ui/header';
-import { SolanaSwapComponent } from '../solana-swapper/solana-swap';
+import { SolanaSwapComponent } from '@/components/solana-swapper/solana-swap';
 import Image from "next/image";
-import NewsletterInput from '../ui/newsletter-input';
-import ContactForm from '../ui/contact-form';
+import NewsletterInput from '@/components/ui/newsletter-input';
+import ContactForm from '@/components/ui/contact-form';
 
 export default function LandingPage() {
   const [showBanner, setShowBanner] = useState(true);
@@ -36,14 +36,14 @@ export default function LandingPage() {
       )}
       
       {/* Panel 1 */}
-      <div className="flex w-full relative" style={{ minHeight: '90vh' }}>
-        <div className="w-full sm:w-1/3 overflow-y-auto px-4">
+      <div className="relative w-full flex flex-col items-center justify-center" style={{ minHeight: '90vh' }}>
+        <div className="z-10 text-center px-4 bg-transparent">
           <Header title="Secure. Private. Efficient." subtitle="Darklake: Advanced privacy-preserving trading platform powered by Solana technology." />
           <div className="max-w-xl mx-auto py-6 sm:px-6 lg:px-9 mt-[50px]">
             <SolanaSwapComponent />
           </div>
-          <div className="flex justify-center items-center text-white cursor-default">
-            <div className="w-96 bg-black text-white p-4 mt-4 rounded-lg shadow-xl">
+          <div className="flex justify-center items-center text-white cursor-default mt-4">
+            <div className="w-96 bg-black text-white p-4 rounded-lg shadow-xl">
               <p className="mb-2">For testing, get tokens from these faucets:</p>
               <ul className="list-disc list-inside">
                 <li><a href="https://faucet.paxos.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">PYUSD Devnet Faucet</a></li>
@@ -51,16 +51,6 @@ export default function LandingPage() {
               </ul>
             </div>
           </div>
-        </div>
-        <div className="hidden sm:block sm:w-2/3 relative">
-          <Image
-            src="/images/background.jpg"
-            alt="Background"
-            fill
-            sizes="100vw"
-            style={{
-              objectFit: "cover"
-            }} />
         </div>
         
         {/* Scroll to learn more */}
