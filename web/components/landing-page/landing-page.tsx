@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import posthog from 'posthog-js';
+import { useWallet } from '@solana/wallet-adapter-react';
 import { Header } from '../ui/header';
 import { SolanaSwapComponent } from '@/components/solana-swapper/solana-swap';
 import Image from "next/image";
@@ -11,13 +13,31 @@ export default function LandingPage() {
   const [showBanner, setShowBanner] = useState(true);
   const [currentImage, setCurrentImage] = useState(1);
   const totalImages = 6;
+  const wallet = useWallet();
+
+  useEffect(() => {
+    const walletAddress = wallet.connected ? wallet.publicKey?.toString() : null;
+
+    // Identify user if wallet is connected
+    if (walletAddress) {
+      posthog.identify(walletAddress);
+    }
+
+    // Capture page load event
+    posthog.capture('Landing Page Loaded', {
+      walletConnected: wallet.connected,
+      walletAddress: walletAddress,
+    });
+  }, [wallet.connected, wallet.publicKey]);
 
   const nextImage = () => {
     setCurrentImage((prev) => (prev % totalImages) + 1);
+    posthog.capture('Next Image Clicked', { currentImage: currentImage });
   };
 
   const prevImage = () => {
     setCurrentImage((prev) => (prev === 1 ? totalImages : prev - 1));
+    posthog.capture('Previous Image Clicked', { currentImage: currentImage });
   };
 
   return (
