@@ -19,6 +19,7 @@ import { useCluster } from '@/components/cluster/cluster-data-access';
 import { useSwapEstimate } from '@/hooks/useSwapEstimate';
 import { Token } from '@/types/token';
 import tokenList from '@/constants/tokens.json';
+import { usePostHog } from 'posthog-js/react'
 
 const tokens: Token[] = tokenList;
 
@@ -41,6 +42,7 @@ export function SolanaSwapComponent() {
   const { cluster } = useCluster()
 
   const confidentialSwap = useConfidentialSwap()
+  const posthog = usePostHog()
 
   const estimatedDestAmount = useSwapEstimate(sourceToken, destToken, sourceAmount);
 
@@ -78,6 +80,16 @@ export function SolanaSwapComponent() {
     setIsSwapping(true);
     setSwapError(null);
     setSwapSuccess(null);
+
+    // Track swap button click
+    posthog.capture('swap_button_clicked', {
+      sourceToken: sourceToken.symbol,
+      destToken: destToken.symbol,
+      sourceAmount,
+      destAmount,
+      slippage: slippage[0],
+    })
+
     try {
       if (!publicKey) throw new Error('Wallet not connected');
 
@@ -209,9 +221,29 @@ export function SolanaSwapComponent() {
       console.log('Swap successful');
       setSwapSuccess(signature);
 
+      // Track successful swap
+      posthog.capture('swap_successful', {
+        sourceToken: sourceToken.symbol,
+        destToken: destToken.symbol,
+        sourceAmount,
+        destAmount,
+        slippage: slippage[0],
+        signature,
+      })
+
     } catch (error) {
       console.error('Swap error:', error);
       setSwapError(error instanceof Error ? error.message : 'An unexpected error occurred');
+
+      // Track failed swap
+      posthog.capture('swap_failed', {
+        sourceToken: sourceToken.symbol,
+        destToken: destToken.symbol,
+        sourceAmount,
+        destAmount,
+        slippage: slippage[0],
+        error: error instanceof Error ? error.message : 'An unexpected error occurred',
+      })
 
       // Sentry error reporting
       Sentry.captureException(error, {
