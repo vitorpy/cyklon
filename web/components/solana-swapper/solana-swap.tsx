@@ -356,7 +356,7 @@ export function SolanaSwapComponent() {
           </Popover>
           <Button 
             className={`w-full ${isValidPool ? 'bg-[#a1a1aa] hover:bg-[#71717a]' : 'bg-gray-500 cursor-not-allowed'} text-primary-content`}
-            disabled={!isValidPool || isSwapping}
+            disabled={!isValidPool || isSwapping || !sourceAmount || isNaN(parseFloat(sourceAmount)) || parseFloat(sourceAmount) <= 0}
             onClick={handleConfidentialSwap}
           >
             {isSwapping ? 'Swapping...' : isValidPool ? 'Swap' : 'This pool isn\'t available yet.'}
