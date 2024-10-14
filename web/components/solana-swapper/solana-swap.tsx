@@ -189,12 +189,22 @@ export function SolanaSwapComponent() {
       }
 
       console.log('Transaction built. Instruction count:', transaction.instructions.length);
+      
+      transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+      transaction.feePayer = publicKey;
+      
       console.log('Sending transaction...');
 
       // Send and confirm the transaction
       let signature;
       try {
-        signature = await wallet.sendTransaction(transaction, connection);
+        if (!wallet.signTransaction) {
+          throw new Error('Wallet does not support signing transactions');
+        }
+        const signedTransaction = await wallet.signTransaction(transaction);
+        const rawTransaction = signedTransaction.serialize();
+        signature = await connection.sendRawTransaction(rawTransaction);
+
         console.log('Transaction sent. Signature:', signature);
       } catch (error) {
         console.error('Transaction submission failed:', error);
