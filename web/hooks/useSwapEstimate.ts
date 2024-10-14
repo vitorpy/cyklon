@@ -3,13 +3,18 @@ import { PublicKey } from '@solana/web3.js';
 import { useConnection } from '@solana/wallet-adapter-react';
 import { Token } from '@/types/token';
 import { useAnchorProvider } from '../components/solana/solana-provider';
-import { getCyklonProgram } from '@blackpool/anchor';
+import { useCluster } from '../components/cluster/cluster-data-access';
+import { getCyklonProgram, getCyklonProgramId } from '@blackpool/anchor';
 import { NATIVE_MINT } from '@solana/spl-token';
+import { generateProof } from '../lib/prepare-proof';
 
 export function useSwapEstimate(sourceToken: Token, destToken: Token, sourceAmount: string) {
   const [estimatedDestAmount, setEstimatedDestAmount] = useState<string>('');
   const { connection } = useConnection();
   const provider = useAnchorProvider();
+  const { cluster } = useCluster();
+  // @ts-expect-error Weird typing issues.
+  const programId = getCyklonProgramId(cluster);
 
   useEffect(() => {
     const estimateSwap = async () => {
@@ -21,7 +26,7 @@ export function useSwapEstimate(sourceToken: Token, destToken: Token, sourceAmou
       try {
         const program = getCyklonProgram(provider);
 
-        // Handle NATIVE token and sort token public keys
+        // Sort token public keys to ensure consistent pool seed calculation
         const sourceAddress = sourceToken.address === 'NATIVE' ? NATIVE_MINT : new PublicKey(sourceToken.address);
         const destAddress = destToken.address === 'NATIVE' ? NATIVE_MINT : new PublicKey(destToken.address);
         const [tokenX, tokenY] = [sourceAddress, destAddress].sort((a, b) => 
@@ -29,31 +34,44 @@ export function useSwapEstimate(sourceToken: Token, destToken: Token, sourceAmou
         );
 
         // Determine if we're swapping from X to Y
-        const isXtoY = sourceAddress.equals(tokenX);
+        const isSwapXtoY = sourceAddress.equals(tokenX) ? 1 : 0;
 
-        // Find pool PDA
+        // Find pool PDA using sorted token public keys
         const [poolPubkey] = PublicKey.findProgramAddressSync(
           [Buffer.from("pool"), tokenX.toBuffer(), tokenY.toBuffer()],
-          program.programId
+          programId
         );
 
         // Fetch pool account data
         const poolAccount = await program.account.pool.fetch(poolPubkey);
 
-        // Get reserves directly from the pool account
-        const reserveX = poolAccount.reserveX;
-        const reserveY = poolAccount.reserveY;
+        // Prepare inputs for proof generation
+        const publicInputs = {
+          publicBalanceX: poolAccount.reserveX.toString(),
+          publicBalanceY: poolAccount.reserveY.toString(),
+          isSwapXtoY: isSwapXtoY
+        };
 
-        // Calculate the estimated amount based on the pool reserves
-        const sourceReserve = isXtoY ? reserveX : reserveY;
-        const destReserve = isXtoY ? reserveY : reserveX;
         const sourceAmountBN = BigInt(Math.floor(parseFloat(sourceAmount) * 10 ** sourceToken.decimals));
 
-        // Use the constant product formula: x * y = k
-        const k = sourceReserve * destReserve;
-        const newSourceReserve = sourceReserve + sourceAmountBN;
-        const newDestReserve = k / newSourceReserve;
-        const estimatedAmountBN = destReserve - newDestReserve;
+        const privateInputs = {
+          privateInputAmount: sourceAmountBN.toString(),
+          privateMinReceived: "0" // We're not enforcing a minimum for estimation
+        };
+
+        // Generate proof
+        const { publicSignals } = await generateProof(
+          privateInputs,
+          publicInputs
+        );
+
+        // Extract the third element (index 2) from publicSignals
+        const amountReceivedSignal = publicSignals[2];
+
+        // Convert the last 8 bytes of the Uint8Array to a BigInt
+        const estimatedAmountBN = amountReceivedSignal.slice(-8).reduce((acc, value, index) => {
+          return acc + (BigInt(value) << BigInt(8 * (7 - index)));
+        }, BigInt(0));
 
         // Convert back to human-readable format
         const estimatedAmount = Number(estimatedAmountBN) / 10 ** destToken.decimals;
@@ -65,6 +83,7 @@ export function useSwapEstimate(sourceToken: Token, destToken: Token, sourceAmou
     };
 
     estimateSwap();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sourceToken, destToken, sourceAmount, connection, provider]);
 
   return estimatedDestAmount;
