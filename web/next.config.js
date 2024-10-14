@@ -34,8 +34,8 @@ const plugins = [
 
 module.exports = withSentryConfig(composePlugins(...plugins)(nextConfig),
   {
-    org: "blackpool-dao",
-    project: "blackpooldao",
+    org: "darklake",
+    project: "darklake",
     authToken: process.env.SENTRY_AUTH_TOKEN,
     silent: false,
     tunnelRoute: "/monitoring-tunnel",
