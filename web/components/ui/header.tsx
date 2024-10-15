@@ -15,16 +15,16 @@ export function Header({
   const textColor = isWhite ? 'text-white' : 'text-black';
   
   return (
-    <div className="hero py-[64px]">
-      <div className="hero-content text-center">
-        <div className="max-w-2xl">
+    <div className="py-[64px]">
+      <div className="text-center">
+        <div className="max-w-4xl">
           {typeof title === 'string' ? (
-            <h1 className={`text-5xl font-base ${textColor}`}>{title}</h1>
+            <h1 className={`text-7xl font-base ${textColor}`}>{title}</h1>
           ) : (
             title
           )}
           {typeof subtitle === 'string' ? (
-            <p className={`py-6 font-light ${textColor}`}>{subtitle}</p>
+            <p className={`py-6 ${textColor}`}>{subtitle}</p>
           ) : (
             subtitle
           )}
