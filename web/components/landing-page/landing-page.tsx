@@ -69,40 +69,42 @@ export default function LandingPage() {
       )}
       
       {/* Panel 1 */}
-      <div className="relative w-full flex flex-col items-center justify-center" style={{ minHeight: '90vh' }}>
-        <div className="z-10 text-center px-4 bg-transparent mb-8">
-          <Header title="Secure. Private. Efficient." subtitle="Darklake: Advanced privacy-preserving trading platform powered by Solana technology." />
-        </div>
-        
-        <div className="flex flex-col md:flex-row justify-center items-start gap-8 w-full max-w-6xl px-4">
-          <div className="w-full md:w-1/2">
-            <SolanaSwapComponent />
+      <div className="hero relative w-full flex flex-col items-center justify-center" style={{ minHeight: '90vh' }}>
+        <div className="hero-content w-full flex flex-col items-center justify-center">
+          <div className="z-10 text-center px-4 bg-transparent mb-8">
+            <Header title="Secure. Private. Efficient." subtitle="Solana's first DEX delivering real-time, MEV-resistant order execution." />
           </div>
           
-          <div className="w-full md:w-1/2 bg-transparent text-black p-6">
-            <h2 className="text-2xl font-bold mb-4">Welcome to Darklake</h2>
-            <p className="mb-4">Explore the future of decentralized trading &ndash; now on Solana&apos;s devnet.</p>
+          <div className="flex flex-col md:flex-row justify-center items-start gap-8 w-full max-w-6xl px-4">
+            <div className="w-full md:w-1/2">
+              <SolanaSwapComponent />
+            </div>
             
-            <h3 className="text-xl font-semibold mb-2">What This Means for You:</h3>
-            <ul className="list-disc list-inside mb-4">
-              <li>Risk-free testing environment</li>
-              <li>Your feedback shapes our platform</li>
-            </ul>
-            
-            <h3 className="text-xl font-semibold mb-2">Get Started:</h3>
-            <ul className="list-disc list-inside mb-4">
-              <li><a href="https://faucet.paxos.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Get PYUSD test tokens</a></li>
-              <li><a href="https://faucet.solana.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Get SOL test tokens</a></li>
-              <li>Start exploring Darklake</li>
-            </ul>
-            
-            <p className="mb-2">Stay updated on our mainnet launch:</p>
-            <a 
-              onClick={scrollToNewsletter}
-              className="text-blue-400 hover:underline cursor-pointer"
-            >
-              Subscribe to Our Newsletter
-            </a>
+            <div className="w-full md:w-1/2 text-black p-6">
+              <h2 className="text-2xl font-bold mb-4">Welcome to Darklake</h2>
+              <p className="mb-4">Explore the future of decentralized trading &ndash; now on Solana&apos;s devnet.</p>
+              
+              <h3 className="text-xl font-semibold mb-2">What This Means for You:</h3>
+              <ul className="list-disc list-inside mb-4">
+                <li>Risk-free testing environment</li>
+                <li>Your feedback shapes our platform</li>
+              </ul>
+              
+              <h3 className="text-xl font-semibold mb-2">Get Started:</h3>
+              <ul className="list-disc list-inside mb-4">
+                <li><a href="https://faucet.paxos.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Get PYUSD test tokens</a></li>
+                <li><a href="https://faucet.solana.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Get SOL test tokens</a></li>
+                <li>Start exploring Darklake</li>
+              </ul>
+              
+              <p className="mb-2">Stay updated on our mainnet launch:</p>
+              <a 
+                onClick={scrollToNewsletter}
+                className="text-blue-400 hover:underline cursor-pointer"
+              >
+                Subscribe to Our Newsletter
+              </a>
+            </div>
           </div>
         </div>
 
@@ -156,20 +158,9 @@ export default function LandingPage() {
       </div>
 
       {/* Panel 4 */}
-      <div className="w-full bg-black flex flex-col-reverse sm:flex-row text-white" style={{ minHeight: '100vh' }}>
-        <div className='hidden sm:block sm:w-3/5 relative'>
-          <Image
-            src="/images/about.jpeg"
-            alt="Background"
-            fill
-            sizes="100vw"
-            style={{
-              objectFit: "contain"
-            }} />
-        </div>
-        <div className='w-full sm:w-2/5 relative p-4 flex flex-col items-center justify-center'>
+      <div className="w-full bg-black flex flex-col-reverse sm:flex-row text-white">
+        <div className='w-full relative p-4 flex flex-col items-center justify-center'>
           <div className='flex flex-col items-center justify-center w-full'>
-            <Header title="About Us" subtitle="Solana's first DEX delivering real-time, MEV-resistant order execution." isWhite={true} />
             <div className="flex space-x-6">
               <a href="https://twitter.com/darklakefi" target="_blank" rel="noopener noreferrer" className="text-3xl text-white hover:text-blue-600">
                 <i className="fab fa-x-twitter"></i>
