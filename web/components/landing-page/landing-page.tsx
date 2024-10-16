@@ -55,8 +55,9 @@ export default function LandingPage() {
 
   return (
     <div className="w-full">
+      {/* Banner */}
       {showBanner && (
-        <div className="bg-black text-white p-3 flex justify-between items-center">
+        <div className="p-4 flex justify-between items-center bg-black text-white">
           <p className="text-center w-full">Blackpool is now Darklake.</p>
           <button 
             onClick={() => setShowBanner(false)}
@@ -69,18 +70,18 @@ export default function LandingPage() {
       )}
       
       {/* Panel 1 */}
-      <div className="hero relative w-full flex flex-col items-center justify-center" style={{ minHeight: '90vh' }}>
-        <div className="hero-content w-full flex flex-col items-center justify-center">
-          <div className="z-10 text-center px-4 bg-transparent mb-8">
+      <div className="hero relative w-full flex flex-col items-center justify-center p-4 md:p-8" style={{ minHeight: '90vh' }}>
+        <div className="hero-content w-full max-w-7xl flex flex-col items-center justify-center">
+          <div className="z-10 text-center mb-8">
             <Header title="Secure. Private. Efficient." subtitle="Solana's first DEX delivering real-time, MEV-resistant order execution." />
           </div>
           
-          <div className="flex flex-col md:flex-row justify-center items-start gap-8 w-full max-w-6xl px-4">
+          <div className="flex flex-col md:flex-row justify-center items-start gap-8 w-full">
             <div className="w-full md:w-1/2">
               <SolanaSwapComponent />
             </div>
             
-            <div className="w-full md:w-1/2 text-black p-6">
+            <div className="w-full md:w-1/2 p-8 text-black">
               <h2 className="text-2xl font-bold mb-4">Welcome to Darklake</h2>
               <p className="mb-4">Explore the future of decentralized trading &ndash; now on Solana&apos;s devnet.</p>
               
@@ -116,8 +117,8 @@ export default function LandingPage() {
       </div>
 
       {/* Panel 2 */}
-      <div className="flex w-full second-panel-style items-center justify-center" style={{ minHeight: '100vh' }}>
-        <div className="relative w-full">
+      <div className="flex second-panel-style w-full items-center justify-center min-h-screen p-4 md:p-8">
+        <div className="relative w-full max-w-7xl">
           <Image
             src={`/images/explainer/${currentImage}.svg`}
             alt={`Explainer ${currentImage}`}
@@ -146,22 +147,22 @@ export default function LandingPage() {
       </div>
 
       {/* Panel 3 */}
-      <div className="w-full third-panel-style flex flex-col sm:flex-row text-black" style={{ minHeight: '75vh' }}>
-        <div className='w-full sm:w-1/2 relative p-4 flex flex-col items-center justify-center'>
+      <div className="w-full third-panel-style flex flex-col sm:flex-row min-h-[75vh] p-4 md:p-8">
+        <div className='w-full sm:w-1/2 p-8 flex flex-col items-center justify-center'>
           <Header title="Contact Us" subtitle="Have questions or feedback? Contact us below" />
           <ContactForm />
         </div>
-        <div id="newsletter-section" className='w-full sm:w-1/2 relative p-4 flex flex-col items-center justify-center'>
+        <div id="newsletter-section" className='w-full sm:w-1/2 p-8 flex flex-col items-center justify-center'>
           <Header title="Newsletter" subtitle="Sign up with your email address to receive news and updates" />
           <NewsletterInput />
         </div>
       </div>
 
       {/* Panel 4 */}
-      <div className="w-full bg-black flex flex-col-reverse sm:flex-row text-white">
-        <div className='w-full relative p-4 flex flex-col items-center justify-center'>
+      <div className="w-full fourth-panel-style flex flex-col-reverse sm:flex-row p-4 md:p-8 bg-black">
+        <div className='w-full p-8 flex flex-col items-center justify-center'>
           <div className='flex flex-col items-center justify-center w-full'>
-            <div className="flex space-x-6">
+            <div className="flex space-x-8">
               <a href="https://twitter.com/darklakefi" target="_blank" rel="noopener noreferrer" className="text-3xl text-white hover:text-blue-600">
                 <i className="fab fa-x-twitter"></i>
               </a>
