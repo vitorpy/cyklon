@@ -1,6 +1,8 @@
 import React, { useState, KeyboardEvent } from 'react';
 import { subscribeToNewsletter } from '@/lib/mailchimp';
 import posthog from 'posthog-js';
+import { Button } from './button';
+import { Input } from './input';
 
 const NewsletterInput: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -40,7 +42,7 @@ const NewsletterInput: React.FC = () => {
     return (
         <div id="newsletter-section" className="w-full max-w-md">
             <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row sm:space-x-2">
-                <input
+                <Input
                     id="newsletter-email"
                     type="email"
                     value={email}
@@ -50,13 +52,13 @@ const NewsletterInput: React.FC = () => {
                     className="mt-1 block w-full px-3 py-2 border bg-white border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     required
                 />
-                <button type="submit"
+                <Button type="submit"
                     className="mt-2 sm:mt-1 flex items-center justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-black swap-button-style focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                 >
                     <span className="text-black text-primary-content text-sm">
                         Subscribe
                     </span>    
-                </button>
+                </Button>
             </form>
             <p id="newsletter-message" className="text-black mt-2">{message}</p>
         </div>

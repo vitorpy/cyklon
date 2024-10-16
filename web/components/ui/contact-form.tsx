@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { submitContactForm } from '../../lib/mailchimp';
+import { Button } from './button';
+import { Input } from './input';
+import { TextArea } from './textarea';
 
 const ContactForm: React.FC = () => {
     const [name, setName] = useState('');
@@ -54,7 +57,7 @@ const ContactForm: React.FC = () => {
         <form onSubmit={handleSubmit} className="w-1/2 space-y-4">
             <div>
                 <label htmlFor="name" className="block text-sm font-medium text-black">Name</label>
-                <input
+                <Input
                     type="text"
                     id="name"
                     value={name}
@@ -65,7 +68,7 @@ const ContactForm: React.FC = () => {
             </div>
             <div>
                 <label htmlFor="email" className="block text-sm font-medium text-black">Email</label>
-                <input
+                <Input
                     type="email"
                     id="email"
                     value={email}
@@ -76,17 +79,17 @@ const ContactForm: React.FC = () => {
             </div>
             <div>
                 <label htmlFor="message" className="block text-sm font-medium text-black">Message</label>
-                <textarea
+                <TextArea
                     id="message"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     required
                     rows={4}
                     className="mt-1 block w-full px-3 py-2 border bg-white border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                ></textarea>
+                />
             </div>
             <div className="flex items-center">
-                <input
+                <Input
                     type="checkbox"
                     id="subscribe"
                     checked={subscribeNewsletter}
@@ -98,7 +101,7 @@ const ContactForm: React.FC = () => {
                 </label>
             </div>
             <div>
-                <button
+                <Button
                     type="submit"
                     disabled={isSubmitting}
                     className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-black swap-button-style focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
@@ -106,7 +109,7 @@ const ContactForm: React.FC = () => {
                     <span className="text-black text-primary-content text-sm">
                         {isSubmitting ? 'Sending...' : 'Send Message'}
                     </span>
-                </button>
+                </Button>
             </div>
             
             {submitStatus === 'success' && (
