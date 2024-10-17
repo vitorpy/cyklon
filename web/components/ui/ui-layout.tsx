@@ -28,12 +28,18 @@ export function UiLayout({
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <div className="navbar bg-base-300 text-neutral-content flex-col md:flex-row space-y-2 md:space-y-0">
-        <div className="flex-1">
+      <div className="navbar bg-base-300 text-neutral-content flex-wrap justify-between p-2">
+        <div className="flex-1 flex items-center">
           <Link className="btn btn-ghost normal-case text-xl" href="/">
             <p className="font-normal header-title-text text-white">Darklake</p>
           </Link>
-          <ul className="menu menu-horizontal px-1 space-x-2">
+        </div>
+        <div className="flex-none flex items-center space-x-2">
+          <WalletButton />
+          <ClusterUiSelect />
+        </div>
+        <div className="w-full mt-2">
+          <ul className="menu menu-horizontal px-1 flex-wrap justify-center">
             {links.map(({ label, path }) => (
               <li key={path}>
                 <Link
@@ -45,10 +51,6 @@ export function UiLayout({
               </li>
             ))}
           </ul>
-        </div>
-        <div className="flex-none space-x-2">
-          <WalletButton />
-          <ClusterUiSelect />
         </div>
       </div>
       <ClusterChecker>
