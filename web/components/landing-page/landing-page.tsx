@@ -110,7 +110,7 @@ export default function LandingPage() {
         </div>
 
         {/* Scroll to learn more */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-center text-black">
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-center text-black hidden md:block">
           <p className="mb-2">Scroll to learn more</p>
           <i className="fas fa-chevron-down text-2xl animate-bounce"></i>
         </div>
