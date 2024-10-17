@@ -10,16 +10,15 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import Image from "next/image"
 import { useConfidentialSwap } from '@/lib/cyklon-swap'
 import { PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js'
-import { createAssociatedTokenAccountInstruction, createSyncNativeInstruction, NATIVE_MINT, createCloseAccountInstruction, getAssociatedTokenAddress } from '@solana/spl-token'
+import { createAssociatedTokenAccountInstruction, createSyncNativeInstruction, NATIVE_MINT, createCloseAccountInstruction, getAssociatedTokenAddress, TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token'
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { useTokenBalance } from '@/hooks/useTokenBalance'
 import * as Sentry from "@sentry/nextjs";
-import Link from 'next/link';
-import { useCluster } from '@/components/cluster/cluster-data-access';
 import { useSwapEstimate } from '@/hooks/useSwapEstimate';
 import { Token } from '@/types/token';
 import tokenList from '@/constants/tokens.json';
 import { usePostHog } from 'posthog-js/react'
+import { useTransactionToast } from '@/components/ui/ui-layout'
 
 const tokens: Token[] = tokenList;
 
@@ -33,13 +32,12 @@ export function SolanaSwapComponent() {
   const [isSwapping, setIsSwapping] = useState<boolean>(false)
   const [swapError, setSwapError] = useState<string | null>(null)
   const [minReceived, setMinReceived] = useState<number>(0)
-  const [swapSuccess, setSwapSuccess] = useState<string | null>(null)
+  const transactionToast = useTransactionToast()
 
   const { publicKey } = useWallet()
   const { balance: sourceTokenBalance } = useTokenBalance(publicKey, sourceToken.address)
   const { connection } = useConnection()
   const wallet = useWallet()
-  const { cluster } = useCluster()
 
   const confidentialSwap = useConfidentialSwap()
   const posthog = usePostHog()
@@ -79,7 +77,6 @@ export function SolanaSwapComponent() {
   const handleConfidentialSwap = async () => {
     setIsSwapping(true);
     setSwapError(null);
-    setSwapSuccess(null);
 
     // Track swap button click
     posthog.capture('swap_button_clicked', {
@@ -125,7 +122,8 @@ export function SolanaSwapComponent() {
       }
 
       // Check and create associated token account for destination token if needed
-      const destTokenAccount = await getAssociatedTokenAddress(destTokenPublicKey, publicKey);
+      const destTokenProgram = destToken.tokenProgram === 'Token-2022' ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID;
+      const destTokenAccount = await getAssociatedTokenAddress(destTokenPublicKey, publicKey, false, destTokenProgram);
       let destTokenAccountInfo;
       try {
         destTokenAccountInfo = await connection.getAccountInfo(destTokenAccount);
@@ -140,7 +138,8 @@ export function SolanaSwapComponent() {
             publicKey, // payer
             destTokenAccount,
             publicKey, // owner
-            destTokenPublicKey
+            destTokenPublicKey,
+            destTokenProgram
           )
         );
         console.log('Added create associated token account instruction');
@@ -229,7 +228,7 @@ export function SolanaSwapComponent() {
       
       // Handle successful swap
       console.log('Swap successful');
-      setSwapSuccess(signature);
+      transactionToast(signature); // Use the transaction toast here
 
       // Track successful swap
       posthog.capture('swap_successful', {
@@ -372,19 +371,6 @@ export function SolanaSwapComponent() {
             {isSwapping ? 'Swapping...' : isValidPool ? 'Swap' : 'This pool isn\'t available yet.'}
           </Button>
           {swapError && <div className="text-red-500 text-sm">{swapError}</div>}
-          {swapSuccess && (
-            <div className="text-white text-sm mt-2">
-              Swap successful!{' '}
-              <Link 
-                href={`https://explorer.solana.com/tx/${swapSuccess}?cluster=${cluster.network}`}
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="underline hover:text-blue-300"
-              >
-                View transaction
-              </Link>
-            </div>
-          )}
         </div>
       </div>
     </div>
