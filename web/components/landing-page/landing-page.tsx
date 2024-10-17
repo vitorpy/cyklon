@@ -8,6 +8,7 @@ import { SolanaSwapComponent } from '@/components/solana-swapper/solana-swap';
 import Image from "next/image";
 import NewsletterInput from '@/components/ui/newsletter-input';
 import ContactForm from '@/components/ui/contact-form';
+import { Button } from '@/components/ui/button';
 
 export default function LandingPage() {
   const [showBanner, setShowBanner] = useState(true);
@@ -81,30 +82,30 @@ export default function LandingPage() {
               <SolanaSwapComponent />
             </div>
             
-            <div className="w-full md:w-1/2 p-8 text-black">
-              <h2 className="text-2xl font-bold mb-4">Welcome to Darklake</h2>
-              <p className="mb-4">Explore the future of decentralized trading &ndash; now on Solana&apos;s devnet.</p>
+            <div className="w-full md:w-1/2 p-8 text-black space-y-6">
+              <h2 className="text-3xl font-bold">Welcome to Darklake</h2>
+              <p className="text-lg">Explore the future of decentralized trading &ndash; now on Solana&apos;s devnet.</p>
               
-              <h3 className="text-xl font-semibold mb-2">What This Means for You:</h3>
-              <ul className="list-disc list-inside mb-4">
-                <li>Risk-free testing environment</li>
-                <li>Your feedback shapes our platform</li>
-              </ul>
+              <div>
+                <h3 className="text-2xl font-semibold mb-3">Get Started:</h3>
+                <ul className="list-disc list-inside space-y-2">
+                  <li><a href="https://faucet.paxos.com/" target="_blank" rel="noopener noreferrer" className="text-slate-600 hover:text-slate-800 hover:underline">Get PYUSD test tokens</a></li>
+                  <li><a href="https://faucet.solana.com/" target="_blank" rel="noopener noreferrer" className="text-slate-600 hover:text-slate-800 hover:underline">Get SOL test tokens</a></li>
+                  <li>Start exploring Darklake</li>
+                </ul>
+              </div>
               
-              <h3 className="text-xl font-semibold mb-2">Get Started:</h3>
-              <ul className="list-disc list-inside mb-4">
-                <li><a href="https://faucet.paxos.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Get PYUSD test tokens</a></li>
-                <li><a href="https://faucet.solana.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Get SOL test tokens</a></li>
-                <li>Start exploring Darklake</li>
-              </ul>
-              
-              <p className="mb-2">Stay updated on our mainnet launch:</p>
-              <a 
-                onClick={scrollToNewsletter}
-                className="text-blue-400 hover:underline cursor-pointer"
-              >
-                Subscribe to Our Newsletter
-              </a>
+              <div>
+                <p className="mb-2">Stay updated on our mainnet launch:</p>
+                <Button 
+                  className="max-w-md flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-black swap-button-style focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                  onClick={scrollToNewsletter}
+                >
+                  <span className="text-black text-primary-content text-sm">
+                    Subscribe to Our Newsletter
+                  </span>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -117,7 +118,7 @@ export default function LandingPage() {
       </div>
 
       {/* Panel 2 */}
-      <div className="flex second-panel-style w-full items-center justify-center min-h-screen p-4 md:p-8">
+      <div className="flex second-panel-style w-full items-center justify-center min-h-[75vh] p-4 md:p-8">
         <div className="relative w-full max-w-7xl">
           <Image
             src={`/images/explainer/${currentImage}.svg`}
@@ -147,7 +148,7 @@ export default function LandingPage() {
       </div>
 
       {/* Panel 3 */}
-      <div className="w-full third-panel-style flex flex-col sm:flex-row min-h-[75vh] p-4 md:p-8">
+      <div className="w-full third-panel-style flex flex-col sm:flex-row min-h-[50vh] p-4 md:p-8">
         <div className='w-full sm:w-1/2 p-8 flex flex-col items-center justify-center'>
           <Header title="Contact Us" subtitle="Have questions or feedback? Contact us below" />
           <ContactForm />
