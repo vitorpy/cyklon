@@ -176,7 +176,7 @@ Token Y: ${tokenY.toBase58()}`
 
   it('Confidential Swap', async () => {
     const poolAccount = await program.account.pool.fetch(poolPubkey);
-
+    
     const userTokenAccountX = await getOrCreateAssociatedTokenAccount(
       provider.connection,
       convertToSigner(payer),
@@ -288,6 +288,10 @@ Token Y: ${tokenY.toBase58()}`
 
   it('Remove Liquidity', async () => {
     const poolAccount = await program.account.pool.fetch(poolPubkey);
+    
+    const balanceX = poolAccount.reserveX.toNumber();
+    const balanceY = poolAccount.reserveY.toNumber();
+
     const [lpMintPubkey] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from("lp"), tokenX.toBuffer(), tokenY.toBuffer()],
       program.programId
@@ -370,7 +374,7 @@ Token Y: ${tokenY.toBase58()}`
           poolTokenAccountY: poolTokenAccountY.address,
           user: payer.publicKey,
         })
-        .rpc();
+        .rpc({ commitment: 'confirmed' });
 
       const updatedPoolAccount = await program.account.pool.fetch(poolPubkey);
       const updatedUserLpBalance = await provider.connection.getTokenAccountBalance(userTokenAccountLp.address);
@@ -379,8 +383,8 @@ Token Y: ${tokenY.toBase58()}`
       expect(new anchor.BN(updatedUserLpBalance.value.amount)).toEqual(new anchor.BN(lpTokenBalance.value.amount).sub(halfLpTokens));
 
       // Check that reserves were reduced by approximately half
-      expect(updatedPoolAccount.reserveX.toNumber()).toBeLessThan(poolAccount.reserveX.toNumber());
-      expect(updatedPoolAccount.reserveY.toNumber()).toBeLessThan(poolAccount.reserveY.toNumber());
+      expect(updatedPoolAccount.reserveX.toNumber()).toBeLessThan(balanceX);
+      expect(updatedPoolAccount.reserveY.toNumber()).toBeLessThan(balanceY);
 
       // Check that user received tokens
       const updatedUserXBalance = await provider.connection.getTokenAccountBalance(userTokenAccountX.address);

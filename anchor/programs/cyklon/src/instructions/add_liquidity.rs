@@ -66,8 +66,8 @@ pub struct AddLiquidity<'info> {
 impl<'info> AddLiquidity<'info> {
     pub fn add_liquidity(
         &mut self,
-        amount_0: u64,
-        amount_1: u64,
+        amount_x: u64,
+        amount_y: u64,
     ) -> Result<()> {
         // Add this check at the beginning of the function
         if self.token_mint_x.key() >= self.token_mint_y.key() {
@@ -78,16 +78,16 @@ impl<'info> AddLiquidity<'info> {
         
         // Calculate the liquidity to be added
         let liquidity = if pool.reserve_x == 0 && pool.reserve_y == 0 {
-            (amount_0 as u128 * amount_1 as u128) as u64
+            (amount_x as u128 * amount_y as u128) as u64
         } else {
-            let liquidity_x = amount_0 * pool.reserve_y / pool.reserve_x;
-            let liquidity_y = amount_1 * pool.reserve_x / pool.reserve_y;
+            let liquidity_x = amount_x * pool.reserve_y / pool.reserve_x;
+            let liquidity_y = amount_y * pool.reserve_x / pool.reserve_y;
             liquidity_x.min(liquidity_y)
         };
 
         // Update pool reserves
-        pool.reserve_x = pool.reserve_x.checked_add(amount_0).unwrap();
-        pool.reserve_y = pool.reserve_y.checked_add(amount_1).unwrap();
+        pool.reserve_x = pool.reserve_x.checked_add(amount_x).unwrap();
+        pool.reserve_y = pool.reserve_y.checked_add(amount_y).unwrap();
 
         // Transfer tokens from user to pool
         transfer_checked(
@@ -100,7 +100,7 @@ impl<'info> AddLiquidity<'info> {
                     mint: self.token_mint_x.to_account_info(),
                 },
             ),
-            amount_0,
+            amount_x,
             self.token_mint_x.decimals,
         )?;
 
@@ -114,7 +114,7 @@ impl<'info> AddLiquidity<'info> {
                     mint: self.token_mint_y.to_account_info(),
                 },
             ),
-            amount_1,
+            amount_y,
             self.token_mint_y.decimals,
         )?;
 
@@ -145,11 +145,13 @@ impl<'info> AddLiquidity<'info> {
             ),
             liquidity,
         )?;
+        
+        self.pool.liquidity = self.pool.liquidity.checked_add(liquidity.into()).unwrap();
 
         emit!(LiquidityAdded {
             user: self.user.key(),
-            amount_0,
-            amount_1,
+            amount_x,
+            amount_y,
             liquidity,
         });
 

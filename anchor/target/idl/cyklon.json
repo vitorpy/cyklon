@@ -1463,11 +1463,11 @@
             "type": "pubkey"
           },
           {
-            "name": "amount_0",
+            "name": "amount_x",
             "type": "u64"
           },
           {
-            "name": "amount_1",
+            "name": "amount_y",
             "type": "u64"
           },
           {
@@ -1487,11 +1487,11 @@
             "type": "pubkey"
           },
           {
-            "name": "amount_0",
+            "name": "amount_x",
             "type": "u64"
           },
           {
-            "name": "amount_1",
+            "name": "amount_y",
             "type": "u64"
           },
           {

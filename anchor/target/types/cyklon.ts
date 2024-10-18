@@ -1469,11 +1469,11 @@ export type Cyklon = {
             "type": "pubkey"
           },
           {
-            "name": "amount0",
+            "name": "amountX",
             "type": "u64"
           },
           {
-            "name": "amount1",
+            "name": "amountY",
             "type": "u64"
           },
           {
@@ -1493,11 +1493,11 @@ export type Cyklon = {
             "type": "pubkey"
           },
           {
-            "name": "amount0",
+            "name": "amountX",
             "type": "u64"
           },
           {
-            "name": "amount1",
+            "name": "amountY",
             "type": "u64"
           },
           {
