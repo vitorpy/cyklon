@@ -2,11 +2,7 @@ import * as anchor from '@coral-xyz/anchor';
 import { Program } from '@coral-xyz/anchor';
 import { Cyklon } from '../target/types/cyklon';
 import { createMint, mintTo, getAccount, getOrCreateAssociatedTokenAccount, TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token';
-import * as snarkjs from "snarkjs";
-import * as path from "path";
-import { buildBn128, utils } from "ffjavascript";
-const { unstringifyBigInts } = utils;
-import { g1Uncompressed, negateAndSerializeG1, g2Uncompressed, to32ByteBuffer } from "../src/utils";
+import { generateProof } from './proof';
 
 const convertToSigner = (wallet: anchor.Wallet): anchor.web3.Signer => ({
   publicKey: wallet.publicKey,
@@ -69,7 +65,7 @@ Token Y: ${tokenY.toBase58()}`
     try {
       await program.methods
         .initializePool()
-        .accounts({
+        .accountsPartial({
           tokenMintX: tokenX,
           tokenMintY: tokenY,
           payer: payer.publicKey,
@@ -151,6 +147,7 @@ Token Y: ${tokenY.toBase58()}`
           tokenMintY: tokenY,
           tokenMintXProgram: tokenXProgramId,
           tokenMintYProgram: tokenYProgramId,
+          tokenMintLpProgram: TOKEN_PROGRAM_ID,
           pool: poolPubkey,
           userTokenAccountX: userTokenAccountX.address,
           userTokenAccountY: userTokenAccountY.address,
@@ -179,7 +176,7 @@ Token Y: ${tokenY.toBase58()}`
 
   it('Confidential Swap', async () => {
     const poolAccount = await program.account.pool.fetch(poolPubkey);
-
+    
     const userTokenAccountX = await getOrCreateAssociatedTokenAccount(
       provider.connection,
       convertToSigner(payer),
@@ -288,50 +285,116 @@ Token Y: ${tokenY.toBase58()}`
       throw error;
     }
   }, 10000000);
+
+  it('Remove Liquidity', async () => {
+    const poolAccount = await program.account.pool.fetch(poolPubkey);
+    
+    const balanceX = poolAccount.reserveX.toNumber();
+    const balanceY = poolAccount.reserveY.toNumber();
+
+    const [lpMintPubkey] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("lp"), tokenX.toBuffer(), tokenY.toBuffer()],
+      program.programId
+    );
+
+    const userTokenAccountX = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      convertToSigner(payer),
+      tokenX,
+      payer.publicKey,
+      false,
+      undefined,
+      undefined,
+      tokenXProgramId
+    );
+
+    const userTokenAccountY = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      convertToSigner(payer),
+      tokenY,
+      payer.publicKey,
+      false,
+      undefined,
+      undefined,
+      tokenYProgramId
+    );
+
+    const userTokenAccountLp = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      convertToSigner(payer),
+      lpMintPubkey,
+      payer.publicKey,
+      false,
+      undefined,
+      undefined,
+      TOKEN_PROGRAM_ID
+    );
+
+    const poolTokenAccountX = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      convertToSigner(payer),
+      tokenX,
+      poolPubkey,
+      true,
+      undefined,
+      undefined,
+      tokenXProgramId
+    );
+
+    const poolTokenAccountY = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      convertToSigner(payer),
+      tokenY,
+      poolPubkey,
+      true,
+      undefined,
+      undefined,
+      tokenYProgramId
+    );
+
+    // Get the current LP token balance
+    const lpTokenBalance = await provider.connection.getTokenAccountBalance(userTokenAccountLp.address);
+    const halfLpTokens = new anchor.BN(lpTokenBalance.value.amount).div(new anchor.BN(2));
+
+    try {
+      await program.methods
+        .removeLiquidity(halfLpTokens)
+        .accountsPartial({
+          tokenMintX: tokenX,
+          tokenMintY: tokenY,
+          tokenMintXProgram: tokenXProgramId,
+          tokenMintYProgram: tokenYProgramId,
+          tokenMintLp: lpMintPubkey,
+          tokenMintLpProgram: TOKEN_PROGRAM_ID,
+          pool: poolPubkey,
+          userTokenAccountX: userTokenAccountX.address,
+          userTokenAccountY: userTokenAccountY.address,
+          userTokenAccountLp: userTokenAccountLp.address,
+          poolTokenAccountX: poolTokenAccountX.address,
+          poolTokenAccountY: poolTokenAccountY.address,
+          user: payer.publicKey,
+        })
+        .rpc({ commitment: 'confirmed' });
+
+      const updatedPoolAccount = await program.account.pool.fetch(poolPubkey);
+      const updatedUserLpBalance = await provider.connection.getTokenAccountBalance(userTokenAccountLp.address);
+
+      // Check that LP tokens were burned
+      expect(new anchor.BN(updatedUserLpBalance.value.amount)).toEqual(new anchor.BN(lpTokenBalance.value.amount).sub(halfLpTokens));
+
+      // Check that reserves were reduced by approximately half
+      expect(updatedPoolAccount.reserveX.toNumber()).toBeLessThan(balanceX);
+      expect(updatedPoolAccount.reserveY.toNumber()).toBeLessThan(balanceY);
+
+      // Check that user received tokens
+      const updatedUserXBalance = await provider.connection.getTokenAccountBalance(userTokenAccountX.address);
+      const updatedUserYBalance = await provider.connection.getTokenAccountBalance(userTokenAccountY.address);
+      expect(Number(updatedUserXBalance.value.amount)).toBeGreaterThan(0);
+      expect(Number(updatedUserYBalance.value.amount)).toBeGreaterThan(0);
+
+    } catch (error) {
+      console.error("Error removing liquidity:", error);
+      throw error;
+    }
+  }, 10000000);
 });
-
-async function generateProof(
-  privateInputs: { privateInputAmount: string, privateMinReceived: string },
-  publicInputs: { publicBalanceX: string, publicBalanceY: string, isSwapXtoY: number }
-): Promise<{ proofA: Uint8Array, proofB: Uint8Array, proofC: Uint8Array, publicSignals: Uint8Array[] }> {
-  console.log("Generating proof for inputs:", { privateInputs, publicInputs });
-
-  const wasmPath = path.join(__dirname, "../../circuits/swap_js", "swap.wasm");
-  const zkeyPath = path.join(__dirname, "../../circuits", "swap_0001.zkey");
-
-  const input = {
-    privateInputAmount: privateInputs.privateInputAmount,
-    privateMinReceived: privateInputs.privateMinReceived,
-    publicBalanceX: publicInputs.publicBalanceX,
-    publicBalanceY: publicInputs.publicBalanceY,
-    isSwapXtoY: publicInputs.isSwapXtoY.toString()
-  };
-
-  const { proof, publicSignals } = await snarkjs.groth16.fullProve(input, wasmPath, zkeyPath);
-
-  console.log("Original proof:", JSON.stringify(proof, null, 2));
-  console.log("Public signals:", JSON.stringify(publicSignals, null, 2));
-
-  const curve = await buildBn128();
-  const proofProc = unstringifyBigInts(proof);
-  const publicSignalsUnstrigified = unstringifyBigInts(publicSignals);
-
-  let proofA = g1Uncompressed(curve, proofProc.pi_a);
-  proofA = await negateAndSerializeG1(curve, proofA);
-
-  const proofB = g2Uncompressed(curve, proofProc.pi_b);
-  const proofC = g1Uncompressed(curve, proofProc.pi_c);
-
-  await curve.terminate();
-
-  const formattedPublicSignals = publicSignalsUnstrigified.map(signal => {
-    return to32ByteBuffer(BigInt(signal));
-  });
-
-  return { 
-    proofA: new Uint8Array(proofA), 
-    proofB: new Uint8Array(proofB), 
-    proofC: new Uint8Array(proofC), 
-    publicSignals: formattedPublicSignals 
-  };
-}
