@@ -12,6 +12,7 @@ import { useConfidentialSwap } from '@/lib/cyklon-swap'
 import { PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js'
 import { createAssociatedTokenAccountInstruction, createSyncNativeInstruction, NATIVE_MINT, createCloseAccountInstruction, getAssociatedTokenAddress, TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token'
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
+import { useWalletModal } from '@solana/wallet-adapter-react-ui'
 import { useTokenBalance } from '@/hooks/useTokenBalance'
 import * as Sentry from "@sentry/nextjs";
 import { useSwapEstimate } from '@/hooks/useSwapEstimate';
@@ -22,7 +23,7 @@ import { useTransactionToast } from '@/components/ui/ui-layout'
 
 const tokens: Token[] = tokenList;
 
-export function SolanaSwapComponent() {
+export function TokenSwapper() {
   const [sourceToken, setSourceToken] = useState<Token>(tokens.find(t => t.symbol === 'PYUSD') || tokens[0])
   const [destToken, setDestToken] = useState<Token>(tokens.find(t => t.symbol === 'SOL') || tokens[1])
   const [sourceAmount, setSourceAmount] = useState<string>('')
@@ -38,6 +39,7 @@ export function SolanaSwapComponent() {
   const { balance: sourceTokenBalance } = useTokenBalance(publicKey, sourceToken.address)
   const { connection } = useConnection()
   const wallet = useWallet()
+  const { setVisible } = useWalletModal()
 
   const confidentialSwap = useConfidentialSwap()
   const posthog = usePostHog()
@@ -75,8 +77,14 @@ export function SolanaSwapComponent() {
                       (sourceToken.symbol === 'SOL' && destToken.symbol === 'PYUSD');
 
   const handleConfidentialSwap = async () => {
-    setIsSwapping(true);
-    setSwapError(null);
+    if (!wallet.connected) {
+      // If wallet is not connected, open the wallet modal
+      setVisible(true)
+      return
+    }
+
+    setIsSwapping(true)
+    setSwapError(null)
 
     // Track swap button click
     posthog.capture('swap_button_clicked', {

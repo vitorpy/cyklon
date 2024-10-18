@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import posthog from 'posthog-js';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Header } from '../ui/header';
-import { SolanaSwapComponent } from '@/components/solana-swapper/solana-swap';
+import { TokenSwapper } from '@/components/token-swapper/token-swapper';
 import Image from "next/image";
 import NewsletterInput from '@/components/ui/newsletter-input';
 import ContactForm from '@/components/ui/contact-form';
@@ -79,7 +79,7 @@ export default function LandingPage() {
           
           <div className="flex flex-col md:flex-row justify-center items-start gap-8 w-full">
             <div className="w-full md:w-1/2">
-              <SolanaSwapComponent />
+              <TokenSwapper />
             </div>
             
             <div className="w-full md:w-1/2 p-8 text-black space-y-6">
