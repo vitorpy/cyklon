@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use anchor_spl::token::{Mint as SplMint, Token as SplToken, MintTo as SplMintTo, mint_to as spl_mint_to};
 use anchor_spl::token_interface::{transfer_checked, Mint, TokenAccount, TokenInterface, TransferChecked};
 use anchor_spl::associated_token::AssociatedToken;
 
@@ -8,10 +9,17 @@ use crate::events::LiquidityAdded;
 
 #[derive(Accounts)]
 pub struct AddLiquidity<'info> {
-    pub token_mint_x: InterfaceAccount<'info, Mint>,
-    pub token_mint_y: InterfaceAccount<'info, Mint>,
+    pub token_mint_x: Box<InterfaceAccount<'info, Mint>>,
+    pub token_mint_y: Box<InterfaceAccount<'info, Mint>>,
     pub token_mint_x_program: Interface<'info, TokenInterface>,
     pub token_mint_y_program: Interface<'info, TokenInterface>,
+    #[account(
+        mut,
+        seeds = [b"lp", token_mint_x.key().as_ref(), token_mint_y.key().as_ref()],
+        bump
+    )]
+    pub token_mint_lp: Account<'info, SplMint>,
+    pub token_mint_lp_program: Program<'info, SplToken>,
     #[account(mut,
         seeds = [b"pool", pool.token_mint_x.key().as_ref(), pool.token_mint_y.key().as_ref()],
         bump
@@ -22,25 +30,34 @@ pub struct AddLiquidity<'info> {
         associated_token::authority = user,
         associated_token::token_program = token_mint_x_program.key(),
     )]
-    pub user_token_account_x: InterfaceAccount<'info, TokenAccount>,
+    pub user_token_account_x: Box<InterfaceAccount<'info, TokenAccount>>,
     #[account(mut,
         associated_token::mint = token_mint_y,
         associated_token::authority = user,
         associated_token::token_program = token_mint_y_program.key(),
     )]
-    pub user_token_account_y: InterfaceAccount<'info, TokenAccount>,
+    pub user_token_account_y: Box<InterfaceAccount<'info, TokenAccount>>,
+    #[account(
+        init_if_needed,
+        associated_token::mint = token_mint_lp,
+        associated_token::authority = user,
+        associated_token::token_program = token_mint_lp_program,
+        payer = user
+    )]
+    pub user_token_account_lp: Box<InterfaceAccount<'info, TokenAccount>>,
     #[account(mut,
         associated_token::mint = token_mint_x,
         associated_token::authority = pool,
         associated_token::token_program = token_mint_x_program.key(),
     )]
-    pub pool_token_account_x: InterfaceAccount<'info, TokenAccount>,
+    pub pool_token_account_x: Box<InterfaceAccount<'info, TokenAccount>>,
     #[account(mut,
         associated_token::mint = token_mint_y,
         associated_token::authority = pool,
         associated_token::token_program = token_mint_y_program.key(),
     )]
-    pub pool_token_account_y: InterfaceAccount<'info, TokenAccount>,
+    pub pool_token_account_y: Box<InterfaceAccount<'info, TokenAccount>>,
+    #[account(mut)]
     pub user: Signer<'info>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
@@ -99,6 +116,34 @@ impl<'info> AddLiquidity<'info> {
             ),
             amount_1,
             self.token_mint_y.decimals,
+        )?;
+
+        let token_mint_x_key = self.token_mint_x.key();
+        let token_mint_y_key = self.token_mint_y.key();
+        
+        let pool_signer_seeds = &[
+            b"pool",
+            token_mint_x_key.as_ref(),
+            token_mint_y_key.as_ref(),
+            &[pool.bump],
+        ];
+
+        msg!("Minting LP tokens");
+        msg!("Mint: {}", self.token_mint_lp.key().to_string());
+        msg!("To: {}", self.user_token_account_lp.key().to_string());
+        msg!("Authority: {}", self.pool.key().to_string());
+
+        spl_mint_to(
+            CpiContext::new_with_signer(
+                self.token_mint_lp_program.to_account_info(),
+                SplMintTo {
+                    mint: self.token_mint_lp.to_account_info(),
+                    to: self.user_token_account_lp.to_account_info(),
+                    authority: self.pool.to_account_info(),
+                },
+                &[&pool_signer_seeds[..]],
+            ),
+            liquidity,
         )?;
 
         emit!(LiquidityAdded {

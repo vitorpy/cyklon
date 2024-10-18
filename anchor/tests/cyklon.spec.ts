@@ -69,7 +69,7 @@ Token Y: ${tokenY.toBase58()}`
     try {
       await program.methods
         .initializePool()
-        .accounts({
+        .accountsPartial({
           tokenMintX: tokenX,
           tokenMintY: tokenY,
           payer: payer.publicKey,
@@ -151,6 +151,7 @@ Token Y: ${tokenY.toBase58()}`
           tokenMintY: tokenY,
           tokenMintXProgram: tokenXProgramId,
           tokenMintYProgram: tokenYProgramId,
+          tokenMintLpProgram: TOKEN_PROGRAM_ID,
           pool: poolPubkey,
           userTokenAccountX: userTokenAccountX.address,
           userTokenAccountY: userTokenAccountY.address,

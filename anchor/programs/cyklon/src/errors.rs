@@ -6,12 +6,6 @@ pub enum ErrorCode {
     InvalidInput,
     #[msg("Invalid proof")]
     InvalidProof,
-    #[msg("Lower tick must be less than upper tick")]
-    InvalidTickRange,
-    #[msg("Lower tick must be a multiple of tick spacing")]
-    InvalidLowerTick,
-    #[msg("Upper tick must be a multiple of tick spacing")]
-    InvalidUpperTick,
     #[msg("Slippage tolerance exceeded")]
     SlippageExceeded,
     #[msg("Math overflow")]
@@ -22,4 +16,8 @@ pub enum ErrorCode {
     InvalidTokenOrder,
     #[msg("Invalid swap amount")]
     InvalidSwapAmount,
+    #[msg("Invalid LP mint")]
+    InvalidLpMint,
+    #[msg("Invalid metadata account")]
+    InvalidMetadataAccount,
 }
