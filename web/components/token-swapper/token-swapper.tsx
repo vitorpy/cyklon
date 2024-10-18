@@ -22,7 +22,7 @@ import { useTransactionToast } from '@/components/ui/ui-layout'
 
 const tokens: Token[] = tokenList;
 
-export function SolanaSwapComponent() {
+export function TokenSwapper() {
   const [sourceToken, setSourceToken] = useState<Token>(tokens.find(t => t.symbol === 'PYUSD') || tokens[0])
   const [destToken, setDestToken] = useState<Token>(tokens.find(t => t.symbol === 'SOL') || tokens[1])
   const [sourceAmount, setSourceAmount] = useState<string>('')
