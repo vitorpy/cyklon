@@ -20,4 +20,6 @@ pub enum ErrorCode {
     InvalidLpMint,
     #[msg("Invalid metadata account")]
     InvalidMetadataAccount,
+    #[msg("LP mint already initialized")]
+    LpMintAlreadyInitialized,
 }

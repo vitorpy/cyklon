@@ -65,7 +65,10 @@ impl<'info> InitializePool<'info> {
         let lp_account_info = self.token_mint_lp.to_account_info();
         if lp_account_info.data_len() != SplMint::LEN {
             self.initialize_lp_mint(&self.token_mint_x.key(), &self.token_mint_y.key(), lp_bump)?;
+        } else {
+            return Err(ErrorCode::LpMintAlreadyInitialized.into());
         }
+
 
         Ok(())
     }
