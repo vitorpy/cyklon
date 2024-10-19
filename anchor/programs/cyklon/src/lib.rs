@@ -61,4 +61,8 @@ pub mod cyklon {
     ) -> Result<()> {
         ctx.accounts.confidential_swap(proof_a, proof_b, proof_c, public_inputs)
     }
+
+    pub fn upgrade_pool(ctx: Context<UpgradePool>) -> Result<()> {
+        ctx.accounts.upgrade_pool()
+    }
 }
