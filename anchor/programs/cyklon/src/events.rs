@@ -1,10 +1,26 @@
 use anchor_lang::prelude::*;
 
 #[event]
-pub struct LiquidityAdded {
+pub struct PoolInitialized {
     pub user: Pubkey,
     pub amount_0: u64,
     pub amount_1: u64,
+    pub liquidity: u64,
+}
+
+#[event]
+pub struct LiquidityAdded {
+    pub user: Pubkey,
+    pub amount_x: u64,
+    pub amount_y: u64,
+    pub liquidity: u64,
+}
+
+#[event]
+pub struct LiquidityRemoved {
+    pub user: Pubkey,
+    pub amount_x: u64,
+    pub amount_y: u64,
     pub liquidity: u64,
 }
 
