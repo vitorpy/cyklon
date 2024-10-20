@@ -14,7 +14,7 @@ import tokenList from '@/constants/tokens.json'
 import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js'
 import { createSyncNativeInstruction, getAssociatedTokenAddress, NATIVE_MINT, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { AnchorProvider, BN } from '@coral-xyz/anchor'
-import { useTransactionToast } from '@/components/ui/ui-layout'
+import { useTransactionToast, useErrorToast } from '@/hooks/useToast'
 import { getCyklonProgram } from '@blackpool/anchor';
 import { usePostHog } from 'posthog-js/react'
 
@@ -35,6 +35,7 @@ export function LiquidityManager() {
   const { connection } = useConnection();
   const wallet = useAnchorWallet();
   const transactionToast = useTransactionToast();
+  const errorToast = useErrorToast();
   const posthog = usePostHog()
 
   const handleAddRemoveLiquidity = async () => {
@@ -218,6 +219,7 @@ export function LiquidityManager() {
       })
 
       // Handle error (e.g., show an error message to the user)
+      errorToast(error instanceof Error ? error.message : 'Unknown error');
     }
   };
 

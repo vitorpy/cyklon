@@ -13,9 +13,8 @@ import { AccountChecker } from '../account/account-ui';
 import {
   ClusterChecker,
   ClusterUiSelect,
-  ExplorerLink,
 } from '../cluster/cluster-ui';
-import toast, { Toaster } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 
 export function UiLayout({
   children,
@@ -79,19 +78,4 @@ export function ellipsify(str = '', len = 4) {
     );
   }
   return str;
-}
-
-export function useTransactionToast() {
-  return (signature: string) => {
-    toast.success(
-      <div className={'text-center'}>
-        <div className="text-lg">Transaction sent</div>
-        <ExplorerLink
-          path={`tx/${signature}`}
-          label={'View Transaction'}
-          className="btn btn-xs btn-primary"
-        />
-      </div>
-    );
-  };
 }
