@@ -48,6 +48,10 @@ pub mod cyklon {
         ctx.accounts.add_liquidity(amount_0, amount_1)
     }
 
+    pub fn remove_liquidity(ctx: Context<RemoveLiquidity>, amount: u64) -> Result<()> {
+        ctx.accounts.remove_liquidity(amount)
+    }
+
     pub fn confidential_swap(
         ctx: Context<ConfidentialSwap>,
         proof_a: [u8; 64],
@@ -56,5 +60,9 @@ pub mod cyklon {
         public_inputs: [[u8; 32]; 3]
     ) -> Result<()> {
         ctx.accounts.confidential_swap(proof_a, proof_b, proof_c, public_inputs)
+    }
+
+    pub fn upgrade_pool(ctx: Context<UpgradePool>) -> Result<()> {
+        ctx.accounts.upgrade_pool()
     }
 }

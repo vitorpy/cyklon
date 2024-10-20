@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import posthog from 'posthog-js';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { Header } from '../ui/header';
-import { TokenSwapper } from '@/components/token-swapper/token-swapper';
+import { Header } from '@/components/ui/header';
+import TabbedCards from '@/components/ui/tabbed-cards';
 import Image from "next/image";
 import NewsletterInput from '@/components/ui/newsletter-input';
 import ContactForm from '@/components/ui/contact-form';
@@ -79,7 +79,7 @@ export default function LandingPage() {
           
           <div className="flex flex-col md:flex-row justify-center items-start gap-8 w-full">
             <div className="w-full md:w-1/2">
-              <TokenSwapper />
+              <TabbedCards />
             </div>
             
             <div className="w-full md:w-1/2 p-8 text-black space-y-6">
