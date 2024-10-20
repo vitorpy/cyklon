@@ -16,6 +16,7 @@ import { createSyncNativeInstruction, getAssociatedTokenAddress, NATIVE_MINT, TO
 import { AnchorProvider, BN } from '@coral-xyz/anchor'
 import { useTransactionToast } from '@/components/ui/ui-layout'
 import { getCyklonProgram } from '@blackpool/anchor';
+import { usePostHog } from 'posthog-js/react'
 
 const tokens: Token[] = tokenList;
 
@@ -34,6 +35,7 @@ export function LiquidityManager() {
   const { connection } = useConnection();
   const wallet = useAnchorWallet();
   const transactionToast = useTransactionToast();
+  const posthog = usePostHog()
 
   const handleAddRemoveLiquidity = async () => {
     if (!wallet || !wallet.publicKey) return;
@@ -151,7 +153,7 @@ export function LiquidityManager() {
         tx.add(addLiquidityIx);
       } else {
         // Removing liquidity
-        const lpTokensToRemove = new BN(parseFloat(inputLpTokens) * Math.pow(10, 6)); // Assuming LP tokens have 6 decimals
+        const lpTokensToRemove = new BN(parseFloat(inputLpTokens) * Math.pow(10, 9));
 
         const removeLiquidityIx = await program.methods
           .removeLiquidity(lpTokensToRemove)
@@ -192,12 +194,29 @@ export function LiquidityManager() {
       const signedTx = await wallet.signTransaction(tx);
       const txId = await connection.sendRawTransaction(signedTx.serialize());
 
+      // Capture event for successful liquidity add/remove
+      posthog.capture(`liquidity_${isAdding ? 'add' : 'remove'}_success`, {
+        tokenX: pair.tokenX.symbol,
+        tokenY: pair.tokenY.symbol,
+        amount: inputLpTokens,
+        txId,
+      })
+
       await connection.confirmTransaction(txId);
       transactionToast(txId);
 
       console.log(`${isAdding ? 'Added' : 'Removed'} liquidity: ${inputLpTokens} LP tokens`);
     } catch (error) {
       console.error("Error managing liquidity:", error);
+      
+      // Capture event for failed liquidity add/remove
+      posthog.capture(`liquidity_${isAdding ? 'add' : 'remove'}_failed`, {
+        tokenX: pair.tokenX.symbol,
+        tokenY: pair.tokenY.symbol,
+        amount: inputLpTokens,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+
       // Handle error (e.g., show an error message to the user)
     }
   };
