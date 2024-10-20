@@ -1,22 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TokenSwapper } from '@/components/token-swapper/token-swapper';
 import { LiquidityManager } from '@/components/liquidity-manager/liquidity-manager';
+import posthog from 'posthog-js';
 
 const TabbedCards: React.FC = () => {
   const [activeTab, setActiveTab] = useState('swap');
+
+  useEffect(() => {
+    // Track tab change event
+    posthog.capture('tab_changed', { tab: activeTab });
+  }, [activeTab]);
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+  };
 
   return (
     <div className="w-full max-w-xl mx-auto">
       <div className="tabs tabs-boxed mb-4">
         <a
           className={`tab ${activeTab === 'swap' ? 'tab-active' : ''}`}
-          onClick={() => setActiveTab('swap')}
+          onClick={() => handleTabChange('swap')}
         >
           Swap
         </a>
         <a
           className={`tab ${activeTab === 'liquidity' ? 'tab-active' : ''}`}
-          onClick={() => setActiveTab('liquidity')}
+          onClick={() => handleTabChange('liquidity')}
         >
           Liquidity
         </a>
@@ -35,4 +45,3 @@ const TabbedCards: React.FC = () => {
 };
 
 export default TabbedCards;
-
