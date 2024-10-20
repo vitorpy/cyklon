@@ -7,10 +7,9 @@
   ./node_modules/.bin/ts-node -P ./anchor/tsconfig.lib.json ./anchor/migrations/devnet-setup.ts
  */
 import * as anchor from '@coral-xyz/anchor';
-import { createAssociatedTokenAccountInstruction, createSyncNativeInstruction } from '@solana/spl-token';
 import { AnchorProvider, web3, Program, Idl } from '@coral-xyz/anchor';
 import { PublicKey, SystemProgram, Connection, Keypair } from '@solana/web3.js';
-import { TOKEN_PROGRAM_ID, getAssociatedTokenAddress, TOKEN_2022_PROGRAM_ID, NATIVE_MINT } from '@solana/spl-token';
+import { TOKEN_PROGRAM_ID, NATIVE_MINT } from '@solana/spl-token';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -21,8 +20,6 @@ const cyklonIdl = require('../target/idl/cyklon.json') as Idl;
 
 // Constants
 const PYUSD_MINT = new PublicKey('CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM');
-const PYUSD_AMOUNT = 100 * 10**6; // 100 PYUSD (assuming 6 decimals)
-const WSOL_AMOUNT = 1 * 10**9; // 1 WSOL (9 decimals)
 
 function getCyklonProgram(provider: AnchorProvider): Program<typeof cyklonIdl> {
   return new Program<typeof cyklonIdl>(cyklonIdl, provider);
