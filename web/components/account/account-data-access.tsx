@@ -12,8 +12,7 @@ import {
   VersionedTransaction,
 } from '@solana/web3.js';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
-import { useTransactionToast } from '@/hooks/useToast';
+import { useTransactionToast, useErrorToast } from '@/hooks/useToast';
 
 export function useGetBalance({ address }: { address: PublicKey }) {
   const { connection } = useConnection();
@@ -60,6 +59,7 @@ export function useTransferSol({ address }: { address: PublicKey }) {
   const transactionToast = useTransactionToast();
   const wallet = useWallet();
   const client = useQueryClient();
+  const errorToast = useErrorToast();
 
   return useMutation({
     mutationKey: [
@@ -113,7 +113,7 @@ export function useTransferSol({ address }: { address: PublicKey }) {
       ]);
     },
     onError: (error) => {
-      toast.error(`Transaction failed! ${error}`);
+      errorToast(`Transaction failed! ${error}`);
     },
   });
 }
