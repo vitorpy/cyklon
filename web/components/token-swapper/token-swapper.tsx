@@ -1,57 +1,57 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { ChevronDown, ChevronUp, ArrowUpDown } from 'lucide-react'
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Slider } from "@/components/ui/slider"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import Image from "next/image"
-import { useConfidentialSwap } from '@/lib/cyklon-swap'
-import { PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js'
-import { createAssociatedTokenAccountInstruction, createSyncNativeInstruction, NATIVE_MINT, createCloseAccountInstruction, getAssociatedTokenAddress, TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token'
-import { useWallet, useConnection } from '@solana/wallet-adapter-react'
-import { useWalletModal } from '@solana/wallet-adapter-react-ui'
-import { useTokenBalance } from '@/hooks/useTokenBalance'
+import { useState, useEffect } from 'react';
+import { ChevronDown, ChevronUp, ArrowUpDown } from 'lucide-react';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Slider } from "@/components/ui/slider";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import Image from "next/image";
+import { useConfidentialSwap } from '@/lib/cyklon-swap';
+import { PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { createAssociatedTokenAccountInstruction, createSyncNativeInstruction, NATIVE_MINT, createCloseAccountInstruction, getAssociatedTokenAddress, TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token';
+import { useWallet, useConnection } from '@solana/wallet-adapter-react';
+import { useWalletModal } from '@solana/wallet-adapter-react-ui';
+import { useTokenBalance } from '@/hooks/useTokenBalance';
 import * as Sentry from "@sentry/nextjs";
 import { useSwapEstimate } from '@/hooks/useSwapEstimate';
 import { Token } from '@/types/token';
 import tokenList from '@/constants/tokens.json';
-import { usePostHog } from 'posthog-js/react'
-import { useTransactionToast } from '@/components/ui/ui-layout'
+import { usePostHog } from 'posthog-js/react';
+import { useTransactionToast, useErrorToast } from '@/hooks/useToast';
 
 const tokens: Token[] = tokenList;
 
 export function TokenSwapper() {
-  const [sourceToken, setSourceToken] = useState<Token>(tokens.find(t => t.symbol === 'PYUSD') || tokens[0])
-  const [destToken, setDestToken] = useState<Token>(tokens.find(t => t.symbol === 'SOL') || tokens[1])
-  const [sourceAmount, setSourceAmount] = useState<string>('')
-  const [destAmount, setDestAmount] = useState<string>('')
-  const [slippage, setSlippage] = useState<number[]>([0.5])
-  const [showSlippage, setShowSlippage] = useState<boolean>(false)
-  const [isSwapping, setIsSwapping] = useState<boolean>(false)
-  const [swapError, setSwapError] = useState<string | null>(null)
-  const [minReceived, setMinReceived] = useState<number>(0)
-  const transactionToast = useTransactionToast()
+  const [sourceToken, setSourceToken] = useState<Token>(tokens.find(t => t.symbol === 'PYUSD') || tokens[0]);
+  const [destToken, setDestToken] = useState<Token>(tokens.find(t => t.symbol === 'SOL') || tokens[1]);
+  const [sourceAmount, setSourceAmount] = useState<string>('');
+  const [destAmount, setDestAmount] = useState<string>('');
+  const [slippage, setSlippage] = useState<number[]>([0.5]);
+  const [showSlippage, setShowSlippage] = useState<boolean>(false);
+  const [isSwapping, setIsSwapping] = useState<boolean>(false);
+  const [minReceived, setMinReceived] = useState<number>(0);
+  const transactionToast = useTransactionToast();
+  const errorToast = useErrorToast();
 
-  const { publicKey } = useWallet()
-  const { balance: sourceTokenBalance } = useTokenBalance(publicKey, sourceToken.address)
-  const { connection } = useConnection()
-  const wallet = useWallet()
-  const { setVisible } = useWalletModal()
+  const { publicKey } = useWallet();
+  const { balance: sourceTokenBalance } = useTokenBalance(publicKey, sourceToken.address);
+  const { connection } = useConnection();
+  const wallet = useWallet();
+  const { setVisible } = useWalletModal();
 
-  const confidentialSwap = useConfidentialSwap()
-  const posthog = usePostHog()
+  const confidentialSwap = useConfidentialSwap();
+  const posthog = usePostHog();
 
   const estimatedDestAmount = useSwapEstimate(sourceToken, destToken, sourceAmount);
 
   const handleSwap = () => {
-    setSourceToken(destToken)
-    setDestToken(sourceToken)
-    setSourceAmount(destAmount)
-    setDestAmount(sourceAmount)
-  }
+    setSourceToken(destToken);
+    setDestToken(sourceToken);
+    setSourceAmount(destAmount);
+    setDestAmount(sourceAmount);
+  };
 
   const handleSourceAmountChange = (value: string) => {
     setSourceAmount(value);
@@ -79,12 +79,11 @@ export function TokenSwapper() {
   const handleConfidentialSwap = async () => {
     if (!wallet.connected) {
       // If wallet is not connected, open the wallet modal
-      setVisible(true)
-      return
+      setVisible(true);
+      return;
     }
 
-    setIsSwapping(true)
-    setSwapError(null)
+    setIsSwapping(true);
 
     // Track swap button click
     posthog.capture('swap_button_clicked', {
@@ -93,7 +92,7 @@ export function TokenSwapper() {
       sourceAmount,
       destAmount,
       slippage: slippage[0],
-    })
+    });
 
     try {
       if (!publicKey) throw new Error('Wallet not connected');
@@ -250,7 +249,7 @@ export function TokenSwapper() {
 
     } catch (error) {
       console.error('Swap error:', error);
-      setSwapError(error instanceof Error ? error.message : 'An unexpected error occurred');
+      errorToast(error instanceof Error ? error.message : 'An unexpected error occurred');
 
       // Track failed swap
       posthog.capture('swap_failed', {
@@ -378,7 +377,6 @@ export function TokenSwapper() {
           >
             {isSwapping ? 'Swapping...' : isValidPool ? 'Swap' : 'This pool isn\'t available yet.'}
           </Button>
-          {swapError && <div className="text-red-500 text-sm">{swapError}</div>}
         </div>
       </div>
     </div>

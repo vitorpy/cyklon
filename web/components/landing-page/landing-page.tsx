@@ -9,13 +9,20 @@ import Image from "next/image";
 import NewsletterInput from '@/components/ui/newsletter-input';
 import ContactForm from '@/components/ui/contact-form';
 import { Button } from '@/components/ui/button';
+import { useSolanaFaucet } from '@/hooks/useSolanaFaucet';
+import usePyusdFaucet from '@/hooks/usePyusdFaucet';
+import { useTransactionToast, useErrorToast } from '@/hooks/useToast';
 
 export default function LandingPage() {
   const [showBanner, setShowBanner] = useState(true);
   const [currentImage, setCurrentImage] = useState(1);
   const totalImages = 6;
   const wallet = useWallet();
-
+  const { requestPyusd } = usePyusdFaucet();
+  const { requestAirdrop } = useSolanaFaucet();
+  const showTransactionToast = useTransactionToast();
+  const showErrorToast = useErrorToast();
+  
   useEffect(() => {
     const walletAddress = wallet.connected ? wallet.publicKey?.toString() : null;
 
@@ -23,6 +30,7 @@ export default function LandingPage() {
     if (walletAddress) {
       posthog.identify(walletAddress);
     }
+    
 
     // Capture page load event
     posthog.capture('Landing Page Loaded', {
@@ -51,6 +59,36 @@ export default function LandingPage() {
           (emailInput as HTMLInputElement).focus();
         }
       }, 1000); // Delay to ensure smooth scroll completes
+    }
+  };
+
+  const handleSolRequest = async () => {
+    if (!wallet.publicKey) {
+      showErrorToast('Please connect your wallet first');
+      return;
+    }
+    try {
+      const signature = await requestAirdrop(wallet.publicKey);
+      showTransactionToast(signature);
+    } catch (error) {
+      showErrorToast('Failed to request SOL');
+    }
+  };
+
+  const handlePyusdRequest = async () => {
+    if (!wallet.publicKey) {
+      showErrorToast('Please connect your wallet first');
+      return;
+    }
+    try {
+      const response = await requestPyusd(wallet.publicKey.toString());
+      if (response.success) {
+        showTransactionToast('PYUSD tokens requested successfully');
+      } else {
+        showErrorToast(response.message);
+      }
+    } catch (error) {
+      showErrorToast('Failed to request PYUSD');
     }
   };
 
@@ -89,8 +127,24 @@ export default function LandingPage() {
               <div>
                 <h3 className="text-2xl font-semibold mb-3">Get Started:</h3>
                 <ul className="list-disc list-inside space-y-2">
-                  <li><a href="https://faucet.paxos.com/" target="_blank" rel="noopener noreferrer" className="text-slate-600 hover:text-slate-800 hover:underline">Get PYUSD test tokens</a></li>
-                  <li><a href="https://faucet.solana.com/" target="_blank" rel="noopener noreferrer" className="text-slate-600 hover:text-slate-800 hover:underline">Get SOL test tokens</a></li>
+                  <li>
+                    <Button
+                      onClick={handlePyusdRequest}
+                      disabled={!wallet.connected}
+                      className="text-slate-600 hover:text-slate-800 hover:underline"
+                    >
+                      Get PYUSD test tokens
+                    </Button>
+                  </li>
+                  <li>
+                    <Button
+                      onClick={handleSolRequest}
+                      disabled={!wallet.connected}
+                      className="text-slate-600 hover:text-slate-800 hover:underline"
+                    >
+                      Get SOL test tokens
+                    </Button>
+                  </li>
                   <li>Start exploring Darklake</li>
                 </ul>
               </div>
