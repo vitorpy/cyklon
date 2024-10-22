@@ -6,6 +6,8 @@ Sentry.init({
   // Replay may only be enabled for the client-side
   integrations: [
     Sentry.replayIntegration(),
+    Sentry.browserTracingIntegration(),
+    Sentry.browserProfilingIntegration(),
     posthog.sentryIntegration({
       organization: 'darklake',
       projectId: 4508075930484816,
