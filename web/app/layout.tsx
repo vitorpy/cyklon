@@ -4,6 +4,7 @@ import { ClusterProvider } from '@/components/cluster/cluster-data-access';
 import { SolanaProvider } from '@/components/solana/solana-provider';
 import { ReactQueryProvider } from './react-query-provider';
 import { CSPostHogProvider } from './providers';
+import { Analytics } from "@vercel/analytics/react"
 
 export const metadata = {
   title: 'Darklake',
@@ -34,6 +35,7 @@ export default function RootLayout({
             </ClusterProvider>
           </ReactQueryProvider>
         </CSPostHogProvider>
+        <Analytics />
       </body>
     </html>
   );
