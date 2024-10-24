@@ -1,6 +1,6 @@
 import * as anchor from '@coral-xyz/anchor';
 import { Program } from '@coral-xyz/anchor';
-import { Cyklon } from '../target/types/cyklon';
+import { Darklake } from '../target/types/darklake';  
 import { createMint, mintTo, getAccount, getOrCreateAssociatedTokenAccount, TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token';
 import { generateProof } from './proof';
 
@@ -9,12 +9,12 @@ const convertToSigner = (wallet: anchor.Wallet): anchor.web3.Signer => ({
   secretKey: wallet.payer.secretKey,
 });
 
-describe('cyklon', () => {
+describe('darklake', () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
   const payer = provider.wallet as anchor.Wallet;
 
-  const program = anchor.workspace.Cyklon as Program<Cyklon>;
+  const program = anchor.workspace.Darklake as Program<Darklake>;
 
   let poolPubkey: anchor.web3.PublicKey;
   let tokenX: anchor.web3.PublicKey;

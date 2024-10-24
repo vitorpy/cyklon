@@ -34,7 +34,7 @@
             "request": "custom",
             "name": "debug program",
             "targetCreateCommands": [
-              "target create --arch bpfel ${workspaceFolder}/anchor/target/deploy/cyklon.so"
+              "target create --arch bpfel ${workspaceFolder}/anchor/target/deploy/darklake.so"
             ],
             "preLaunchTask": "start-debugger",
             "processCreateCommands": ["gdb-remote 127.0.0.1:9001"],
@@ -44,9 +44,9 @@
             "request": "launch",
             "name": "cargo test",
             "cargo": {
-                "args": ["test", "--manifest-path", "${workspaceFolder}/anchor/programs/cyklon/Cargo.toml"],
+                "args": ["test", "--manifest-path", "${workspaceFolder}/anchor/programs/darklake/Cargo.toml"],
             },
-            "cwd": "${workspaceFolder}/anchor/programs/cyklon",
+            "cwd": "${workspaceFolder}/anchor/programs/darklake",
             "env": {
                 "RUST_BACKTRACE": "1"
             },

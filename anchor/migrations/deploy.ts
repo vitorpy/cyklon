@@ -7,7 +7,7 @@ import { createTransferInstruction } from '@solana/spl-token';
 import { AnchorProvider, web3 } from '@coral-xyz/anchor';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddress } from '@solana/spl-token';
-import { getCyklonProgram, getCyklonProgramId } from '../src/cyklon-exports';
+import { getDarklakeProgram, getDarklakeProgramId } from '../src/darklake-exports';
 
 // Constants
 const PYUSD_MINT = new PublicKey('CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM');
@@ -16,8 +16,8 @@ const PYUSD_AMOUNT = 100 * 10**6; // 100 PYUSD (assuming 6 decimals)
 const WSOL_AMOUNT = 1 * 10**9; // 1 WSOL (9 decimals)
 
 async function createPYUSDWSOLPool(provider: AnchorProvider) {
-  const program = getCyklonProgram(provider);
-  const programId = getCyklonProgramId('devnet');
+  const program = getDarklakeProgram(provider);
+  const programId = getDarklakeProgramId('devnet');
 
   // Find pool PDA
   const [poolPubkey] = PublicKey.findProgramAddressSync(

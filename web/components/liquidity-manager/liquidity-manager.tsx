@@ -15,7 +15,7 @@ import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js'
 import { createSyncNativeInstruction, getAssociatedTokenAddress, NATIVE_MINT, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { AnchorProvider, BN } from '@coral-xyz/anchor'
 import { useTransactionToast, useErrorToast } from '@/hooks/useToast'
-import { getCyklonProgram } from '@blackpool/anchor';
+import { getDarklakeProgram } from '@darklakefi/anchor';
 import { usePostHog } from 'posthog-js/react'
 
 const tokens: Token[] = tokenList;
@@ -42,7 +42,7 @@ export function LiquidityManager() {
     if (!wallet || !wallet.publicKey) return;
 
     const provider = new AnchorProvider(connection, wallet);
-    const program = getCyklonProgram(provider);
+    const program = getDarklakeProgram(provider);
 
     const tokenX = new PublicKey(pair.tokenX.address === 'NATIVE' ? NATIVE_MINT : pair.tokenX.address);
     const tokenY = new PublicKey(pair.tokenY.address === 'NATIVE' ? NATIVE_MINT : pair.tokenY.address);

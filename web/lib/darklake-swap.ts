@@ -2,7 +2,7 @@
 
 import { AnchorProvider, utils } from '@coral-xyz/anchor';
 import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
-import { getCyklonProgram, getCyklonProgramId } from '@blackpool/anchor';
+import { getDarklakeProgram, getDarklakeProgramId } from '@darklakefi/anchor';
 import { useAnchorProvider } from '../components/solana/solana-provider';
 import { useCluster } from '../components/cluster/cluster-data-access';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
@@ -37,7 +37,7 @@ export async function prepareConfidentialSwap(
       destDecimals: ${destDecimals}
     `);
 
-    const program = getCyklonProgram(provider);
+    const program = getDarklakeProgram(provider);
     const payer = provider.wallet;
 
     // Sort token public keys to ensure consistent pool seed calculation
@@ -167,7 +167,7 @@ export function useConfidentialSwap() {
   const { cluster } = useCluster();
 
   // @ts-expect-error Weird typing issues.
-  const programId = getCyklonProgramId(cluster);
+  const programId = getDarklakeProgramId(cluster);
 
   return async (sourceToken: PublicKey, destToken: PublicKey, amount: bigint, minReceived: bigint, sourceTokenProgram: string, destTokenProgram: string, sourceDecimals: number, destDecimals: number): Promise<SwapResult> => {
     return prepareConfidentialSwap(provider, programId, sourceToken, destToken, amount, minReceived, sourceTokenProgram, destTokenProgram, sourceDecimals, destDecimals);

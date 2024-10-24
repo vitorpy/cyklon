@@ -1,8 +1,8 @@
 use anchor_lang::prelude::*;
 
-/// The main module for the Cyklon program.
+/// The main module for the Darklake program.
 ///
-/// This module contains the entry points for the Cyklon program, which implements
+/// This module contains the entry points for the Darklake program, which implements
 /// a decentralized exchange with confidential transactions.
 ///
 /// # Parameters
@@ -37,7 +37,7 @@ use instructions::*;
 declare_id!("GKkoBt4y1oXfUDkRjZG2wj6PQxw39dxZw6MNMM6tYaBy");
 
 #[program]
-pub mod cyklon {
+pub mod darklake {
     use super::*;
 
     pub fn initialize_pool(ctx: Context<InitializePool>) -> Result<()> {

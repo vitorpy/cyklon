@@ -1,12 +1,12 @@
 [package]
-name = "cyklon"
+name = "darklake"
 version = "0.1.0"
-description = "Cyklon"
+description = "Darklake"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "cyklon"
+name = "darklake"
 
 [features]
 no-entrypoint = []

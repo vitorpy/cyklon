@@ -1,6 +1,6 @@
 'use client'
 
-import { g1Uncompressed, negateAndSerializeG1, g2Uncompressed, to32ByteBuffer } from "@blackpool/anchor";
+import { g1Uncompressed, negateAndSerializeG1, g2Uncompressed, to32ByteBuffer } from "@darklakefi/anchor";
 
 declare const snarkjs: {
   groth16: {

@@ -1,7 +1,7 @@
 /*
-  This script is used to setup the devnet environment for the Cyklon program.
+  This script is used to setup the devnet environment for the Darklake program.
   It creates a PYUSD/WSOL pool and transfers initial liquidity to the pool.
-  It is used to test the Cyklon program.
+  It is used to test the Darklake program.
 
   Run with:
   ./node_modules/.bin/ts-node -P ./anchor/tsconfig.lib.json ./anchor/migrations/devnet-setup.ts
@@ -17,30 +17,30 @@ import * as path from 'path';
 
 // Load the IDL using require
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const cyklonIdl = require('../target/idl/cyklon.json') as Idl;
+const darklakeIdl = require('../target/idl/darklake.json') as Idl;
 
 // Constants
 const PYUSD_MINT = new PublicKey('CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM');
 const PYUSD_AMOUNT = 100 * 10**6; // 100 PYUSD (assuming 6 decimals)
 const WSOL_AMOUNT = 1 * 10**9; // 1 WSOL (9 decimals)
 
-function getCyklonProgram(provider: AnchorProvider): Program<typeof cyklonIdl> {
-  return new Program<typeof cyklonIdl>(cyklonIdl, provider);
+function getDarklakeProgram(provider: AnchorProvider): Program<typeof darklakeIdl> {
+  return new Program<typeof darklakeIdl>(darklakeIdl, provider);
 }
 
-function getCyklonProgramId(network: string): PublicKey {
+function getDarklakeProgramId(network: string): PublicKey {
   switch (network) {
     case 'localnet':
     case 'devnet':
-      return new PublicKey(cyklonIdl.address);
+      return new PublicKey(darklakeIdl.address);
     default:
       throw new Error(`Unsupported network: ${network}`);
   }
 }
 
 async function createPYUSDWSOLPool(provider: AnchorProvider) {
-  const program = getCyklonProgram(provider);
-  const programId = getCyklonProgramId('devnet');
+  const program = getDarklakeProgram(provider);
+  const programId = getDarklakeProgramId('devnet');
   
   const [token0, token1] = [PYUSD_MINT, NATIVE_MINT].sort((a, b) => 
     a.toBuffer().compare(b.toBuffer())
@@ -242,7 +242,7 @@ async function createPYUSDWSOLPool(provider: AnchorProvider) {
     const wrapSolSig = await provider.sendAndConfirm(transferTx);
     console.log("SOL wrapped to WSOL. Transaction signature:", wrapSolSig);
 
-    // Call add_liquidity method on Cyklon
+    // Call add_liquidity method on Darklake
     const [sortedToken0, sortedToken1] = [PYUSD_MINT, NATIVE_MINT].sort((a, b) => 
       a.toBuffer().compare(b.toBuffer())
     );
