@@ -18,3 +18,5 @@ test-ledger
 groth16-solana/
 snarkjs/
 /.nx-cache
+/web/.next
+/web/public
