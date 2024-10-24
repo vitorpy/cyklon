@@ -17,7 +17,9 @@ interface ContactFormData {
   subscribeNewsletter: boolean;
 }
 
-export async function subscribeToNewsletter(data: SubscribeData): Promise<boolean> {
+export async function subscribeToNewsletter(
+  data: SubscribeData
+): Promise<boolean> {
   try {
     const response = await axios.post(
       `${API_SERVER}/contacts/doubleOptinConfirmation`,
@@ -44,7 +46,9 @@ export async function subscribeToNewsletter(data: SubscribeData): Promise<boolea
   }
 }
 
-export async function submitContactForm(data: ContactFormData): Promise<boolean> {
+export async function submitContactForm(
+  data: ContactFormData
+): Promise<boolean> {
   try {
     // Use Brevo API to send an email
     const response = await axios.post(

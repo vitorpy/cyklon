@@ -5,7 +5,7 @@
     "module": "commonjs",
     "types": ["jest", "node"],
     "sourceMap": true,
-    "inlineSources": true,
+    "inlineSources": true
   },
   "include": [
     "jest.config.ts",

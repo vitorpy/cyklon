@@ -9,7 +9,9 @@ const usePyusdFaucet = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const requestPyusd = async (walletAddress: string): Promise<FaucetResponse> => {
+  const requestPyusd = async (
+    walletAddress: string
+  ): Promise<FaucetResponse> => {
     setIsLoading(true);
     setError(null);
 
@@ -17,16 +19,19 @@ const usePyusdFaucet = () => {
       const formData = {
         address: walletAddress,
         network: 'SOLANA',
-        token: 'PYUSD'
+        token: 'PYUSD',
       };
 
-      const response = await fetch('https://api.sandbox.paxos.com/v2/treasury/faucet/transfers', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      });
+      const response = await fetch(
+        'https://api.sandbox.paxos.com/v2/treasury/faucet/transfers',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -36,7 +41,9 @@ const usePyusdFaucet = () => {
       return { success: true, message: 'PYUSD tokens requested successfully' };
     } catch (err) {
       setIsLoading(false);
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      setError(
+        err instanceof Error ? err.message : 'An unknown error occurred'
+      );
       return { success: false, message: 'Failed to request PYUSD tokens' };
     }
   };
@@ -45,4 +52,3 @@ const usePyusdFaucet = () => {
 };
 
 export default usePyusdFaucet;
-

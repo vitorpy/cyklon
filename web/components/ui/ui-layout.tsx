@@ -10,10 +10,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { AccountChecker } from '../account/account-ui';
-import {
-  ClusterChecker,
-  ClusterUiSelect,
-} from '../cluster/cluster-ui';
+import { ClusterChecker, ClusterUiSelect } from '../cluster/cluster-ui';
 import { Toaster } from 'react-hot-toast';
 
 export function UiLayout({

@@ -78,7 +78,9 @@ export function ClusterUiSelect() {
           <li key={item.name}>
             <button
               className={`btn btn-sm ${
-                item.active ? 'bg-[#a1a1aa] hover:bg-[#71717a] text-white' : 'btn-ghost'
+                item.active
+                  ? 'bg-[#a1a1aa] hover:bg-[#71717a] text-white'
+                  : 'btn-ghost'
               }`}
               onClick={() => setCluster(item)}
             >

@@ -19,9 +19,13 @@ import * as path from 'path';
 const darklakeIdl = require('../target/idl/darklake.json') as Idl;
 
 // Constants
-const PYUSD_MINT = new PublicKey('CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM');
+const PYUSD_MINT = new PublicKey(
+  'CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM'
+);
 
-function getDarklakeProgram(provider: AnchorProvider): Program<typeof darklakeIdl> {
+function getDarklakeProgram(
+  provider: AnchorProvider
+): Program<typeof darklakeIdl> {
   return new Program<typeof darklakeIdl>(darklakeIdl, provider);
 }
 
@@ -38,31 +42,31 @@ function getDarklakeProgramId(network: string): PublicKey {
 async function createPYUSDWSOLPool(provider: AnchorProvider) {
   const program = getDarklakeProgram(provider);
   const programId = getDarklakeProgramId('devnet');
-  
-  const [token0, token1] = [PYUSD_MINT, NATIVE_MINT].sort((a, b) => 
+
+  const [token0, token1] = [PYUSD_MINT, NATIVE_MINT].sort((a, b) =>
     a.toBuffer().compare(b.toBuffer())
   );
 
   // Find pool PDA using sorted token public keys
   const [poolPubkey] = PublicKey.findProgramAddressSync(
-    [Buffer.from("pool"), token0.toBuffer(), token1.toBuffer()],
+    [Buffer.from('pool'), token0.toBuffer(), token1.toBuffer()],
     programId
   );
 
   // Find LP token mint PDA
   const [lpTokenMint] = PublicKey.findProgramAddressSync(
-    [Buffer.from("lp"), token0.toBuffer(), token1.toBuffer()],
+    [Buffer.from('lp'), token0.toBuffer(), token1.toBuffer()],
     programId
   );
 
   // Find metadata account PDA
   const [metadataAccount] = PublicKey.findProgramAddressSync(
     [
-      Buffer.from("metadata"),
-      new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s").toBuffer(),
-      lpTokenMint.toBuffer()
+      Buffer.from('metadata'),
+      new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s').toBuffer(),
+      lpTokenMint.toBuffer(),
     ],
-    new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")
+    new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s')
   );
 
   // Upgrade the pool
@@ -76,13 +80,13 @@ async function createPYUSDWSOLPool(provider: AnchorProvider) {
       metadataAccount: metadataAccount,
       payer: provider.wallet.publicKey,
       lpTokenProgram: TOKEN_PROGRAM_ID,
-      mplProgram: new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"),
+      mplProgram: new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'),
       systemProgram: SystemProgram.programId,
       rent: web3.SYSVAR_RENT_PUBKEY,
     })
     .rpc();
 
-  console.log("Pool upgraded. Transaction signature:", tx);
+  console.log('Pool upgraded. Transaction signature:', tx);
 }
 
 async function main() {
@@ -93,15 +97,18 @@ async function main() {
   const keypair = Keypair.fromSecretKey(new Uint8Array(JSON.parse(rawdata)));
 
   // Initialize connection to devnet
-  const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
+  const connection = new Connection(
+    'https://api.devnet.solana.com',
+    'confirmed'
+  );
 
   // Create AnchorProvider
   const wallet = new anchor.Wallet(keypair);
   const provider = new AnchorProvider(connection, wallet, {});
 
   // Print header and wallet address
-  console.log("=== Devnet Setup ===");
-  console.log("Wallet address:", wallet.publicKey.toString());
+  console.log('=== Devnet Setup ===');
+  console.log('Wallet address:', wallet.publicKey.toString());
 
   // Set the provider
   anchor.setProvider(provider);

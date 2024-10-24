@@ -38,8 +38,8 @@
 }
 
 :root {
-  --font-base: "Helvetica Neue", Arial, sans-serif;
-  --font-light: "Helvetica Neue Light", Arial, sans-serif;
+  --font-base: 'Helvetica Neue', Arial, sans-serif;
+  --font-light: 'Helvetica Neue Light', Arial, sans-serif;
 }
 
 html,

@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { AnchorProvider, utils } from '@coral-xyz/anchor';
 import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
@@ -41,7 +41,7 @@ export async function prepareConfidentialSwap(
     const payer = provider.wallet;
 
     // Sort token public keys to ensure consistent pool seed calculation
-    const [tokenX, tokenY] = [sourceToken, destToken].sort((a, b) => 
+    const [tokenX, tokenY] = [sourceToken, destToken].sort((a, b) =>
       a.toBuffer().compare(b.toBuffer())
     );
 
@@ -50,13 +50,25 @@ export async function prepareConfidentialSwap(
 
     // Find pool PDA using sorted token public keys
     const [poolPubkey] = PublicKey.findProgramAddressSync(
-      [Buffer.from("pool"), tokenX.toBuffer(), tokenY.toBuffer()],
+      [Buffer.from('pool'), tokenX.toBuffer(), tokenY.toBuffer()],
       programId
     );
 
     // Determine the token program for each token
-    const tokenXProgramId = tokenX.equals(sourceToken) ? (sourceTokenProgram === 'Token-2022' ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID) : (destTokenProgram === 'Token-2022' ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID);
-    const tokenYProgramId = tokenY.equals(destToken) ? (destTokenProgram === 'Token-2022' ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID) : (sourceTokenProgram === 'Token-2022' ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID);
+    const tokenXProgramId = tokenX.equals(sourceToken)
+      ? sourceTokenProgram === 'Token-2022'
+        ? TOKEN_2022_PROGRAM_ID
+        : TOKEN_PROGRAM_ID
+      : destTokenProgram === 'Token-2022'
+      ? TOKEN_2022_PROGRAM_ID
+      : TOKEN_PROGRAM_ID;
+    const tokenYProgramId = tokenY.equals(destToken)
+      ? destTokenProgram === 'Token-2022'
+        ? TOKEN_2022_PROGRAM_ID
+        : TOKEN_PROGRAM_ID
+      : sourceTokenProgram === 'Token-2022'
+      ? TOKEN_2022_PROGRAM_ID
+      : TOKEN_PROGRAM_ID;
 
     // Get user token account addresses
     const userTokenAccountX = await getAssociatedTokenAddress(
@@ -85,7 +97,7 @@ export async function prepareConfidentialSwap(
       true,
       tokenYProgramId
     );
-    
+
     // Fetch pool account data
     const poolAccount = await program.account.pool.fetch(poolPubkey);
     console.log(`Pool account data:
@@ -94,8 +106,12 @@ export async function prepareConfidentialSwap(
     `);
 
     console.log(`Token order:
-      tokenX: ${tokenX.toBase58()} (decimals: ${tokenX.equals(sourceToken) ? sourceDecimals : destDecimals})
-      tokenY: ${tokenY.toBase58()} (decimals: ${tokenY.equals(destToken) ? destDecimals : sourceDecimals})
+      tokenX: ${tokenX.toBase58()} (decimals: ${
+      tokenX.equals(sourceToken) ? sourceDecimals : destDecimals
+    })
+      tokenY: ${tokenY.toBase58()} (decimals: ${
+      tokenY.equals(destToken) ? destDecimals : sourceDecimals
+    })
       isSwapXtoY: ${isSwapXtoY}
     `);
 
@@ -103,12 +119,12 @@ export async function prepareConfidentialSwap(
     const publicInputs = {
       publicBalanceX: poolAccount.reserveX.toString(),
       publicBalanceY: poolAccount.reserveY.toString(),
-      isSwapXtoY: isSwapXtoY
+      isSwapXtoY: isSwapXtoY,
     };
 
     const privateInputs = {
       privateInputAmount: amount.toString(),
-      privateMinReceived: minReceived.toString()
+      privateMinReceived: minReceived.toString(),
     };
 
     console.log(`Circuit inputs:
@@ -158,7 +174,10 @@ export async function prepareConfidentialSwap(
     return { success: true, transaction };
   } catch (error) {
     console.error('Error preparing confidential swap:', error);
-    return { success: false, error: error instanceof Error ? error.message : String(error) };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
   }
 }
 
@@ -169,7 +188,27 @@ export function useConfidentialSwap() {
   // @ts-expect-error Weird typing issues.
   const programId = getDarklakeProgramId(cluster);
 
-  return async (sourceToken: PublicKey, destToken: PublicKey, amount: bigint, minReceived: bigint, sourceTokenProgram: string, destTokenProgram: string, sourceDecimals: number, destDecimals: number): Promise<SwapResult> => {
-    return prepareConfidentialSwap(provider, programId, sourceToken, destToken, amount, minReceived, sourceTokenProgram, destTokenProgram, sourceDecimals, destDecimals);
+  return async (
+    sourceToken: PublicKey,
+    destToken: PublicKey,
+    amount: bigint,
+    minReceived: bigint,
+    sourceTokenProgram: string,
+    destTokenProgram: string,
+    sourceDecimals: number,
+    destDecimals: number
+  ): Promise<SwapResult> => {
+    return prepareConfidentialSwap(
+      provider,
+      programId,
+      sourceToken,
+      destToken,
+      amount,
+      minReceived,
+      sourceTokenProgram,
+      destTokenProgram,
+      sourceDecimals,
+      destDecimals
+    );
   };
 }

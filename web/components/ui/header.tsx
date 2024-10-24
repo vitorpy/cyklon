@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode } from 'react';
 
 export function Header({
   children,
@@ -11,9 +11,8 @@ export function Header({
   subtitle?: ReactNode;
   isWhite?: boolean;
 }) {
-
   const textColor = isWhite ? 'text-white' : 'text-black';
-  
+
   return (
     <div className="py-[64px]">
       <div className="text-center">

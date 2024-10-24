@@ -1,20 +1,44 @@
-'use client'
+'use client';
 
 import { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, ArrowUpDown } from 'lucide-react';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Slider } from "@/components/ui/slider";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import Image from "next/image";
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Slider } from '@/components/ui/slider';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import Image from 'next/image';
 import { useConfidentialSwap } from '@/lib/darklake-swap';
-import { PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { createAssociatedTokenAccountInstruction, createSyncNativeInstruction, NATIVE_MINT, createCloseAccountInstruction, getAssociatedTokenAddress, TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token';
+import {
+  PublicKey,
+  Transaction,
+  SystemProgram,
+  LAMPORTS_PER_SOL,
+} from '@solana/web3.js';
+import {
+  createAssociatedTokenAccountInstruction,
+  createSyncNativeInstruction,
+  NATIVE_MINT,
+  createCloseAccountInstruction,
+  getAssociatedTokenAddress,
+  TOKEN_PROGRAM_ID,
+  TOKEN_2022_PROGRAM_ID,
+} from '@solana/spl-token';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { useTokenBalance } from '@/hooks/useTokenBalance';
-import * as Sentry from "@sentry/nextjs";
+import * as Sentry from '@sentry/nextjs';
 import { useSwapEstimate } from '@/hooks/useSwapEstimate';
 import { Token } from '@/types/token';
 import tokenList from '@/constants/tokens.json';
@@ -24,8 +48,12 @@ import { useTransactionToast, useErrorToast } from '@/hooks/useToast';
 const tokens: Token[] = tokenList;
 
 export function TokenSwapper() {
-  const [sourceToken, setSourceToken] = useState<Token>(tokens.find(t => t.symbol === 'PYUSD') || tokens[0]);
-  const [destToken, setDestToken] = useState<Token>(tokens.find(t => t.symbol === 'SOL') || tokens[1]);
+  const [sourceToken, setSourceToken] = useState<Token>(
+    tokens.find((t) => t.symbol === 'PYUSD') || tokens[0]
+  );
+  const [destToken, setDestToken] = useState<Token>(
+    tokens.find((t) => t.symbol === 'SOL') || tokens[1]
+  );
   const [sourceAmount, setSourceAmount] = useState<string>('');
   const [destAmount, setDestAmount] = useState<string>('');
   const [slippage, setSlippage] = useState<number[]>([0.5]);
@@ -36,7 +64,10 @@ export function TokenSwapper() {
   const errorToast = useErrorToast();
 
   const { publicKey } = useWallet();
-  const { balance: sourceTokenBalance } = useTokenBalance(publicKey, sourceToken.address);
+  const { balance: sourceTokenBalance } = useTokenBalance(
+    publicKey,
+    sourceToken.address
+  );
   const { connection } = useConnection();
   const wallet = useWallet();
   const { setVisible } = useWalletModal();
@@ -44,7 +75,11 @@ export function TokenSwapper() {
   const confidentialSwap = useConfidentialSwap();
   const posthog = usePostHog();
 
-  const estimatedDestAmount = useSwapEstimate(sourceToken, destToken, sourceAmount);
+  const estimatedDestAmount = useSwapEstimate(
+    sourceToken,
+    destToken,
+    sourceAmount
+  );
 
   const handleSwap = () => {
     setSourceToken(destToken);
@@ -73,8 +108,9 @@ export function TokenSwapper() {
     }
   }, [estimatedDestAmount, slippage]);
 
-  const isValidPool = (sourceToken.symbol === 'PYUSD' && destToken.symbol === 'SOL') ||
-                      (sourceToken.symbol === 'SOL' && destToken.symbol === 'PYUSD');
+  const isValidPool =
+    (sourceToken.symbol === 'PYUSD' && destToken.symbol === 'SOL') ||
+    (sourceToken.symbol === 'SOL' && destToken.symbol === 'PYUSD');
 
   const handleConfidentialSwap = async () => {
     if (!wallet.connected) {
@@ -97,20 +133,37 @@ export function TokenSwapper() {
     try {
       if (!publicKey) throw new Error('Wallet not connected');
 
-      const sourceTokenPublicKey = sourceToken.address === 'NATIVE' ? NATIVE_MINT : new PublicKey(sourceToken.address);
-      const destTokenPublicKey = destToken.address === 'NATIVE' ? NATIVE_MINT : new PublicKey(destToken.address);
-      
+      const sourceTokenPublicKey =
+        sourceToken.address === 'NATIVE'
+          ? NATIVE_MINT
+          : new PublicKey(sourceToken.address);
+      const destTokenPublicKey =
+        destToken.address === 'NATIVE'
+          ? NATIVE_MINT
+          : new PublicKey(destToken.address);
+
       const transaction = new Transaction();
       let wrappedSolAccount: PublicKey | null = null;
 
       console.log('Starting confidential swap process');
-      console.log('Source token:', sourceToken.symbol, sourceTokenPublicKey.toBase58());
-      console.log('Destination token:', destToken.symbol, destTokenPublicKey.toBase58());
+      console.log(
+        'Source token:',
+        sourceToken.symbol,
+        sourceTokenPublicKey.toBase58()
+      );
+      console.log(
+        'Destination token:',
+        destToken.symbol,
+        destTokenPublicKey.toBase58()
+      );
 
       // Wrap SOL if the source token is native SOL
       if (sourceToken.address === 'NATIVE') {
         console.log('Wrapping SOL');
-        wrappedSolAccount = await getAssociatedTokenAddress(NATIVE_MINT, publicKey);
+        wrappedSolAccount = await getAssociatedTokenAddress(
+          NATIVE_MINT,
+          publicKey
+        );
         transaction.add(
           createAssociatedTokenAccountInstruction(
             publicKey, // payer
@@ -121,7 +174,7 @@ export function TokenSwapper() {
           SystemProgram.transfer({
             fromPubkey: publicKey,
             toPubkey: wrappedSolAccount,
-            lamports: LAMPORTS_PER_SOL * parseFloat(sourceAmount)
+            lamports: LAMPORTS_PER_SOL * parseFloat(sourceAmount),
           }),
           createSyncNativeInstruction(wrappedSolAccount)
         );
@@ -129,15 +182,25 @@ export function TokenSwapper() {
       }
 
       // Check and create associated token account for destination token if needed
-      const destTokenProgram = destToken.tokenProgram === 'Token-2022' ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID;
-      const destTokenAccount = await getAssociatedTokenAddress(destTokenPublicKey, publicKey, false, destTokenProgram);
+      const destTokenProgram =
+        destToken.tokenProgram === 'Token-2022'
+          ? TOKEN_2022_PROGRAM_ID
+          : TOKEN_PROGRAM_ID;
+      const destTokenAccount = await getAssociatedTokenAddress(
+        destTokenPublicKey,
+        publicKey,
+        false,
+        destTokenProgram
+      );
       let destTokenAccountInfo;
       try {
-        destTokenAccountInfo = await connection.getAccountInfo(destTokenAccount);
+        destTokenAccountInfo = await connection.getAccountInfo(
+          destTokenAccount
+        );
       } catch (error) {
         destTokenAccountInfo = null;
       }
-      
+
       if (!destTokenAccountInfo) {
         console.log('Creating associated token account for destination token');
         transaction.add(
@@ -153,8 +216,12 @@ export function TokenSwapper() {
       }
 
       // Add confidential swap instruction
-      const sourceAmountInteger = BigInt(Math.floor(parseFloat(sourceAmount) * 10 ** sourceToken.decimals));
-      const minReceivedInteger = BigInt(Math.floor(minReceived * 10 ** destToken.decimals));
+      const sourceAmountInteger = BigInt(
+        Math.floor(parseFloat(sourceAmount) * 10 ** sourceToken.decimals)
+      );
+      const minReceivedInteger = BigInt(
+        Math.floor(minReceived * 10 ** destToken.decimals)
+      );
 
       console.log('Preparing confidential swap');
       console.log('Source amount:', sourceAmountInteger.toString());
@@ -183,22 +250,30 @@ export function TokenSwapper() {
       // Unwrap SOL if the destination token is native SOL
       if (destToken.address === 'NATIVE') {
         console.log('Adding SOL unwrapping instruction');
-        const wrappedSolAccount = await getAssociatedTokenAddress(NATIVE_MINT, publicKey);
+        const wrappedSolAccount = await getAssociatedTokenAddress(
+          NATIVE_MINT,
+          publicKey
+        );
         transaction.add(
           createCloseAccountInstruction(
             wrappedSolAccount,
             publicKey, // owner
-            publicKey  // destination
+            publicKey // destination
           )
         );
         console.log('Added SOL unwrapping instruction');
       }
 
-      console.log('Transaction built. Instruction count:', transaction.instructions.length);
-      
-      transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+      console.log(
+        'Transaction built. Instruction count:',
+        transaction.instructions.length
+      );
+
+      transaction.recentBlockhash = (
+        await connection.getLatestBlockhash()
+      ).blockhash;
       transaction.feePayer = publicKey;
-      
+
       console.log('Sending transaction...');
 
       // Send and confirm the transaction
@@ -226,13 +301,13 @@ export function TokenSwapper() {
         console.log('Transaction confirmed:', signature);
       } catch (error) {
         console.error('Transaction confirmation failed:', error);
-        
+
         const simulation = await connection.simulateTransaction(transaction);
         console.log('Transaction simulation:', simulation);
 
         throw error;
       }
-      
+
       // Handle successful swap
       console.log('Swap successful');
       transactionToast(signature); // Use the transaction toast here
@@ -245,11 +320,12 @@ export function TokenSwapper() {
         destAmount,
         slippage: slippage[0],
         signature,
-      })
-
+      });
     } catch (error) {
       console.error('Swap error:', error);
-      errorToast(error instanceof Error ? error.message : 'An unexpected error occurred');
+      errorToast(
+        error instanceof Error ? error.message : 'An unexpected error occurred'
+      );
 
       // Track failed swap
       posthog.capture('swap_failed', {
@@ -258,8 +334,11 @@ export function TokenSwapper() {
         sourceAmount,
         destAmount,
         slippage: slippage[0],
-        error: error instanceof Error ? error.message : 'An unexpected error occurred',
-      })
+        error:
+          error instanceof Error
+            ? error.message
+            : 'An unexpected error occurred',
+      });
 
       // Sentry error reporting
       Sentry.captureException(error, {
@@ -289,7 +368,9 @@ export function TokenSwapper() {
           <div className="flex flex-col">
             <div className="flex justify-between items-center mb-1">
               <span className="text-sm text-gray-400">Balance:</span>
-              <span className="text-sm">{sourceTokenBalance?.toFixed(4) || '0'} {sourceToken.symbol}</span>
+              <span className="text-sm">
+                {sourceTokenBalance?.toFixed(4) || '0'} {sourceToken.symbol}
+              </span>
             </div>
             <div className="flex items-center">
               <div className="w-2/5 pr-2">
@@ -370,17 +451,31 @@ export function TokenSwapper() {
               </div>
             </PopoverContent>
           </Popover>
-          <Button 
-            className={`w-full ${isValidPool ? 'bg-[#a1a1aa] hover:bg-[#71717a]' : 'bg-gray-500 cursor-not-allowed'} text-primary-content`}
-            disabled={!isValidPool || isSwapping || !sourceAmount || isNaN(parseFloat(sourceAmount)) || parseFloat(sourceAmount) <= 0}
+          <Button
+            className={`w-full ${
+              isValidPool
+                ? 'bg-[#a1a1aa] hover:bg-[#71717a]'
+                : 'bg-gray-500 cursor-not-allowed'
+            } text-primary-content`}
+            disabled={
+              !isValidPool ||
+              isSwapping ||
+              !sourceAmount ||
+              isNaN(parseFloat(sourceAmount)) ||
+              parseFloat(sourceAmount) <= 0
+            }
             onClick={handleConfidentialSwap}
           >
-            {isSwapping ? 'Swapping...' : isValidPool ? 'Swap' : 'This pool isn\'t available yet.'}
+            {isSwapping
+              ? 'Swapping...'
+              : isValidPool
+              ? 'Swap'
+              : "This pool isn't available yet."}
           </Button>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 interface TokenSelectProps {
@@ -390,8 +485,13 @@ interface TokenSelectProps {
   disabledToken: Token;
 }
 
-function TokenSelect({ tokens, selectedToken, onSelect, disabledToken }: TokenSelectProps) {
-  const [open, setOpen] = useState(false)
+function TokenSelect({
+  tokens,
+  selectedToken,
+  onSelect,
+  disabledToken,
+}: TokenSelectProps) {
+  const [open, setOpen] = useState(false);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -410,10 +510,13 @@ function TokenSelect({ tokens, selectedToken, onSelect, disabledToken }: TokenSe
               height={20}
               className="mr-2 rounded-full"
               style={{
-                maxWidth: "100%",
-                height: "auto"
-              }} />
-            <span className="truncate">{selectedToken?.symbol || 'Select Token'}</span>
+                maxWidth: '100%',
+                height: 'auto',
+              }}
+            />
+            <span className="truncate">
+              {selectedToken?.symbol || 'Select Token'}
+            </span>
           </div>
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -421,36 +524,44 @@ function TokenSelect({ tokens, selectedToken, onSelect, disabledToken }: TokenSe
       <PopoverContent className="w-[200px] p-0 bg-base-200 border-base-300">
         {tokens && tokens.length > 0 ? (
           <Command value={selectedToken.symbol}>
-            <CommandInput placeholder="Search token..." className="h-9 bg-base-200" />
+            <CommandInput
+              placeholder="Search token..."
+              className="h-9 bg-base-200"
+            />
             <CommandEmpty>No token found.</CommandEmpty>
             <CommandGroup>
               <CommandList>
-              {tokens.map((token) => (
-                <CommandItem
-                  key={token.symbol}
-                  value={token.symbol}
-                  onSelect={() => {
-                    onSelect(token)
-                    setOpen(false)
-                  }}
-                  className={`hover:bg-[#a1a1aa] ${token.symbol === disabledToken.symbol ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  disabled={token.symbol === disabledToken.symbol}
-                >
-                  <div className="flex items-center">
-                    <Image
-                      src={token.image}
-                      alt={token.name}
-                      width={20}
-                      height={20}
-                      className="mr-2 rounded-full"
-                      style={{
-                        maxWidth: "100%",
-                        height: "auto"
-                      }} />
-                    {token.symbol} - {token.name}
-                  </div>
-                </CommandItem>
-              ))}
+                {tokens.map((token) => (
+                  <CommandItem
+                    key={token.symbol}
+                    value={token.symbol}
+                    onSelect={() => {
+                      onSelect(token);
+                      setOpen(false);
+                    }}
+                    className={`hover:bg-[#a1a1aa] ${
+                      token.symbol === disabledToken.symbol
+                        ? 'opacity-50 cursor-not-allowed'
+                        : ''
+                    }`}
+                    disabled={token.symbol === disabledToken.symbol}
+                  >
+                    <div className="flex items-center">
+                      <Image
+                        src={token.image}
+                        alt={token.name}
+                        width={20}
+                        height={20}
+                        className="mr-2 rounded-full"
+                        style={{
+                          maxWidth: '100%',
+                          height: 'auto',
+                        }}
+                      />
+                      {token.symbol} - {token.name}
+                    </div>
+                  </CommandItem>
+                ))}
               </CommandList>
             </CommandGroup>
           </Command>
