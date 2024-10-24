@@ -16,7 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./web/*"],
-      "@blackpool/anchor": ["anchor/src/index.ts"]
+      "@darklakefi/anchor": ["anchor/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

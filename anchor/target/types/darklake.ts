@@ -2,15 +2,15 @@
  * Program IDL in camelCase format in order to be used in JS/TS.
  *
  * Note that this is only a type helper and is not the actual IDL. The original
- * IDL can be found at `target/idl/cyklon.json`.
+ * IDL can be found at `target/idl/darklake.json`.
  */
-export type Cyklon = {
+export type Darklake = {
   "address": "GKkoBt4y1oXfUDkRjZG2wj6PQxw39dxZw6MNMM6tYaBy",
   "metadata": {
-    "name": "cyklon",
+    "name": "darklake",
     "version": "0.1.0",
     "spec": "0.1.0",
-    "description": "cyklon"
+    "description": "darklake"
   },
   "instructions": [
     {

@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Slider } from "@/components/ui/slider";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import Image from "next/image";
-import { useConfidentialSwap } from '@/lib/cyklon-swap';
+import { useConfidentialSwap } from '@/lib/darklake-swap';
 import { PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { createAssociatedTokenAccountInstruction, createSyncNativeInstruction, NATIVE_MINT, createCloseAccountInstruction, getAssociatedTokenAddress, TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';

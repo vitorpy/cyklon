@@ -14,7 +14,7 @@
       {
         "label": "solana-debugger",
         "type": "shell",
-        "command": "solana-ledger-tool program run -l anchor/.anchor/test-ledger -e debugger ${workspaceFolder}/anchor/target/deploy/cyklon.so",
+        "command": "solana-ledger-tool program run -l anchor/.anchor/test-ledger -e debugger ${workspaceFolder}/anchor/target/deploy/darklake.so",
         "problemMatcher": [],
         "presentation": {
           "reveal": "always",

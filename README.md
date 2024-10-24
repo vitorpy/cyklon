@@ -1,8 +1,8 @@
-# Blackpool
+# Darklake
 
-Blackpool is a decentralized exchange (DEX) protocol built on the Solana blockchain, inspired by Uniswap v3. It aims to provide efficient and flexible liquidity provision with concentrated liquidity and confidential swaps.
+Darklake is a decentralized exchange (DEX) protocol built on the Solana blockchain, inspired by Uniswap v3. It aims to provide efficient and flexible liquidity provision with concentrated liquidity and confidential swaps.
 
-Further information can be found in the [website](https://blackpool.capital).
+Further information can be found in the [website](https://darklake.fi).
 
 ## Turbin3 Capstone
 
@@ -50,7 +50,7 @@ The `web` directory contains a React app that interacts with the Solana program 
 
 ## Contributing
 
-We welcome contributions to Cyklon! Please read our contributing guidelines before submitting pull requests.
+We welcome contributions to Darklake! Please read our contributing guidelines before submitting pull requests.
 
 ## License
 

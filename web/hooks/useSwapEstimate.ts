@@ -4,7 +4,7 @@ import { useConnection } from '@solana/wallet-adapter-react';
 import { Token } from '@/types/token';
 import { useAnchorProvider } from '../components/solana/solana-provider';
 import { useCluster } from '../components/cluster/cluster-data-access';
-import { getCyklonProgram, getCyklonProgramId } from '@blackpool/anchor';
+import { getDarklakeProgram, getDarklakeProgramId } from '@darklakefi/anchor';
 import { NATIVE_MINT } from '@solana/spl-token';
 import { generateProof } from '../lib/prepare-proof';
 
@@ -14,7 +14,7 @@ export function useSwapEstimate(sourceToken: Token, destToken: Token, sourceAmou
   const provider = useAnchorProvider();
   const { cluster } = useCluster();
   // @ts-expect-error Weird typing issues.
-  const programId = getCyklonProgramId(cluster);
+  const programId = getDarklakeProgramId(cluster);
 
   useEffect(() => {
     const estimateSwap = async () => {
@@ -24,7 +24,7 @@ export function useSwapEstimate(sourceToken: Token, destToken: Token, sourceAmou
       }
 
       try {
-        const program = getCyklonProgram(provider);
+        const program = getDarklakeProgram(provider);
 
         // Sort token public keys to ensure consistent pool seed calculation
         const sourceAddress = sourceToken.address === 'NATIVE' ? NATIVE_MINT : new PublicKey(sourceToken.address);

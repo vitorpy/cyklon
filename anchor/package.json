@@ -1,5 +1,5 @@
 {
-  "name": "@blackpool/anchor",
+  "name": "@darklakefi/anchor",
   "version": "0.0.1",
   "dependencies": {
     "@coral-xyz/anchor": "^0.30.0",
@@ -10,7 +10,7 @@
   "private": true,
   "devDependencies": {
     "@types/node": "^22.5.4",
-    "circom_tester": "github:blackpooldao/circom_tester",
+    "circom_tester": "github:darklakefi/circom_tester",
     "typescript": "^5.5.4"
   }
 }
