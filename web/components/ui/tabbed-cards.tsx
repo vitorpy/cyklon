@@ -35,9 +35,7 @@ const TabbedCards: React.FC = () => {
       <div className="card bg-base-100 shadow-xl">
         <div className="card-body">
           {activeTab === 'swap' && <TokenSwapper />}
-          {activeTab === 'liquidity' && (
-            <LiquidityManager />
-          )}
+          {activeTab === 'liquidity' && <LiquidityManager />}
         </div>
       </div>
     </div>

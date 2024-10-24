@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react';
 import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 import { useCluster } from '../components/cluster/cluster-data-access';
 
-export function useTokenBalance(walletAddress: PublicKey | null, tokenAddress: string) {
+export function useTokenBalance(
+  walletAddress: PublicKey | null,
+  tokenAddress: string
+) {
   const [balance, setBalance] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +45,7 @@ export function useTokenBalance(walletAddress: PublicKey | null, tokenAddress: s
               params: [
                 walletAddress.toBase58(),
                 { mint: tokenAddress },
-                { encoding: 'jsonParsed' }
+                { encoding: 'jsonParsed' },
               ],
             }),
           });
@@ -51,7 +54,14 @@ export function useTokenBalance(walletAddress: PublicKey | null, tokenAddress: s
         const data = await response.json();
 
         if (data.error) {
-          console.log('Error fetching token balance: cluser: ', cluster.endpoint, ' walletAddress: ', walletAddress.toBase58(), ' tokenAddress: ', tokenAddress);
+          console.log(
+            'Error fetching token balance: cluser: ',
+            cluster.endpoint,
+            ' walletAddress: ',
+            walletAddress.toBase58(),
+            ' tokenAddress: ',
+            tokenAddress
+          );
           console.log(data.error);
           throw new Error(data.error.message);
         }
@@ -62,7 +72,8 @@ export function useTokenBalance(walletAddress: PublicKey | null, tokenAddress: s
         } else {
           if (data.result.value.length > 0) {
             const tokenAccount = data.result.value[0];
-            const tokenBalance = tokenAccount.account.data.parsed.info.tokenAmount.uiAmount;
+            const tokenBalance =
+              tokenAccount.account.data.parsed.info.tokenAmount.uiAmount;
             setBalance(tokenBalance);
           } else {
             setBalance(0);

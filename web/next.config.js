@@ -2,7 +2,7 @@
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { composePlugins, withNx } = require('@nx/next');
-const { withSentryConfig } = require("@sentry/nextjs");
+const { withSentryConfig } = require('@sentry/nextjs');
 
 /**
  * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
@@ -28,29 +28,29 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: "/ingest/static/:path*",
-        destination: "https://eu-assets.i.posthog.com/static/:path*",
+        source: '/ingest/static/:path*',
+        destination: 'https://eu-assets.i.posthog.com/static/:path*',
       },
       {
-        source: "/ingest/:path*",
-        destination: "https://eu.i.posthog.com/:path*",
+        source: '/ingest/:path*',
+        destination: 'https://eu.i.posthog.com/:path*',
       },
       {
-        source: "/ingest/decide",
-        destination: "https://eu.i.posthog.com/decide",
+        source: '/ingest/decide',
+        destination: 'https://eu.i.posthog.com/decide',
       },
     ];
   },
   // This is required to support PostHog trailing slash API requests
-  skipTrailingSlashRedirect: true, 
+  skipTrailingSlashRedirect: true,
   async headers() {
     return [
       {
-        source: "/:path*",
+        source: '/:path*',
         headers: [
           {
-            key: "Document-Policy",
-            value: "js-profiling",
+            key: 'Document-Policy',
+            value: 'js-profiling',
           },
         ],
       },
@@ -63,13 +63,10 @@ const plugins = [
   withNx,
 ];
 
-module.exports = withSentryConfig(composePlugins(...plugins)(nextConfig),
-  {
-    org: "darklake",
-    project: "darklake",
-    authToken: process.env.SENTRY_AUTH_TOKEN,
-    silent: false,
-    tunnelRoute: "/monitoring-tunnel",
-  }
-);
-
+module.exports = withSentryConfig(composePlugins(...plugins)(nextConfig), {
+  org: 'darklake',
+  project: 'darklake',
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: false,
+  tunnelRoute: '/monitoring-tunnel',
+});

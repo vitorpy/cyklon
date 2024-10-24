@@ -5,7 +5,7 @@ import posthog from 'posthog-js';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Header } from '@/components/ui/header';
 import TabbedCards from '@/components/ui/tabbed-cards';
-import Image from "next/image";
+import Image from 'next/image';
 import NewsletterInput from '@/components/ui/newsletter-input';
 import ContactForm from '@/components/ui/contact-form';
 import { Button } from '@/components/ui/button';
@@ -22,15 +22,16 @@ export default function LandingPage() {
   const { requestAirdrop } = useSolanaFaucet();
   const showTransactionToast = useTransactionToast();
   const showErrorToast = useErrorToast();
-  
+
   useEffect(() => {
-    const walletAddress = wallet.connected ? wallet.publicKey?.toString() : null;
+    const walletAddress = wallet.connected
+      ? wallet.publicKey?.toString()
+      : null;
 
     // Identify user if wallet is connected
     if (walletAddress) {
       posthog.identify(walletAddress);
     }
-    
 
     // Capture page load event
     posthog.capture('Landing Page Loaded', {
@@ -98,7 +99,7 @@ export default function LandingPage() {
       {showBanner && (
         <div className="p-4 flex justify-between items-center bg-black text-white">
           <p className="text-center w-full">Blackpool is now Darklake.</p>
-          <button 
+          <button
             onClick={() => setShowBanner(false)}
             className="text-white hover:text-gray-300"
             aria-label="Dismiss banner"
@@ -107,23 +108,32 @@ export default function LandingPage() {
           </button>
         </div>
       )}
-      
+
       {/* Panel 1 */}
-      <div className="hero relative w-full flex flex-col items-center justify-center p-4 md:p-8" style={{ minHeight: '90vh' }}>
+      <div
+        className="hero relative w-full flex flex-col items-center justify-center p-4 md:p-8"
+        style={{ minHeight: '90vh' }}
+      >
         <div className="hero-content w-full max-w-7xl flex flex-col items-center justify-center">
           <div className="z-10 text-center mb-8">
-            <Header title="Secure. Private. Efficient." subtitle="Solana's first DEX delivering real-time, MEV-resistant order execution." />
+            <Header
+              title="Secure. Private. Efficient."
+              subtitle="Solana's first DEX delivering real-time, MEV-resistant order execution."
+            />
           </div>
-          
+
           <div className="flex flex-col md:flex-row justify-center items-start gap-8 w-full">
             <div className="w-full md:w-1/2">
               <TabbedCards />
             </div>
-            
+
             <div className="w-full md:w-1/2 p-8 text-black space-y-6">
               <h2 className="text-3xl font-bold">Welcome to Darklake</h2>
-              <p className="text-lg">Explore the future of decentralized trading &ndash; now on Solana&apos;s devnet.</p>
-              
+              <p className="text-lg">
+                Explore the future of decentralized trading &ndash; now on
+                Solana&apos;s devnet.
+              </p>
+
               <div>
                 <h3 className="text-2xl font-semibold mb-3">Get Started:</h3>
                 <ul className="list-disc list-inside space-y-2">
@@ -148,10 +158,10 @@ export default function LandingPage() {
                   <li>Start exploring Darklake</li>
                 </ul>
               </div>
-              
+
               <div>
                 <p className="mb-2">Stay updated on our mainnet launch:</p>
-                <Button 
+                <Button
                   className="max-w-md flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-black swap-button-style focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                   onClick={scrollToNewsletter}
                 >
@@ -180,7 +190,7 @@ export default function LandingPage() {
             width={1920}
             height={1080}
             style={{
-              objectFit: "cover"
+              objectFit: 'cover',
             }}
             className="mx-auto"
           />
@@ -203,28 +213,52 @@ export default function LandingPage() {
 
       {/* Panel 3 */}
       <div className="w-full third-panel-style flex flex-col sm:flex-row min-h-[50vh] p-4 md:p-8">
-        <div className='w-full sm:w-1/2 p-8 flex flex-col items-center justify-center'>
-          <Header title="Contact Us" subtitle="Have questions or feedback? Contact us below" />
+        <div className="w-full sm:w-1/2 p-8 flex flex-col items-center justify-center">
+          <Header
+            title="Contact Us"
+            subtitle="Have questions or feedback? Contact us below"
+          />
           <ContactForm />
         </div>
-        <div id="newsletter-section" className='w-full sm:w-1/2 p-8 flex flex-col items-center justify-center'>
-          <Header title="Newsletter" subtitle="Sign up with your email address to receive news and updates" />
+        <div
+          id="newsletter-section"
+          className="w-full sm:w-1/2 p-8 flex flex-col items-center justify-center"
+        >
+          <Header
+            title="Newsletter"
+            subtitle="Sign up with your email address to receive news and updates"
+          />
           <NewsletterInput />
         </div>
       </div>
 
       {/* Panel 4 */}
       <div className="w-full fourth-panel-style flex flex-col-reverse sm:flex-row p-4 md:p-8 bg-black">
-        <div className='w-full p-8 flex flex-col items-center justify-center'>
-          <div className='flex flex-col items-center justify-center w-full'>
+        <div className="w-full p-8 flex flex-col items-center justify-center">
+          <div className="flex flex-col items-center justify-center w-full">
             <div className="flex space-x-8">
-              <a href="https://twitter.com/darklakefi" target="_blank" rel="noopener noreferrer" className="text-3xl text-white hover:text-blue-600">
+              <a
+                href="https://twitter.com/darklakefi"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-3xl text-white hover:text-blue-600"
+              >
                 <i className="fab fa-x-twitter"></i>
               </a>
-              <a href="https://github.com/darklakefi" target="_blank" rel="noopener noreferrer" className="text-3xl text-white hover:text-gray-600">
+              <a
+                href="https://github.com/darklakefi"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-3xl text-white hover:text-gray-600"
+              >
                 <i className="fab fa-github"></i>
               </a>
-              <a href="https://t.me/darklakefi" target="_blank" rel="noopener noreferrer" className="text-3xl text-white hover:text-blue-400">
+              <a
+                href="https://t.me/darklakefi"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-3xl text-white hover:text-blue-400"
+              >
                 <i className="fab fa-telegram"></i>
               </a>
             </div>

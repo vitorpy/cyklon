@@ -1,73 +1,71 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "chrome",
-            "request": "launch",
-            "runtimeExecutable": "/usr/bin/brave-browser",
-            "name": "brave",
-            "url": "http://localhost:3000",
-            "webRoot": "${workspaceFolder}/web",
-            "userDataDir": false
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "anchor test",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "outFiles": [
-                "${workspaceFolder}/dist/out-tsc/**/*.js"
-            ],
-            "cwd": "${workspaceFolder}/anchor",
-            "runtimeExecutable": "anchor",
-            "runtimeArgs": ["test"],
-            "sourceMaps": true,
-            "resolveSourceMapLocations": [
-                "${workspaceFolder}/**",
-            ],
-            "console": "integratedTerminal",
-        },
-        {
-            "type": "lldb",
-            "request": "custom",
-            "name": "debug program",
-            "targetCreateCommands": [
-              "target create --arch bpfel ${workspaceFolder}/anchor/target/deploy/darklake.so"
-            ],
-            "preLaunchTask": "start-debugger",
-            "processCreateCommands": ["gdb-remote 127.0.0.1:9001"],
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "cargo test",
-            "cargo": {
-                "args": ["test", "--manifest-path", "${workspaceFolder}/anchor/programs/darklake/Cargo.toml"],
-            },
-            "cwd": "${workspaceFolder}/anchor/programs/darklake",
-            "env": {
-                "RUST_BACKTRACE": "1"
-            },
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "jest: generate valid proof",
-            "cwd": "${workspaceFolder}/anchor",
-            "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/jest",
-            "args": [
-                "--config",
-                "./jest.config.ts",
-                "./tests/groth16.spec.ts",
-                "-t",
-                "should generate a valid proof",
-                "--",
-                "--no-capture"
-            ],
-            "console": "integratedTerminal",
-            "internalConsoleOptions": "neverOpen"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "runtimeExecutable": "/usr/bin/brave-browser",
+      "name": "brave",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/web",
+      "userDataDir": false
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "anchor test",
+      "skipFiles": ["<node_internals>/**"],
+      "outFiles": ["${workspaceFolder}/dist/out-tsc/**/*.js"],
+      "cwd": "${workspaceFolder}/anchor",
+      "runtimeExecutable": "anchor",
+      "runtimeArgs": ["test"],
+      "sourceMaps": true,
+      "resolveSourceMapLocations": ["${workspaceFolder}/**"],
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "lldb",
+      "request": "custom",
+      "name": "debug program",
+      "targetCreateCommands": [
+        "target create --arch bpfel ${workspaceFolder}/anchor/target/deploy/darklake.so"
+      ],
+      "preLaunchTask": "start-debugger",
+      "processCreateCommands": ["gdb-remote 127.0.0.1:9001"]
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "cargo test",
+      "cargo": {
+        "args": [
+          "test",
+          "--manifest-path",
+          "${workspaceFolder}/anchor/programs/darklake/Cargo.toml"
+        ]
+      },
+      "cwd": "${workspaceFolder}/anchor/programs/darklake",
+      "env": {
+        "RUST_BACKTRACE": "1"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "jest: generate valid proof",
+      "cwd": "${workspaceFolder}/anchor",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": [
+        "--config",
+        "./jest.config.ts",
+        "./tests/groth16.spec.ts",
+        "-t",
+        "should generate a valid proof",
+        "--",
+        "--no-capture"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    }
+  ]
 }

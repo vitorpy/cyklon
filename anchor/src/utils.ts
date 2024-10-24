@@ -1,7 +1,6 @@
-
 export function to32ByteBuffer(bigInt: bigint): Uint8Array {
   const hexString = bigInt.toString(16).padStart(64, '0');
-  return new Uint8Array(Buffer.from(hexString, "hex"));
+  return new Uint8Array(Buffer.from(hexString, 'hex'));
 }
 
 export function g1Uncompressed(curve: any, p1Raw: any): Uint8Array {
@@ -11,7 +10,10 @@ export function g1Uncompressed(curve: any, p1Raw: any): Uint8Array {
   return buff;
 }
 
-export async function negateAndSerializeG1(curve: any, p1Uncompressed: Uint8Array): Promise<Uint8Array> {
+export async function negateAndSerializeG1(
+  curve: any,
+  p1Uncompressed: Uint8Array
+): Promise<Uint8Array> {
   const p1 = curve.G1.toAffine(curve.G1.fromRprUncompressed(p1Uncompressed, 0));
   const negatedP1 = curve.G1.neg(p1);
   const serializedNegatedP1 = new Uint8Array(64);
